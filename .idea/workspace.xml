@@ -13,7 +13,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b2f61e55-9467-486e-b84a-47b98c1101b5" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libusb_helpers.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb_helpers.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
     </list>
@@ -26,6 +25,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -85,7 +85,8 @@
       <path value="$PROJECT_DIR$/libusb" />
     </ignored-roots>
     <MESSAGE value="Fixed the weird libusb issue..." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed the weird libusb issue..." />
+    <MESSAGE value="ohmygod it worked (once)" />
+    <option name="LAST_COMMIT_MESSAGE" value="ohmygod it worked (once)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

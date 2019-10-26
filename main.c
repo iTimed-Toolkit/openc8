@@ -47,7 +47,6 @@ int complete_stage(int stage_function(libusb_device_handle *handle))
 
 int stage1_function(libusb_device_handle *handle)
 {
-    printf("~~~ Stage 1 ~~~\n");
     unsigned int i;
 
     stall(handle);
@@ -65,7 +64,6 @@ int stage1_function(libusb_device_handle *handle)
 
 int stage2_function(libusb_device_handle *handle)
 {
-    printf("~~~ Stage 2 ~~~\n");
     unsigned char databuf[0x800];
     memset(databuf, 'A', 0x800);
 
@@ -79,8 +77,6 @@ int stage2_function(libusb_device_handle *handle)
 
 int stage3_function(libusb_device_handle *handle)
 {
-    printf("~~~ Stage 3 ~~~\n");
-
     unsigned char overwrite_buf[1524];
     FILE *overwrite_file = fopen("/home/grg/Projects/School/NCSU/iphone_aes_sc/ipwndfu_rewrite_c/bin/overwrite.bin", "r");
     fread(overwrite_buf, 1524, 1, overwrite_file);
@@ -113,13 +109,13 @@ int main()
     if(ret == 0)
     {
         ret = complete_stage(stage2_function);
+        usleep(500000);
     }
-
-    usleep(2000);
 
     if(ret == 0)
     {
         ret = complete_stage(stage3_function);
+        usleep(500000);
     }
 
     complete_stage(check_function);

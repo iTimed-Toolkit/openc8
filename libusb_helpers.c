@@ -20,7 +20,6 @@ void get_test_device(libusb_context *usb_ctx, struct libusb_device_bundle *bundl
         usb_device = usb_device_list[i];
         libusb_get_device_descriptor(usb_device, &usb_desc);
 
-        printf("%i\t%X:%X\n", i, usb_desc.idVendor, usb_desc.idProduct);
         if(usb_desc.idVendor == 0x05AC && usb_desc.idProduct == 0x1227)
         {
             libusb_open(usb_device, &usb_handle);
@@ -103,7 +102,6 @@ void libusb1_no_error_ctrl_transfer(libusb_device_handle *handle,
 
 void stall(libusb_device_handle *handle)
 {
-    printf("Stall\n");
     unsigned char *data = malloc(0xC0);
     memset(data, 0xA, 0xC0);
     libusb1_async_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0xC0, 1);
@@ -112,27 +110,24 @@ void stall(libusb_device_handle *handle)
 
 void leak(libusb_device_handle *handle)
 {
-    printf("Leak\n");
     unsigned char *data = malloc(0xC0);
     memset(data, 0, 0xC0);
-    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0xC0, 1000);
+    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0xC0, 1);
     free(data);
 }
 
 void no_leak(libusb_device_handle *handle)
 {
-    printf("No leak\n");
     unsigned char *data = malloc(0xC1);
     memset(data, 0, 0xC1);
-    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0xC1, 1000);
+    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0xC1, 1);
     free(data);
 }
 
 void usb_req_stall(libusb_device_handle *handle)
 {
-    printf("Req stall\n");
     unsigned char data[0];
-    libusb1_no_error_ctrl_transfer(handle, 0x2, 3, 0, 0x80, data, 0, 10000);
+    libusb1_no_error_ctrl_transfer(handle, 0x2, 3, 0, 0x80, data, 0, 1);
 }
 
 void usb_req_leak(libusb_device_handle *handle)
@@ -140,13 +135,12 @@ void usb_req_leak(libusb_device_handle *handle)
     printf("Req leak\n");
     unsigned char data[0x40];
     memset(data, 0, 0x40);
-    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0x40, 1000);
+    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0x40, 1);
 }
 
 void usb_req_no_leak(libusb_device_handle *handle)
 {
-    printf("Req no leak\n");
     unsigned char data[0x41];
     memset(data, 0, 0x41);
-    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0x41, 1000);
+    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0x41, 1);
 }
