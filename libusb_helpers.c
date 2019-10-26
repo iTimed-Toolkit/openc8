@@ -20,6 +20,7 @@ void get_test_device(libusb_context *usb_ctx, struct libusb_device_bundle *bundl
         usb_device = usb_device_list[i];
         libusb_get_device_descriptor(usb_device, &usb_desc);
 
+        printf("%i\t%X:%X\n", i, usb_desc.idVendor, usb_desc.idProduct);
         if(usb_desc.idVendor == 0x05AC && usb_desc.idProduct == 0x1227)
         {
             libusb_open(usb_device, &usb_handle);
@@ -45,7 +46,7 @@ void libusb1_async_ctrl_transfer(libusb_device_handle *handle,
     gettimeofday(&start, NULL);
 
     struct libusb_transfer *usb_transfer = libusb_alloc_transfer(0);
-    libusb_fill_control_setup(usb_transfer_buf, bmRequestType, bRequest, wValue, wIndex, 0xC0);
+    libusb_fill_control_setup(usb_transfer_buf, bmRequestType, bRequest, wValue, wIndex, data_len);
     memcpy(&usb_transfer_buf[8], data, data_len);
     libusb_fill_control_transfer(usb_transfer, handle, usb_transfer_buf, NULL, NULL, 1);
 
