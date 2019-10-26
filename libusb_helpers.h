@@ -1,7 +1,7 @@
 #ifndef IPWNDFU_REWRITE_C_LIBUSB_HELPERS_H
 #define IPWNDFU_REWRITE_C_LIBUSB_HELPERS_H
 
-#include "libusb-1.0/libusb.h"
+#include <libusb-1.0/libusb.h>
 
 struct libusb_device_bundle
 {

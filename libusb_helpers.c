@@ -1,11 +1,6 @@
-//
-// Created by grg on 10/23/19.
-//
-
 #include "libusb_helpers.h"
 
 #include <string.h>
-#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -44,15 +39,14 @@ void libusb1_async_ctrl_transfer(libusb_device_handle *handle,
                                  unsigned int timeout)
 {
     struct timeval start, end;
-    unsigned char usb_transfer_buf[8 + 2 + data_len];
+    unsigned char usb_transfer_buf[8 + data_len];
     int ret;
 
     gettimeofday(&start, NULL);
 
     struct libusb_transfer *usb_transfer = libusb_alloc_transfer(0);
     libusb_fill_control_setup(usb_transfer_buf, bmRequestType, bRequest, wValue, wIndex, 0xC0);
-    memset(&usb_transfer_buf[8], data_len, 2);
-    memcpy(&usb_transfer_buf[10], data, data_len);
+    memcpy(&usb_transfer_buf[8], data, data_len);
     libusb_fill_control_transfer(usb_transfer, handle, usb_transfer_buf, NULL, NULL, 1);
 
     ret = libusb_submit_transfer(usb_transfer);
@@ -69,13 +63,11 @@ void libusb1_async_ctrl_transfer(libusb_device_handle *handle,
         if(end.tv_usec - start.tv_usec > timeout)
         {
             ret = libusb_cancel_transfer(usb_transfer);
-            libusb_free_transfer(usb_transfer);
             if(ret != 0)
             {
                 printf("Failed to cancel async USB transfer: %s\n", libusb_error_name(ret));
                 exit(ret);
             }
-
             return;
         }
     }
@@ -113,7 +105,7 @@ void stall(libusb_device_handle *handle)
     printf("Stall\n");
     unsigned char *data = malloc(0xC0);
     memset(data, 0xA, 0xC0);
-    libusb1_async_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0xC0, 1000);
+    libusb1_async_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A, data, 0xC0, 1);
     free(data);
 }
 

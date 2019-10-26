@@ -5,10 +5,10 @@
 #define DEFAULT_VISIBILITY __attribute__((visibility("default")))
 
 /* Start with debug message logging enabled */
-#define ENABLE_DEBUG_LOGGING 1
+//#define ENABLE_DEBUG_LOGGING 1
 
 /* Message logging */
-#define ENABLE_LOGGING 1
+//#define ENABLE_LOGGING 1
 
 /* Define to 1 if you have the <asm/types.h> header file. */
 /* #undef HAVE_ASM_TYPES_H */

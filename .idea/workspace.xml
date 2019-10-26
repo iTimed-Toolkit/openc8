@@ -13,7 +13,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b2f61e55-9467-486e-b84a-47b98c1101b5" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb_helpers.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb_helpers.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb_helpers.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb_helpers.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -94,14 +98,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/libusb_helpers.c</url>
-          <line>133</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/libusb/libusb/os/linux_usbfs.c</url>
-          <line>2719</line>
-          <option name="timeStamp" value="3" />
+          <url>file://$PROJECT_DIR$/libusb/libusb/io.c</url>
+          <line>1579</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -49,21 +49,25 @@ int main()
     usb_req_leak(usb_handle);
     no_leak(usb_handle);
 
-//    libusb_close(usb_handle);
-//    libusb_exit(usb_ctx);
-//
-//    usb_bundle.handle = NULL;
-//
-//    // section 2
-//    libusb_init(&usb_ctx);
-//    get_test_device(usb_ctx, &usb_bundle);
-//    if(usb_bundle.handle == NULL)
-//    {
-//        libusb_exit(usb_ctx);
-//        printf("Could not find device\n");
-//        return 1;
-//    }
+    libusb_reset_device(usb_handle);
 
+    libusb_close(usb_handle);
+    libusb_exit(usb_ctx);
+
+    usb_bundle.handle = NULL;
+
+    // section 2
+    libusb_init(&usb_ctx);
+    get_test_device(usb_ctx, &usb_bundle);
+    if(usb_bundle.handle == NULL)
+    {
+        libusb_exit(usb_ctx);
+        printf("Could not find device\n");
+        return 1;
+    }
+
+    usb_handle = usb_bundle.handle;
+    usb_desc = usb_bundle.descriptor;
 
     return 0;
 }
