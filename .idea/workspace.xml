@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="ipwndfu_rewrite_c" targetName="ipwndfu" />
+      <config projectName="ipwndfu_rewrite_c" targetName="libusb-1.0_custom" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b2f61e55-9467-486e-b84a-47b98c1101b5" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/core.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/core.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/descriptor.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/descriptor.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/hotplug.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/hotplug.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/io.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/io.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/libusbi.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/libusbi.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/linux_netlink.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/os/linux_netlink.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/linux_udev.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/os/linux_udev.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/linux_usbfs.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/os/linux_usbfs.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/poll_posix.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/os/poll_posix.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/threads_posix.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/os/threads_posix.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/strerror.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/strerror.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libusb/libusb/sync.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/libusb/sync.c" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/libusb" />
+  </component>
+  <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
+  <component name="OCResolveContextSettings">
+    <option name="configuration" value="0-libusb-1.0_custom" />
+  </component>
+  <component name="ProjectId" id="1ScgAvqtwFZJr4GXhAgilnvsGlR" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/launch_with_sudo.sh" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="CMake Application.ipwndfu">
+    <configuration name="ipwndfu_debug_sudo" type="CLion_Remote" toolchainName="Default" remoteCommand="localhost:2345" symbolFile="" sysroot="">
+      <method v="2" />
+    </configuration>
+    <configuration name="ipwndfu" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ipwndfu_rewrite_c" TARGET_NAME="ipwndfu" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="ipwndfu_rewrite_c" RUN_TARGET_NAME="ipwndfu">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libusb-1.0_custom" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ipwndfu_rewrite_c" TARGET_NAME="libusb-1.0_custom" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="debug_sudo" type="ShConfigurationType">
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/debug_sudo.sh" />
+      <option name="SCRIPT_OPTIONS" value="cmake-build-debug/ipwndfu" />
+      <option name="INTERPRETER_PATH" value="/bin/bash" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.ipwndfu" />
+      <item itemvalue="CMake Application.libusb-1.0_custom" />
+      <item itemvalue="GDB Remote Debug.ipwndfu_debug_sudo" />
+      <item itemvalue="Shell Script.debug_sudo" />
+    </list>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/libusb_helpers.c</url>
+          <line>138</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/libusb/libusb/os/linux_usbfs.c</url>
+          <line>2719</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
