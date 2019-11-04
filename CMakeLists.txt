@@ -4,5 +4,7 @@ project(ipwndfu_rewrite_c C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS -g)
 
-add_executable(ipwndfu exploit/main.c exploit/libusb_helpers.c exploit/libusb_helpers.h)
+add_executable(ipwndfu main.c
+        exploit/libusb_helpers.c exploit/libusb_helpers.h
+        exploit/exploit_helpers.c exploit/checkm8.h)
 target_link_libraries(ipwndfu usb-1.0)
