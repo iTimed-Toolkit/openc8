@@ -6,5 +6,5 @@ set(CMAKE_C_FLAGS -g)
 
 add_executable(ipwndfu main.c
         exploit/libusb_helpers.c exploit/libusb_helpers.h
-        exploit/exploit_helpers.c exploit/checkm8.h)
+        exploit/exploit.c exploit/checkm8.h exploit/commands.c)
 target_link_libraries(ipwndfu usb-1.0)
