@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
+      <config projectName="ipwndfu_rewrite_c" targetName="libusb_checkm8" />
       <config projectName="ipwndfu_rewrite_c" targetName="ipwndfu" />
     </generated>
   </component>
@@ -11,14 +12,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b2f61e55-9467-486e-b84a-47b98c1101b5" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/exploit/checkm8.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/exploit/shellcode/shellcode.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/exploit/main.c" beforeDir="false" />
-    </list>
+    <list default="true" id="b2f61e55-9467-486e-b84a-47b98c1101b5" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,6 +22,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -40,7 +35,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/launch_with_sudo.sh" />
-    <property name="settings.editor.selected.configurable" value="settings.github" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -60,7 +55,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.ipwndfu">
+  <component name="RunManager" selected="CMake Application.libusb_checkm8">
     <configuration name="ipwndfu_debug_sudo" type="CLion_Remote" toolchainName="Default" remoteCommand="localhost:2345" symbolFile="" sysroot="">
       <method v="2" />
     </configuration>
@@ -69,8 +64,14 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="libusb_checkm8" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ipwndfu_rewrite_c" TARGET_NAME="libusb_checkm8" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="ipwndfu_rewrite_c" RUN_TARGET_NAME="ipwndfu">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="CMake Application.ipwndfu" />
+      <item itemvalue="CMake Application.libusb_checkm8" />
       <item itemvalue="GDB Remote Debug.ipwndfu_debug_sudo" />
     </list>
   </component>
@@ -95,15 +96,16 @@
     <MESSAGE value="Fixed the weird libusb issue..." />
     <MESSAGE value="ohmygod it worked (once)" />
     <MESSAGE value="Some changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="Some changes" />
+    <MESSAGE value="Lotta changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Lotta changes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/libusb/libusb/io.c</url>
-          <line>1579</line>
-          <option name="timeStamp" value="4" />
+          <url>file://$PROJECT_DIR$/main.c</url>
+          <line>19</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
