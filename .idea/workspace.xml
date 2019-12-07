@@ -12,8 +12,16 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b2f61e55-9467-486e-b84a-47b98c1101b5" name="Default Changelist" comment="" />
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <list default="true" id="b2f61e55-9467-486e-b84a-47b98c1101b5" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/conf.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exploit/commands.c" beforeDir="false" afterPath="$PROJECT_DIR$/exploit/commands.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exploit/exploit.c" beforeDir="false" afterPath="$PROJECT_DIR$/exploit/exploit.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exploit/libusb_helpers.c" beforeDir="false" afterPath="$PROJECT_DIR$/exploit/libusb_helpers.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exploit/libusb_helpers.h" beforeDir="false" afterPath="$PROJECT_DIR$/exploit/libusb_helpers.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,10 +36,15 @@
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="OCResolveContextSettings">
-    <option name="configuration" value="0-libusb-1.0_custom" />
+    <option name="configuration" value="0-Debug-libusb_checkm8" />
   </component>
   <component name="ProjectId" id="1ScgAvqtwFZJr4GXhAgilnvsGlR" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/launch_with_sudo.sh" />
@@ -43,19 +56,7 @@
       <recent name="$PROJECT_DIR$/exploit" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
-  <component name="RunManager" selected="CMake Application.libusb_checkm8">
+  <component name="RunManager" selected="CMake Application.ipwndfu">
     <configuration name="ipwndfu_debug_sudo" type="CLion_Remote" toolchainName="Default" remoteCommand="localhost:2345" symbolFile="" sysroot="">
       <method v="2" />
     </configuration>
@@ -74,6 +75,18 @@
       <item itemvalue="CMake Application.libusb_checkm8" />
       <item itemvalue="GDB Remote Debug.ipwndfu_debug_sudo" />
     </list>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -99,15 +112,70 @@
     <MESSAGE value="Lotta changes" />
     <option name="LAST_COMMIT_MESSAGE" value="Lotta changes" />
   </component>
+  <component name="WindowStateProjectService">
+    <state x="1378" y="377" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1575247663503">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="1378" y="377" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1440@0.0.2560.1440" timestamp="1575247663503" />
+    <state width="2514" height="659" key="GridCell.Tab.0.bottom" timestamp="1575746430598">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="2514" height="659" key="GridCell.Tab.0.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430598" />
+    <state width="1234" height="371" key="GridCell.Tab.0.bottom/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844020" />
+    <state width="2514" height="659" key="GridCell.Tab.0.center" timestamp="1575746430596">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="2514" height="659" key="GridCell.Tab.0.center/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430596" />
+    <state width="1234" height="371" key="GridCell.Tab.0.center/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844020" />
+    <state width="2514" height="659" key="GridCell.Tab.0.left" timestamp="1575746430595">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="2514" height="659" key="GridCell.Tab.0.left/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430595" />
+    <state width="1234" height="371" key="GridCell.Tab.0.left/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844019" />
+    <state width="2514" height="659" key="GridCell.Tab.0.right" timestamp="1575746430597">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="2514" height="659" key="GridCell.Tab.0.right/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430597" />
+    <state width="1234" height="371" key="GridCell.Tab.0.right/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844020" />
+    <state width="2514" height="659" key="GridCell.Tab.1.bottom" timestamp="1575746430602">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="2514" height="659" key="GridCell.Tab.1.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430602" />
+    <state width="1234" height="371" key="GridCell.Tab.1.bottom/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844393" />
+    <state width="2514" height="659" key="GridCell.Tab.1.center" timestamp="1575746430600">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="2514" height="659" key="GridCell.Tab.1.center/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430600" />
+    <state width="1234" height="371" key="GridCell.Tab.1.center/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844393" />
+    <state width="2514" height="659" key="GridCell.Tab.1.left" timestamp="1575746430599">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="2514" height="659" key="GridCell.Tab.1.left/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430599" />
+    <state width="1234" height="371" key="GridCell.Tab.1.left/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844392" />
+    <state width="2514" height="659" key="GridCell.Tab.1.right" timestamp="1575746430601">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="2514" height="659" key="GridCell.Tab.1.right/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430601" />
+    <state width="1234" height="371" key="GridCell.Tab.1.right/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844393" />
+    <state x="1801" y="457" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey" timestamp="1575247658369">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="1801" y="457" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey/0.0.2560.1440@0.0.2560.1440" timestamp="1575247658369" />
+    <state width="1666" height="818" key="javadoc.popup.new" timestamp="1575242155779">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state width="1666" height="818" key="javadoc.popup.new/0.0.2560.1440@0.0.2560.1440" timestamp="1575242155779" />
+    <state x="442" y="356" width="672" height="678" key="search.everywhere.popup" timestamp="1575744763657">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="442" y="356" width="672" height="678" key="search.everywhere.popup/0.0.2560.1440@0.0.2560.1440" timestamp="1575744763657" />
+    <state x="2863" y="327" width="672" height="678" key="search.everywhere.popup/0.0.3840.1440@0.0.3840.1440" timestamp="1575249469831" />
+  </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/main.c</url>
-          <line>19</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="CLion_Remote">
+        <watch expression="target" language="ObjectiveC" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

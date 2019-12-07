@@ -4,12 +4,12 @@ project(ipwndfu_rewrite_c)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS -g)
 
-add_executable(ipwndfu main.c
+add_executable(ipwndfu main.c conf.h
         exploit/libusb_helpers.c exploit/libusb_helpers.h
         exploit/exploit.c exploit/checkm8.h exploit/commands.c)
 
 add_library(libusb_checkm8
-        libusb/config.h
+        conf.h libusb/config.h
 
         libusb/libusb/core.c libusb/libusb/descriptor.c libusb/libusb/hotplug.c
         libusb/libusb/io.c libusb/libusb/strerror.c libusb/libusb/sync.c
@@ -19,4 +19,4 @@ add_library(libusb_checkm8
         libusb/libusb/os/threads_posix.c libusb/libusb/os/poll_posix.c
         libusb/libusb/os/linux_usbfs.h libusb/libusb/os/threads_posix.h libusb/libusb/os/poll_posix.h)
 
-target_link_libraries(ipwndfu usb-1.0 libusb_checkm8)
+target_link_libraries(ipwndfu libusb_checkm8 pthread udev)
