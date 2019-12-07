@@ -1,7 +1,7 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-#include "../conf.h"
+#include "../checkm8_remote/conf.h"
 
 /* Default visibility */
 #define DEFAULT_VISIBILITY __attribute__((visibility("default")))

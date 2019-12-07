@@ -6,7 +6,7 @@ int main()
     int status = exploit_device();
     if(status != 0)
     {
-        printf("Failed to exploit device\n");
+        printf("Failed to checkm8_remote device\n");
         return status;
     }
 
