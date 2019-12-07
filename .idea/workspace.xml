@@ -13,199 +13,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b2f61e55-9467-486e-b84a-47b98c1101b5" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/libusb/config.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exploit/exploit.c" beforeDir="false" afterPath="$PROJECT_DIR$/exploit/exploit.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exploit/libusb_helpers.c" beforeDir="false" afterPath="$PROJECT_DIR$/exploit/libusb_helpers.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/AUTHORS" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Brewfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/ChangeLog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/INSTALL_WIN.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Makefile.am" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/NEWS" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/PORTING" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/README" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/README.git" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/TODO" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Xcode/common.xcconfig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Xcode/config.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Xcode/debug.xcconfig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Xcode/libusb.xcconfig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Xcode/libusb.xcodeproj/project.pbxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Xcode/libusb_debug.xcconfig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Xcode/libusb_release.xcconfig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/Xcode/release.xcconfig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/android/README" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/android/config.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/android/jni/Android.mk" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/android/jni/Application.mk" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/android/jni/examples.mk" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/android/jni/libusb.mk" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/android/jni/tests.mk" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/appveyor.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/appveyor_cygwin.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/appveyor_minGW.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/autogen.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/bootstrap.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/configure.ac" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/doc/Makefile.am" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/doc/doxygen.cfg.in" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/doc/libusb.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/Makefile.am" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/dpfp.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/dpfp_threaded.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/ezusb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/ezusb.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/fxload.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/getopt/getopt.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/getopt/getopt.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/getopt/getopt1.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/hotplugtest.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/listdevs.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/sam3u_benchmark.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/testlibusb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/examples/xusb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb-1.0.pc.in" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/Makefile.am" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/core.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/core.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/descriptor.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/descriptor.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/hotplug.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/hotplug.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/hotplug.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/hotplug.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/io.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/io.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/libusb-1.0.def" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/libusb-1.0.def" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/libusb-1.0.rc" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/libusb-1.0.rc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/libusb.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/libusb.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/libusbi.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/libusbi.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/darwin_usb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/darwin_usb.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/haiku_pollfs.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/haiku_usb.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/haiku_usb_backend.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/haiku_usb_raw.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/haiku_usb_raw.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/linux_netlink.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/linux_netlink.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/linux_udev.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/linux_udev.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/linux_usbfs.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/linux_usbfs.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/linux_usbfs.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/linux_usbfs.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/netbsd_usb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/openbsd_usb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/poll_posix.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/poll_posix.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/poll_posix.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/poll_posix.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/poll_windows.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/poll_windows.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/poll_windows.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/poll_windows.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/sunos_usb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/sunos_usb.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/threads_posix.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/threads_posix.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/threads_posix.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/os/threads_posix.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/threads_windows.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/threads_windows.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/wince_usb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/wince_usb.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/windows_common.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/windows_nt_common.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/windows_nt_common.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/windows_nt_shared_types.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/windows_usbdk.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/windows_usbdk.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/windows_winusb.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/os/windows_winusb.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/strerror.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/strerror.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/sync.c" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/sync.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/version.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/version.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/libusb/version_nano.h" beforeDir="false" afterPath="$PROJECT_DIR$/libusb/src/version_nano.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/appveyor.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/config.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/ddk_build.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/errno.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/fxload_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/fxload_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/fxload_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/fxload_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/fxload_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/fxload_sources" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/getopt_2005.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/getopt_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/getopt_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/getopt_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/getopt_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/getopt_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/getopt_sources" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/hotplugtest_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/hotplugtest_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/hotplugtest_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/hotplugtest_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/hotplugtest_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/hotplugtest_sources" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/inttypes.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb.dsw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_2005.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_2010.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_2012.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_2013.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_2015.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_2017.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_dll.dsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_dll_2005.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_dll_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_dll_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_dll_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_dll_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_dll_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_dll_wince.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_sources" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_static.dsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_static_2005.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_static_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_static_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_static_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_static_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_static_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_static_wince.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/libusb_wince.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs.dsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs_2005.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs_sources" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/listdevs_wince.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/missing.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/missing.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stdint.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stress_2005.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stress_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stress_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stress_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stress_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stress_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stress_sources" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/stress_wince.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/testlibusb_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/testlibusb_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/testlibusb_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/testlibusb_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/testlibusb_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/testlibusb_sources" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb.dsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb_2005.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb_2010.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb_2012.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb_2013.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb_2015.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb_2017.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb_sources" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/msvc/xusb_wince.vcproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/tests/Makefile.am" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/tests/libusb_testlib.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/tests/stress.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/tests/testlib.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libusb/travis-autogen.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/exploit/libusb_helpers.h" beforeDir="false" afterPath="$PROJECT_DIR$/exploit/libusb_helpers.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -307,45 +118,45 @@
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state x="377" y="0" width="1384" height="1124" key="CommitChangelistDialog2/0.0.2560.1440@0.0.2560.1440" timestamp="1575746530760" />
-    <state width="2514" height="659" key="GridCell.Tab.0.bottom" timestamp="1575746430598">
+    <state width="2514" height="782" key="GridCell.Tab.0.bottom" timestamp="1575747702099">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="2514" height="659" key="GridCell.Tab.0.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430598" />
+    <state width="2514" height="782" key="GridCell.Tab.0.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1575747702099" />
     <state width="1234" height="371" key="GridCell.Tab.0.bottom/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844020" />
-    <state width="2514" height="659" key="GridCell.Tab.0.center" timestamp="1575746430596">
+    <state width="2514" height="782" key="GridCell.Tab.0.center" timestamp="1575747702099">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="2514" height="659" key="GridCell.Tab.0.center/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430596" />
+    <state width="2514" height="782" key="GridCell.Tab.0.center/0.0.2560.1440@0.0.2560.1440" timestamp="1575747702099" />
     <state width="1234" height="371" key="GridCell.Tab.0.center/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844020" />
-    <state width="2514" height="659" key="GridCell.Tab.0.left" timestamp="1575746430595">
+    <state width="2514" height="782" key="GridCell.Tab.0.left" timestamp="1575747702098">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="2514" height="659" key="GridCell.Tab.0.left/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430595" />
+    <state width="2514" height="782" key="GridCell.Tab.0.left/0.0.2560.1440@0.0.2560.1440" timestamp="1575747702098" />
     <state width="1234" height="371" key="GridCell.Tab.0.left/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844019" />
-    <state width="2514" height="659" key="GridCell.Tab.0.right" timestamp="1575746430597">
+    <state width="2514" height="782" key="GridCell.Tab.0.right" timestamp="1575747702099">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="2514" height="659" key="GridCell.Tab.0.right/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430597" />
+    <state width="2514" height="782" key="GridCell.Tab.0.right/0.0.2560.1440@0.0.2560.1440" timestamp="1575747702099" />
     <state width="1234" height="371" key="GridCell.Tab.0.right/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844020" />
-    <state width="2514" height="659" key="GridCell.Tab.1.bottom" timestamp="1575746430602">
+    <state width="2514" height="658" key="GridCell.Tab.1.bottom" timestamp="1575747502454">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="2514" height="659" key="GridCell.Tab.1.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430602" />
+    <state width="2514" height="658" key="GridCell.Tab.1.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1575747502454" />
     <state width="1234" height="371" key="GridCell.Tab.1.bottom/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844393" />
-    <state width="2514" height="659" key="GridCell.Tab.1.center" timestamp="1575746430600">
+    <state width="2514" height="658" key="GridCell.Tab.1.center" timestamp="1575747502453">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="2514" height="659" key="GridCell.Tab.1.center/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430600" />
+    <state width="2514" height="658" key="GridCell.Tab.1.center/0.0.2560.1440@0.0.2560.1440" timestamp="1575747502453" />
     <state width="1234" height="371" key="GridCell.Tab.1.center/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844393" />
-    <state width="2514" height="659" key="GridCell.Tab.1.left" timestamp="1575746430599">
+    <state width="2514" height="658" key="GridCell.Tab.1.left" timestamp="1575747502453">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="2514" height="659" key="GridCell.Tab.1.left/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430599" />
+    <state width="2514" height="658" key="GridCell.Tab.1.left/0.0.2560.1440@0.0.2560.1440" timestamp="1575747502453" />
     <state width="1234" height="371" key="GridCell.Tab.1.left/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844392" />
-    <state width="2514" height="659" key="GridCell.Tab.1.right" timestamp="1575746430601">
+    <state width="2514" height="658" key="GridCell.Tab.1.right" timestamp="1575747502454">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="2514" height="659" key="GridCell.Tab.1.right/0.0.2560.1440@0.0.2560.1440" timestamp="1575746430601" />
+    <state width="2514" height="658" key="GridCell.Tab.1.right/0.0.2560.1440@0.0.2560.1440" timestamp="1575747502454" />
     <state width="1234" height="371" key="GridCell.Tab.1.right/0.0.3840.1440@0.0.3840.1440" timestamp="1575251844393" />
     <state x="875" y="455" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575746583281">
       <screen x="0" y="0" width="2560" height="1440" />
@@ -366,6 +177,15 @@
     <state x="2863" y="327" width="672" height="678" key="search.everywhere.popup/0.0.3840.1440@0.0.3840.1440" timestamp="1575249469831" />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/main.c</url>
+          <line>5</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <watches-manager>
       <configuration name="CLion_Remote">
         <watch expression="target" language="ObjectiveC" />
