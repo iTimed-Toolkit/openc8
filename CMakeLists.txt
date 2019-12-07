@@ -11,12 +11,12 @@ add_executable(ipwndfu main.c conf.h
 add_library(libusb_checkm8
         conf.h libusb/config.h
 
-        libusb/libusb/core.c libusb/libusb/descriptor.c libusb/libusb/hotplug.c
-        libusb/libusb/io.c libusb/libusb/strerror.c libusb/libusb/sync.c
-        libusb/libusb/hotplug.h libusb/libusb/libusb.h libusb/libusb/libusbi.h libusb/libusb/version.h
+        libusb/src/core.c libusb/src/descriptor.c libusb/src/hotplug.c
+        libusb/src/io.c libusb/src/strerror.c libusb/src/sync.c
+        libusb/src/hotplug.h libusb/src/libusb.h libusb/src/libusbi.h libusb/src/version.h
 
-        libusb/libusb/os/linux_netlink.c libusb/libusb/os/linux_usbfs.c libusb/libusb/os/linux_udev.c
-        libusb/libusb/os/threads_posix.c libusb/libusb/os/poll_posix.c
-        libusb/libusb/os/linux_usbfs.h libusb/libusb/os/threads_posix.h libusb/libusb/os/poll_posix.h)
+        libusb/src/os/linux_netlink.c libusb/src/os/linux_usbfs.c libusb/src/os/linux_udev.c
+        libusb/src/os/threads_posix.c libusb/src/os/poll_posix.c
+        libusb/src/os/linux_usbfs.h libusb/src/os/threads_posix.h libusb/src/os/poll_posix.h)
 
 target_link_libraries(ipwndfu libusb_checkm8 pthread udev)
