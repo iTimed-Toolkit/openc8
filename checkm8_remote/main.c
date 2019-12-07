@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "exploit/checkm8.h"
+#include "checkm8.h"
 
 int main()
 {

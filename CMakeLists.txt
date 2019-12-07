@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 project(ipwndfu_rewrite_c)
 enable_language(C)
 
+include_directories(libusb/src/)
 add_library(checkm8_libusb
-        checkm8_remote/conf.h libusb/config.h
+        checkm8_remote/include/conf.h libusb/config.h
 
         libusb/src/core.c libusb/src/descriptor.c libusb/src/hotplug.c
         libusb/src/io.c libusb/src/strerror.c libusb/src/sync.c

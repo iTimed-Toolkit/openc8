@@ -1,5 +1,5 @@
 #include "libusb_helpers.h"
-#include "../libusb/src/libusb.h"
+#include "libusb.h"
 
 #include <string.h>
 #include <stdio.h>
