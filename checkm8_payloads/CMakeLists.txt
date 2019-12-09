@@ -7,4 +7,15 @@ set(CMAKE_ASM_COMPILER /usr/bin/aarch64-linux-gnu-as)
 set(CMAKE_OBJCOPY /usr/bin/aarch64-linux-gnu-objcopy)
 set(CMAKE_C_FLAGS "-nostdlib")
 
-add_executable(payload aes.c)
+set(PAYLOADS payload_aes)
+add_executable(payload_aes aes.c)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+foreach(BINARY ${PAYLOADS})
+    add_custom_command(TARGET ${BINARY} POST_BUILD
+                        BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/bin/${BINARY}.bin
+                        COMMAND ${CMAKE_OBJCOPY}
+                        ARGS -O binary -j .text
+                            ${CMAKE_CURRENT_BINARY_DIR}/${BINARY}
+                            ${CMAKE_CURRENT_SOURCE_DIR}/bin/${BINARY}.bin)
+endforeach(BINARY)
