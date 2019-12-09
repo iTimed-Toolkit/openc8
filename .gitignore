@@ -2,3 +2,4 @@
 cmake-build-debug/*
 
 checkm8_payloads/bin
+checkm8_remote/bin/payloads
