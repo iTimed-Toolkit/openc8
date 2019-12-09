@@ -1,7 +1,7 @@
 #ifndef IPWNDFU_REWRITE_C_BRFUNC_COMMON_H
 #define IPWNDFU_REWRITE_C_BRFUNC_COMMON_H
 
-#include "include/checkm8_config.h"
+#include "checkm8_config.h"
 
 typedef int (*BOOTROM_FUNC)();
 
