@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "../../config.h"
+#include "libusb_config.h"
 
 #include <time.h>
 #if defined(__linux__) || defined(__OpenBSD__)

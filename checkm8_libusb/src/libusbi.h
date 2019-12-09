@@ -23,7 +23,7 @@
 #ifndef LIBUSBI_H
 #define LIBUSBI_H
 
-#include "../config.h"
+#include "libusb_config.h"
 
 #include <stdlib.h>
 #include <assert.h>

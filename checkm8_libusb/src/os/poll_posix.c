@@ -18,7 +18,7 @@
  *
  */
 
-#include "../../config.h"
+#include "libusb_config.h"
 
 #include <unistd.h>
 #include <fcntl.h>
