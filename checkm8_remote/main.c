@@ -3,11 +3,11 @@
 
 int main()
 {
-    int status = exploit_device();
-    if(status != 0)
+    struct pwned_device *dev = exploit_device();
+    if(dev == NULL)
     {
-        printf("Failed to checkm8_remote device\n");
-        return status;
+        printf("Failed to exploit device\n");
+        return -1;
     }
 
 }

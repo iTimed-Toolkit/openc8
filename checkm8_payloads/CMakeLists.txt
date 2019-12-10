@@ -7,8 +7,9 @@ set(CMAKE_ASM_COMPILER /usr/bin/aarch64-linux-gnu-as)
 set(CMAKE_OBJCOPY /usr/bin/aarch64-linux-gnu-objcopy)
 set(CMAKE_C_FLAGS "-nostdlib -O")
 
-set(PAYLOADS payload_aes)
-add_executable(payload_aes aes.c)
+set(PAYLOADS payload_aes payload_sysreg)
+add_executable(payload_aes src/aes.c)
+add_executable(payload_sysreg src/sysreg.c)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 foreach(BINARY ${PAYLOADS})

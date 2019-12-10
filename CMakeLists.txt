@@ -3,9 +3,8 @@ project(ipwndfu_rewrite_c)
 enable_language(C)
 
 include_directories(include)
+include_directories(checkm8_libusb/src)
 add_library(checkm8_libusb
-        include/checkm8_config.h include/libusb_config.h
-
         checkm8_libusb/src/core.c checkm8_libusb/src/descriptor.c checkm8_libusb/src/hotplug.c
         checkm8_libusb/src/io.c checkm8_libusb/src/strerror.c checkm8_libusb/src/sync.c
         checkm8_libusb/src/hotplug.h include/libusb.h checkm8_libusb/src/libusbi.h checkm8_libusb/src/version.h

