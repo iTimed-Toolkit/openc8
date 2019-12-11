@@ -10,19 +10,13 @@
 #define IS_CHECKM8_FAIL(code) code < 0
 
 #if CHECKM8_PLATFORM == 8010
-#define DEV_IDVENDOR 0x05AC
-#define DEV_IDPRODUCT 0x1227
+
+#define DEV_IDVENDOR    0x05AC
+#define DEV_IDPRODUCT   0x1227
+
 #else
 #error "Unspported checkm8 platform"
 #endif
-
-struct libusb_device_bundle
-{
-    struct libusb_context *ctx;
-    struct libusb_device *device;
-    struct libusb_device_handle *handle;
-    struct libusb_device_descriptor *descriptor;
-};
 
 struct pwned_device
 {
@@ -34,7 +28,9 @@ struct pwned_device
 
     unsigned int idVendor;
     unsigned int idProduct;
+
     struct libusb_device_bundle *bundle;
+    struct payload *installed;
 };
 
 struct pwned_device *exploit_device();

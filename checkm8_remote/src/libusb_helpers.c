@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../checkm8_libusb/src/libusbi.h"
+#include "libusbi.h"
 
 int get_device_bundle(struct pwned_device *dev)
 {

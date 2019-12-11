@@ -5,6 +5,14 @@
 
 #define LIBUSB_MAX_PACKET_SIZE 0x800
 
+struct libusb_device_bundle
+{
+    struct libusb_context *ctx;
+    struct libusb_device *device;
+    struct libusb_device_handle *handle;
+    struct libusb_device_descriptor *descriptor;
+};
+
 int get_device_bundle(struct pwned_device *dev);
 int release_device_bundle(struct pwned_device *dev);
 
