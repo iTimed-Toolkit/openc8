@@ -4,8 +4,10 @@
 #include "checkm8_config.h"
 
 #define CHECKM8_SUCCESS         0
-#define CHECKM8_FAIL_NODEV      -1
-#define CHECKM8_FAIL_NOEXP      -2
+#define CHECKM8_FAIL_INVARGS    -1
+#define CHECKM8_FAIL_NODEV      -2
+#define CHECKM8_FAIL_NOEXP      -3
+#define CHECKM8_FAIL_NOTDONE    -4
 
 #define IS_CHECKM8_FAIL(code) code < 0
 
