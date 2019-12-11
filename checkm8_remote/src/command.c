@@ -6,7 +6,7 @@
 
 #include "stdlib.h"
 
-void dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len)
+int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len)
 {
     checkm8_debug("dfu_send_data(dev = %p, data = %p, data_len = %li)\n", dev, data, data_len);
     long index = 0, amount;
@@ -19,21 +19,28 @@ void dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len)
 
         checkm8_debug("sending chunk of size %li at index %li\n", amount, index);
         ret = libusb_control_transfer(dev->bundle->handle, 0x21, 1, 0, 0, &data[index], amount, 5000);
-        checkm8_debug("transferred %i bytes\n", ret);
+        if(ret > 0) checkm8_debug("transferred %i bytes\n", ret);
+        else
+        {
+            checkm8_debug("request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            return CHECKM8_FAIL_XFER;
+        }
         index += amount;
     }
 }
 
 struct command_args
 {
-    unsigned long magic;
-    unsigned long arg1;
-    unsigned long arg2;
-    unsigned long arg3;
-    unsigned long arg4;
-    unsigned long arg5;
-    unsigned long arg6;
-    unsigned long arg7;
+    unsigned long long magic;
+    unsigned long long pad;
+
+    unsigned long long arg1;
+    unsigned long long arg2;
+    unsigned long long arg3;
+    unsigned long long arg4;
+    unsigned long long arg5;
+    unsigned long long arg6;
+    unsigned long long arg7;
 
     long len;
 };
@@ -48,34 +55,59 @@ int command(struct pwned_device *dev, struct command_args *args, struct command_
     int ret;
     dfu_send_data(dev, nullbuf, 16);
     ret = libusb_control_transfer(dev->bundle->handle, 0x21, 1, 0, 0, nullbuf, 0, 100);
-    checkm8_debug("got return code %i (%s) from control transfer\n", ret, libusb_error_name(ret));
+    if(ret > 0) checkm8_debug("transferred %i bytes\n", ret);
+    else
+    {
+        checkm8_debug("request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        return CHECKM8_FAIL_XFER;
+    }
 
     ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 3, 0, 0, nullbuf, 6, 100);
-    checkm8_debug("got return code %i (%s) from control transfer\n", ret, libusb_error_name(ret));
+    if(ret > 0) checkm8_debug("transferred %i bytes\n", ret);
+    else
+    {
+        checkm8_debug("request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        return CHECKM8_FAIL_XFER;
+    }
 
     ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 3, 0, 0, nullbuf, 6, 100);
-    checkm8_debug("got return code %i (%s) from control transfer\n", ret, libusb_error_name(ret));
+    if(ret > 0) checkm8_debug("transferred %i bytes\n", ret);
+    else
+    {
+        checkm8_debug("request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        return CHECKM8_FAIL_XFER;
+    }
 
     dfu_send_data(dev, (unsigned char *) args, args->len);
     if(response_len == 0)
     {
         ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 2, 0xFFFF, 0, (unsigned char *) resp, response_len + 1, 100);
-        checkm8_debug("got return code %i (%s) from final response transfer\n", ret, libusb_error_name(ret));
+        if(ret > 0) checkm8_debug("final request transferred %i bytes\n", ret);
+        else
+        {
+            checkm8_debug("final request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            return CHECKM8_FAIL_XFER;
+        }
     }
     else
     {
         ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 2, 0xFFFF, 0, (unsigned char *) resp, response_len, 100);
-        checkm8_debug("got return code %i (%s) from control transfer\n", ret, libusb_error_name(ret));
+        if(ret > 0) checkm8_debug("final request transferred %i bytes\n", ret);
+        else
+        {
+            checkm8_debug("final request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            return CHECKM8_FAIL_XFER;
+        }
     }
 
     checkm8_debug("got response magic %X\n", resp->magic);
     return CHECKM8_SUCCESS;
 }
 
-#define EXEC_MAGIC 0x6365786563657865ul // 'execexec'[::-1]
-#define MEMC_MAGIC 0x636d656d636d656dul // 'memcmemc'[::-1]
-#define MEMS_MAGIC 0x736d656d736d656dul // 'memsmems'[::-1]
-#define DONE_MAGIC 0x656e6f64656e6f64ul // 'donedone'[::-1]
+#define EXEC_MAGIC 0x6578656365786563ul // 'execexec'[::-1]
+#define MEMC_MAGIC 0x6d656d636d656d63ul // 'memcmemc'[::-1]
+#define MEMS_MAGIC 0x6d656d736d656d73ul // 'memsmems'[::-1]
+#define DONE_MAGIC 0x646f6e65646f6e65ul // 'donedone'[::-1]
 
 int dev_memset(struct pwned_device *dev, long addr, unsigned char c, long len)
 {
@@ -87,10 +119,11 @@ int dev_memset(struct pwned_device *dev, long addr, unsigned char c, long len)
 
     checkm8_debug("cmd_args = %p, cmd_resp = %p\n", cmd_args, cmd_resp);
     cmd_args->magic = MEMS_MAGIC;
+    cmd_args->pad = 0;
     cmd_args->arg1 = addr;
     cmd_args->arg2 = (unsigned long) c;
     cmd_args->arg3 = len;
-    cmd_args->len = 16;
+    cmd_args->len = 40;
 
     ret = command(dev, cmd_args, cmd_resp, 0);
     free(cmd_args);
@@ -109,10 +142,11 @@ int dev_memcpy(struct pwned_device *dev, long dest, long src, long len)
 
     checkm8_debug("cmd_args = %p, cmd_resp = %p\n", cmd_args, cmd_resp);
     cmd_args->magic = MEMC_MAGIC;
+    cmd_args->pad = 0;
     cmd_args->arg1 = dest;
     cmd_args->arg2 = src;
     cmd_args->arg3 = len;
-    cmd_args->len = 16;
+    cmd_args->len = 40;
 
     ret = command(dev, cmd_args, cmd_resp, 0);
     free(cmd_args);
@@ -121,7 +155,7 @@ int dev_memcpy(struct pwned_device *dev, long dest, long src, long len)
     return ret;
 }
 
-int dev_exec(struct pwned_device *dev, long response_len, int nargs, long *args)
+int dev_exec(struct pwned_device *dev, long response_len, int nargs, unsigned long long *args)
 {
     checkm8_debug("dev_exec(dev = %p, response_len = %l, nargs = %i, args = %p\n", dev, response_len, nargs, args);
     if(nargs > 7)
@@ -131,7 +165,7 @@ int dev_exec(struct pwned_device *dev, long response_len, int nargs, long *args)
     }
 
     int ret;
-    unsigned long *argbase;
+    unsigned long long *argbase;
     struct command_args *cmd_args, *cmd_resp;
     cmd_args = calloc(1, sizeof(struct command_args));
     cmd_resp = calloc(1, sizeof(struct command_args));
@@ -140,6 +174,7 @@ int dev_exec(struct pwned_device *dev, long response_len, int nargs, long *args)
     checkm8_debug("copying args: ");
 
     cmd_args->magic = EXEC_MAGIC;
+    cmd_args->pad = 0;
     argbase = &cmd_args->arg1;
     for(ret = 0; ret < nargs; ret++)
     {
