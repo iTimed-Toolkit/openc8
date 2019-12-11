@@ -2,6 +2,9 @@
 #define IPWNDFU_REWRITE_C_CHECKM8_CONFIG_H
 
 //#define LIBUSB_LOGGING
+#define CHECKM8_LOGGING
 #define CHECKM8_PLATFORM 8010
+
+void checkm8_debug(const char *format, ...);
 
 #endif //IPWNDFU_REWRITE_C_CHECKM8_CONFIG_H

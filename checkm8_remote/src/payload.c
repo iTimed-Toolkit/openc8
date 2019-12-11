@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "command.h"
+#include "libusb_helpers.h"
+
 
 struct payload
 {
@@ -23,7 +26,7 @@ struct payload *get_payload(PAYLOAD_T p)
     switch(p)
     {
         case PAYLOAD_AES:
-            path = "blehblehbleh";
+            path = "/home/grg/Projects/School/NCSU/iphone_aes_sc/ipwndfu_rewrite_c/checkm8_remote/bin/payloads/payload_aes.bin";
             break;
 
         default:
@@ -61,7 +64,7 @@ void free_payload(struct payload *p)
 
 long get_address(struct pwned_device *dev, LOCATION_T l)
 {
-
+    return 0x180151000;
 }
 
 
@@ -82,11 +85,7 @@ int dev_insert_payload(struct pwned_device *dev, struct payload *pl)
     if(dev->installed == NULL)
     {
         dev->installed = pl;
-        return PAYLOAD_SUCCESS;
-    }
-    else if(dev_contains_payload(dev, pl->type) == PAYLOAD_FOUND)
-    {
-        return PAYLOAD_FAIL_DUP;
+        return CHECKM8_SUCCESS;
     }
     else
     {
@@ -94,7 +93,7 @@ int dev_insert_payload(struct pwned_device *dev, struct payload *pl)
 
         curr->next = pl;
         pl->prev = curr;
-        return PAYLOAD_SUCCESS;
+        return CHECKM8_SUCCESS;
     }
 }
 
@@ -124,8 +123,28 @@ struct payload *dev_remove_payload(struct pwned_device *dev, PAYLOAD_T p)
 
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 {
-    struct payload *payload = get_payload(p);
+    int i, ret;
+    struct payload *pl = get_payload(p);
     long addr = get_address(dev, loc);
+
+    if(pl == NULL || addr == -1) return CHECKM8_FAIL_INVARGS;
+
+    ret = get_device_bundle(dev);
+    if(IS_CHECKM8_FAIL(ret)) return ret;
+
+    for(i = 0; i < pl->len; i++)
+    {
+        ret = dev_memset(dev, addr + i, pl->data[i], 1);
+        if(IS_CHECKM8_FAIL(ret))
+        {
+            release_device_bundle(dev);
+            return CHECKM8_FAIL_XFER;
+        }
+    }
+
+    dev_insert_payload(dev, pl);
+    release_device_bundle(dev);
+    return ret;
 }
 
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)

@@ -3,9 +3,6 @@
 
 #include "checkm8.h"
 
-#define PAYLOAD_SUCCESS     0
-#define PAYLOAD_FAIL_DUP    -1
-
 #define PAYLOAD_FOUND       0
 #define PAYLOAD_NOT_FOUND   -1
 

