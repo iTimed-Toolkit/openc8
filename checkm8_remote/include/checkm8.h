@@ -9,6 +9,7 @@
 #define CHECKM8_FAIL_NOEXP      -3
 #define CHECKM8_FAIL_NOTDONE    -4
 #define CHECKM8_FAIL_XFER       -5
+#define CHECKM8_FAIL_NOINST     -6
 
 #define IS_CHECKM8_FAIL(code) code < 0
 

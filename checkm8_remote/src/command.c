@@ -17,12 +17,12 @@ int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len)
         if(data_len - index >= LIBUSB_MAX_PACKET_SIZE) amount = LIBUSB_MAX_PACKET_SIZE;
         else amount = data_len - index;
 
-        checkm8_debug("sending chunk of size %li at index %li\n", amount, index);
+        checkm8_debug("\tsending chunk of size %li at index %li\n", amount, index);
         ret = libusb_control_transfer(dev->bundle->handle, 0x21, 1, 0, 0, &data[index], amount, 5000);
-        if(ret > 0) checkm8_debug("transferred %i bytes\n", ret);
+        if(ret > 0) checkm8_debug("\ttransferred %i bytes\n", ret);
         else
         {
-            checkm8_debug("request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            checkm8_debug("\trequest failed with error code %i (%s)\n", ret, libusb_error_name(ret));
             return CHECKM8_FAIL_XFER;
         }
         index += amount;
@@ -53,54 +53,58 @@ int command(struct pwned_device *dev, struct command_args *args, struct command_
     if(!is_device_bundle_open(dev)) return CHECKM8_FAIL_NODEV;
 
     int ret;
-    dfu_send_data(dev, nullbuf, 16);
+    ret = dfu_send_data(dev, nullbuf, 16);
+    if(IS_CHECKM8_FAIL(ret)) return ret;
+
     ret = libusb_control_transfer(dev->bundle->handle, 0x21, 1, 0, 0, nullbuf, 0, 100);
-    if(ret > 0) checkm8_debug("transferred %i bytes\n", ret);
+    if(ret >= 0) checkm8_debug("\ttransferred %i bytes\n", ret);
     else
     {
-        checkm8_debug("request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        checkm8_debug("\trequest failed with error code %i (%s)\n", ret, libusb_error_name(ret));
         return CHECKM8_FAIL_XFER;
     }
 
     ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 3, 0, 0, nullbuf, 6, 100);
-    if(ret > 0) checkm8_debug("transferred %i bytes\n", ret);
+    if(ret >= 0) checkm8_debug("\ttransferred %i bytes\n", ret);
     else
     {
-        checkm8_debug("request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        checkm8_debug("\trequest failed with error code %i (%s)\n", ret, libusb_error_name(ret));
         return CHECKM8_FAIL_XFER;
     }
 
     ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 3, 0, 0, nullbuf, 6, 100);
-    if(ret > 0) checkm8_debug("transferred %i bytes\n", ret);
+    if(ret >= 0) checkm8_debug("\ttransferred %i bytes\n", ret);
     else
     {
-        checkm8_debug("request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        checkm8_debug("\trequest failed with error code %i (%s)\n", ret, libusb_error_name(ret));
         return CHECKM8_FAIL_XFER;
     }
 
-    dfu_send_data(dev, (unsigned char *) args, args->len);
+    ret = dfu_send_data(dev, (unsigned char *) args, args->len);
+    if(IS_CHECKM8_FAIL(ret)) return ret;
+
     if(response_len == 0)
     {
         ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 2, 0xFFFF, 0, (unsigned char *) resp, response_len + 1, 100);
-        if(ret > 0) checkm8_debug("final request transferred %i bytes\n", ret);
+        if(ret >= 0) checkm8_debug("\tfinal request transferred %i bytes\n", ret);
         else
         {
-            checkm8_debug("final request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            checkm8_debug("\tfinal request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
             return CHECKM8_FAIL_XFER;
         }
     }
     else
     {
         ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 2, 0xFFFF, 0, (unsigned char *) resp, response_len, 100);
-        if(ret > 0) checkm8_debug("final request transferred %i bytes\n", ret);
+        if(ret >= 0) checkm8_debug("\tfinal request transferred %i bytes\n", ret);
         else
         {
-            checkm8_debug("final request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            checkm8_debug("\tfinal request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
             return CHECKM8_FAIL_XFER;
         }
     }
 
-    checkm8_debug("got response magic %X\n", resp->magic);
+    checkm8_debug("\tgot response magic %lx (%s)\n", resp->magic, (char *) &resp->magic);
     return CHECKM8_SUCCESS;
 }
 
@@ -117,7 +121,7 @@ int dev_memset(struct pwned_device *dev, long addr, unsigned char c, long len)
     cmd_args = calloc(1, sizeof(struct command_args));
     cmd_resp = calloc(1, sizeof(struct command_args));
 
-    checkm8_debug("cmd_args = %p, cmd_resp = %p\n", cmd_args, cmd_resp);
+    checkm8_debug("\tcmd_args = %p, cmd_resp = %p\n", cmd_args, cmd_resp);
     cmd_args->magic = MEMS_MAGIC;
     cmd_args->pad = 0;
     cmd_args->arg1 = addr;
@@ -125,7 +129,7 @@ int dev_memset(struct pwned_device *dev, long addr, unsigned char c, long len)
     cmd_args->arg3 = len;
     cmd_args->len = 40;
 
-    ret = command(dev, cmd_args, cmd_resp, 0);
+    ret = command(dev, cmd_args, cmd_resp, 8);
     free(cmd_args);
     free(cmd_resp);
 
@@ -140,7 +144,7 @@ int dev_memcpy(struct pwned_device *dev, long dest, long src, long len)
     cmd_args = calloc(1, sizeof(struct command_args));
     cmd_resp = calloc(1, sizeof(struct command_args));
 
-    checkm8_debug("cmd_args = %p, cmd_resp = %p\n", cmd_args, cmd_resp);
+    checkm8_debug("\tcmd_args = %p, cmd_resp = %p\n", cmd_args, cmd_resp);
     cmd_args->magic = MEMC_MAGIC;
     cmd_args->pad = 0;
     cmd_args->arg1 = dest;
@@ -160,28 +164,27 @@ int dev_exec(struct pwned_device *dev, long response_len, int nargs, unsigned lo
     checkm8_debug("dev_exec(dev = %p, response_len = %l, nargs = %i, args = %p\n", dev, response_len, nargs, args);
     if(nargs > 7)
     {
-        checkm8_debug("too many args\n");
+        checkm8_debug("\ttoo many args\n");
         return CHECKM8_FAIL_INVARGS;
     }
 
-    int ret;
+    int ret, i;
     unsigned long long *argbase;
     struct command_args *cmd_args, *cmd_resp;
     cmd_args = calloc(1, sizeof(struct command_args));
     cmd_resp = calloc(1, sizeof(struct command_args));
 
-    checkm8_debug("cmd_args = %p, cmd_resp = %p\n", cmd_args, cmd_resp);
-    checkm8_debug("copying args: ");
+    checkm8_debug("\tcmd_args = %p, cmd_resp = %p\n", cmd_args, cmd_resp);
+    checkm8_debug("\tcopying args");
 
     cmd_args->magic = EXEC_MAGIC;
     cmd_args->pad = 0;
     argbase = &cmd_args->arg1;
-    for(ret = 0; ret < nargs; ret++)
+    for(i = 0; i < nargs; i++)
     {
-        checkm8_debug("%lx ", args[ret]);
-        argbase[ret] = args[ret];
+        argbase[i] = args[i];
+        checkm8_debug("\t\t%ul\n", args[i]);
     }
-    checkm8_debug("\n");
 
     ret = command(dev, cmd_args, cmd_resp, 16 + response_len);
     if(ret == CHECKM8_SUCCESS && cmd_resp->magic != DONE_MAGIC) return CHECKM8_FAIL_NOTDONE;

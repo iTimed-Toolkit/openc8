@@ -3,8 +3,8 @@
 
 #include "checkm8.h"
 
-#define PAYLOAD_FOUND       0
-#define PAYLOAD_NOT_FOUND   -1
+#define PAYLOAD_AES_BIN     CHECKM8_BIN_BASE "payloads/payload_aes.bin"
+#define PAYLOAD_SYSREG_BIN  CHECKM8_BIN_BASE "payloads/payload_sysreg.bin"
 
 typedef enum
 {
@@ -21,6 +21,6 @@ typedef enum
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc);
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p);
 
-int execute_payload(struct pwned_device *dev, PAYLOAD_T p, ...);
+int execute_payload(struct pwned_device *dev, PAYLOAD_T p, int nargs, ...);
 
 #endif //IPWNDFU_REWRITE_C_PAYLOAD_H

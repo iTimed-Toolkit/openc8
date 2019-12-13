@@ -4,6 +4,7 @@
 //#define LIBUSB_LOGGING
 #define CHECKM8_LOGGING
 #define CHECKM8_PLATFORM 8010
+#define CHECKM8_BIN_BASE "/home/grg/Projects/School/NCSU/iphone_aes_sc/checkm8_remote/bin/"
 
 void checkm8_debug(const char *format, ...);
 

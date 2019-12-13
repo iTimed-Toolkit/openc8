@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
+
 #include "command.h"
 #include "libusb_helpers.h"
 
@@ -26,7 +28,11 @@ struct payload *get_payload(PAYLOAD_T p)
     switch(p)
     {
         case PAYLOAD_AES:
-            path = "/home/grg/Projects/School/NCSU/iphone_aes_sc/ipwndfu_rewrite_c/checkm8_remote/bin/payloads/payload_aes.bin";
+            path = PAYLOAD_AES_BIN;
+            break;
+
+        case PAYLOAD_SYSREG:
+            path = PAYLOAD_SYSREG_BIN;
             break;
 
         default:
@@ -59,7 +65,8 @@ struct payload *get_payload(PAYLOAD_T p)
 
 void free_payload(struct payload *p)
 {
-
+    free(p->data);
+    free(p);
 }
 
 long get_address(struct pwned_device *dev, LOCATION_T l)
@@ -68,18 +75,18 @@ long get_address(struct pwned_device *dev, LOCATION_T l)
 }
 
 
-int dev_contains_payload(struct pwned_device *dev, PAYLOAD_T p)
+struct payload *dev_retrieve_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
     struct payload *curr;
     for(curr = dev->installed; curr != NULL; curr = curr->next)
     {
-        if(curr->type == p) return PAYLOAD_FOUND;
+        if(curr->type == p) return curr;
     }
 
-    return PAYLOAD_NOT_FOUND;
+    return NULL;
 }
 
-int dev_insert_payload(struct pwned_device *dev, struct payload *pl)
+int dev_link_payload(struct pwned_device *dev, struct payload *pl)
 {
     struct payload *curr;
     if(dev->installed == NULL)
@@ -97,27 +104,19 @@ int dev_insert_payload(struct pwned_device *dev, struct payload *pl)
     }
 }
 
-struct payload *dev_remove_payload(struct pwned_device *dev, PAYLOAD_T p)
+int *dev_unlink_payload(struct pwned_device *dev, struct payload *pl)
 {
-    struct payload *curr;
-    if(dev->installed == NULL)
+    if(dev->installed == pl)
     {
-        return NULL;
+        dev->installed = NULL;
+        return CHECKM8_SUCCESS;
     }
     else
     {
-        for(curr = dev->installed; curr != NULL; curr = curr->next)
-        {
-            if(curr->type == p)
-            {
-                curr->prev->next = curr->next;
-                curr->next->prev = curr->prev;
-                return curr;
-            }
-        }
+        pl->prev->next = pl->next;
+        pl->next->prev = pl->prev;
+        return CHECKM8_SUCCESS;
     }
-
-    return NULL;
 }
 
 
@@ -142,7 +141,8 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
         }
     }
 
-    dev_insert_payload(dev, pl);
+    pl->install_base = addr;
+    dev_link_payload(dev, pl);
     release_device_bundle(dev);
     return ret;
 }
@@ -152,7 +152,27 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 
 }
 
-int execute_payload(struct pwned_device *dev, PAYLOAD_T p, ...)
+int execute_payload(struct pwned_device *dev, PAYLOAD_T p, int nargs, ...)
 {
+    int ret, i;
+    struct payload *pl;
+    if((pl = dev_retrieve_payload(dev, p)) == NULL) return CHECKM8_FAIL_NOINST;
 
+    ret = get_device_bundle(dev);
+    if(IS_CHECKM8_FAIL(ret)) return ret;
+
+    unsigned long long args[nargs + 1];
+    args[0] = pl->install_base;
+
+    va_list arg_list;
+    va_start(arg_list, nargs);
+    for(i = 0; i < nargs; i++)
+    {
+        args[i + 1] = va_arg(arg_list, unsigned long long);
+    }
+    va_end(arg_list);
+
+    ret = dev_exec(dev, 16, nargs, args);
+    release_device_bundle(dev);
+    return ret;
 }

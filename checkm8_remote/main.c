@@ -32,5 +32,6 @@ int main()
         return -1;
     }
 
-    install_payload(dev, PAYLOAD_AES, DRAM);
+    install_payload(dev, PAYLOAD_SYSREG, DRAM);
+    execute_payload(dev, PAYLOAD_SYSREG, 0);
 }
