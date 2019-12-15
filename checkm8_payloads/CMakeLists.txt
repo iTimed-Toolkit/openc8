@@ -3,7 +3,7 @@ include_directories(include)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-if(CMAKE_HOST_SYSTEM_PROCESSOR EQUAL "x86_64")
+if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     set(CMAKE_C_COMPILER /usr/bin/aarch64-linux-gnu-gcc)
     set(CMAKE_ASM_COMPILER /usr/bin/aarch64-linux-gnu-as)
     set(CMAKE_OBJCOPY /usr/bin/aarch64-linux-gnu-objcopy)
