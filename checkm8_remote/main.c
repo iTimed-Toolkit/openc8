@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include <execinfo.h>
 
-void checkm8_debug(const char *format, ...)
+void checkm8_debug_indent(const char *format, ...)
 {
 #ifdef CHECKM8_LOGGING
     void *traces[100];
@@ -14,7 +14,6 @@ void checkm8_debug(const char *format, ...)
     {
         printf("\t");
     }
-
     va_list args;
 
     va_start (args, format);
@@ -22,6 +21,18 @@ void checkm8_debug(const char *format, ...)
     va_end(args);
 #endif
 }
+
+void checkm8_debug_block(const char *format, ...)
+{
+#ifdef CHECKM8_LOGGING
+    va_list args;
+
+    va_start (args, format);
+    vprintf(format, args);
+    va_end(args);
+#endif
+}
+
 
 int main()
 {
@@ -32,6 +43,9 @@ int main()
         return -1;
     }
 
+    install_payload(dev, PAYLOAD_SYNC, DRAM);
     install_payload(dev, PAYLOAD_SYSREG, DRAM);
+
+    execute_payload(dev, PAYLOAD_SYNC, 0);
     execute_payload(dev, PAYLOAD_SYSREG, 0);
 }

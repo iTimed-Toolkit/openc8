@@ -5,9 +5,10 @@
 
 #define PAYLOAD_AES_BIN     CHECKM8_BIN_BASE "payloads/payload_aes.bin"
 #define PAYLOAD_SYSREG_BIN  CHECKM8_BIN_BASE "payloads/payload_sysreg.bin"
-
+#define PAYLOAD_SYNC_BIN    CHECKM8_BIN_BASE "payloads/payload_sync.bin"
 typedef enum
 {
+    PAYLOAD_SYNC,
     PAYLOAD_AES,
     PAYLOAD_SYSREG
 } PAYLOAD_T;

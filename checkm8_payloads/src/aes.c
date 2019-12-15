@@ -2,7 +2,9 @@
 #include "brfunc_timing.h"
 #include "brfunc_sep.h"
 
-__attribute__ ((section (".payload_text")))
+#include "util.h"
+
+PAYLOAD_SECTION
 int aes_hw_crypto_command(unsigned int cmd,
                           void *src,
                           void *dst,
@@ -45,6 +47,7 @@ int aes_hw_crypto_command(unsigned int cmd,
     return 0;
 }
 
+TEXT_SECTION
 int _start(unsigned int cmd,
            void *src,
            void *dst,
