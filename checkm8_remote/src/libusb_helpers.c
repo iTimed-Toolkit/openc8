@@ -58,14 +58,24 @@ int get_device_bundle(struct pwned_device *dev)
     if(ret == LIBUSB_SUCCESS)
     {
         checkm8_debug_indent("\topening device and returning success\n");
-        libusb_open(dev->bundle->device, &dev->bundle->handle);
-        libusb_set_auto_detach_kernel_driver(dev->bundle->handle, 1);
+        ret = libusb_open(dev->bundle->device, &dev->bundle->handle);
+        if(ret == 0)
+        {
+            libusb_set_auto_detach_kernel_driver(dev->bundle->handle, 1);
+        }
+        else
+        {
+            checkm8_debug_indent("\tfailed to open device\n");
+            libusb_exit(dev->bundle->ctx);
+            free(dev->bundle->descriptor);
+        }
+
+        return ret;
     }
     else
     {
         checkm8_debug_indent("\tcould not find a matching device\n");
         libusb_exit(dev->bundle->ctx);
-        free(dev->bundle->ctx);
         free(dev->bundle->descriptor);
 
         dev->bundle->ctx = NULL;
@@ -93,7 +103,6 @@ int release_device_bundle(struct pwned_device *dev)
     {
         checkm8_debug_indent("\texiting context\n");;
         libusb_exit(dev->bundle->ctx);
-        free(dev->bundle->ctx);
         dev->bundle->ctx = NULL;
     }
 
