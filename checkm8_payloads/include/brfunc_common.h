@@ -13,14 +13,14 @@ typedef int (*BOOTROM_FUNC)();
 #define ADDR_PUSH_COMMAND_IV                0x100000d18
 #define ADDR_PUSH_COMMAND_DATA              0x100000d98
 #define ADDR_PUSH_COMMAND_FLAG              0x100000e20
-#define ADDR_WAIT_FOR_COMMAND_FLAG          0x100000ec4
+#define ADDR_WAIT_FOR_COMMAND               0x100000ec4
 
-#define ADDR_rAES_CONTROL                   0x20A108008
-#define ADDR_rAES_INT_STATUS                0x20A108018
+#define ADDR_AES_CONTROL                    0x20A108008
+#define ADDR_AES_STATUS                     0x20A108018
 
 /* SEP */
 #define ADDR_DPA_SEEDED                     0x100001140
-#define ADDR_SEP_CREATE_SEND_DPA_MESSAGE    0x100002338
+#define ADDR_SEND_DPA_MESSAGE               0x100002338
 
 /* Timing */
 #define ADDR_CLOCK_GATE                     0x100009d4c
