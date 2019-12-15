@@ -12,7 +12,7 @@ struct payload
 {
     PAYLOAD_T type;
     unsigned char *data;
-    long len;
+    int len;
 
     long long install_base;
     struct payload *next;
@@ -76,6 +76,7 @@ void free_payload(struct payload *p)
 long long curr_address = 0x180150000;
 long long get_address(struct pwned_device *dev, LOCATION_T l)
 {
+    //TODO: make an actual memory allocator
     long long ret = curr_address;
     curr_address += 0x1000;
     return ret;
@@ -131,6 +132,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 {
     checkm8_debug_indent("install_payload(dev = %p, p = %i, loc = %i)\n", dev, p, loc);
     int i, ret;
+    struct dev_cmd_resp *resp = NULL;
     struct payload *pl = get_payload(p);
     long long addr = get_address(dev, loc);
 
@@ -139,42 +141,50 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
     ret = get_device_bundle(dev);
     if(IS_CHECKM8_FAIL(ret)) return ret;
 
-    for(i = 0; i < pl->len; i++)
+    resp = dev_write_memory(dev, addr, pl->data, pl->len);
+    if(IS_CHECKM8_FAIL(resp->ret))
     {
-        checkm8_debug_indent("\tcopying payload byte %i of %i\n", i, pl->len);
-        ret = dev_memset(dev, addr + i, pl->data[i], 1);
-        if(IS_CHECKM8_FAIL(ret))
-        {
-            release_device_bundle(dev);
-            return CHECKM8_FAIL_XFER;
-        }
+        free_dev_cmd_resp(resp);
+        release_device_bundle(dev);
+        return CHECKM8_FAIL_XFER;
     }
 
-    checkm8_debug_indent("\tdone copying and linking payload");
+    checkm8_debug_indent("\tdone copying and linking payload\n");
     pl->install_base = addr;
     dev_link_payload(dev, pl);
+
+    free_dev_cmd_resp(resp);
     release_device_bundle(dev);
     return ret;
 }
 
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
-
+    //TODO: free memory in memory allocator
 }
 
-int execute_payload(struct pwned_device *dev, PAYLOAD_T p, int nargs, ...)
+struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int nargs, ...)
 {
     checkm8_debug_indent("execute_payload(dev = %p, p = %i, nargs = %i, ...)\n", dev, p, nargs);
     int ret, i;
+    struct dev_cmd_resp *resp;
     struct payload *pl;
+
     if((pl = dev_retrieve_payload(dev, p)) == NULL)
     {
         checkm8_debug_indent("\tpayload is not installed\n");
-        return CHECKM8_FAIL_NOINST;
+        resp = calloc(1, sizeof(struct dev_cmd_resp));
+        resp->ret = CHECKM8_FAIL_NOINST;
+        return resp;
     }
 
     ret = get_device_bundle(dev);
-    if(IS_CHECKM8_FAIL(ret)) return ret;
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        resp = calloc(1, sizeof(struct dev_cmd_resp));
+        resp->ret = ret;
+        return resp;
+    }
 
     unsigned long long args[nargs + 1];
     args[0] = pl->install_base;
@@ -189,7 +199,43 @@ int execute_payload(struct pwned_device *dev, PAYLOAD_T p, int nargs, ...)
     }
     va_end(arg_list);
 
-    ret = dev_exec(dev, 2, nargs + 1, args);
+    resp = dev_exec(dev, 8, nargs + 1, args);
     release_device_bundle(dev);
-    return ret;
+    return resp;
+}
+
+struct dev_cmd_resp *read_payload(struct pwned_device *dev, long long addr, int len)
+{
+    int ret;
+    struct dev_cmd_resp *resp;
+
+    ret = get_device_bundle(dev);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        resp = calloc(1, sizeof(struct dev_cmd_resp));
+        resp->ret = ret;
+        return resp;
+    }
+
+    resp = dev_read_memory(dev, addr, len);
+    release_device_bundle(dev);
+    return resp;
+}
+
+struct dev_cmd_resp *write_payload(struct pwned_device *dev, long long addr, unsigned char *data, int len)
+{
+    int ret;
+    struct dev_cmd_resp *resp;
+
+    ret = get_device_bundle(dev);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        resp = calloc(1, sizeof(struct dev_cmd_resp));
+        resp->ret = ret;
+        return resp;
+    }
+
+    resp = dev_write_memory(dev, addr, data, len);
+    release_device_bundle(dev);
+    return resp;
 }
