@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <execinfo.h>
-#include <command.h>
+#include <libusb_helpers.h>
+#include "command.h"
 
 void checkm8_debug_indent(const char *format, ...)
 {
@@ -46,23 +47,54 @@ int main()
     }
 
     struct dev_cmd_resp *resp;
+    ret = install_payload(dev, PAYLOAD_SYNC, DRAM);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        printf("Failed to install sync payload\n");
+        return -1;
+    }
 
-    install_payload(dev, PAYLOAD_SYNC, DRAM);
-    install_payload(dev, PAYLOAD_SYSREG, DRAM);
+    ret = install_payload(dev, PAYLOAD_AES, DRAM);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        printf("Failed to install AES payload\n");
+        return -1;
+    }
 
     resp = execute_payload(dev, PAYLOAD_SYNC, 0);
-    printf("payload sync execution got ret %i\n", resp->ret);
-    free_dev_cmd_resp(resp);
-
-    resp = execute_payload(dev, PAYLOAD_SYSREG, 0);
-    if(resp->ret == CHECKM8_SUCCESS)
+    if(IS_CHECKM8_FAIL(resp->ret))
     {
-        long long evt_base = RESP_VALUE(resp->data, unsigned long long, 0);
-        printf("got evt base %llx\n", evt_base);
+        printf("Failed to execute sync payload\n");
+        return -1;
+    }
 
-        resp = read_payload(dev, evt_base, 16);
-        printf("%08llX %08llx %08llx",
-                RESP_VALUE(resp->data, unsigned long long, 0),
-                RESP_VALUE(resp->data, unsigned long long, 1));
+    unsigned char data[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe,
+                              0xef};
+    unsigned char key[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe,
+                             0xef};
+
+    free_dev_cmd_resp(resp);
+    resp = write_payload(dev, 0x180152000, data, 16);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("Failed to write AES data\n");
+        return -1;
+    }
+
+    free_dev_cmd_resp(resp);
+    resp = write_payload(dev, 0x180152010, key, 16);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("Failed to write AES key\n");
+        return -1;
+    }
+
+    free_dev_cmd_resp(resp);
+    resp = execute_payload(dev, PAYLOAD_AES, 7, 16, 0x180152000, DFU_IMAGE_BASE + 56, 128, 0, 0x180152010, 0);
+
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("Failed to execute AES\n");
+        return -1;
     }
 }

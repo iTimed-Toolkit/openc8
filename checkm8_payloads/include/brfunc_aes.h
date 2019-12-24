@@ -3,6 +3,8 @@
 
 #include "brfunc_common.h"
 
+#define AES_HW_CRYPTO_CMD           ((BOOTROM_FUNC) ADDR_AES_HW_CRYPTO_CMD)
+
 #define CREATE_KEY_COMMAND          ((BOOTROM_FUNC) ADDR_CREATE_KEY_COMMAND)
 #define PUSH_COMMAND_KEY            ((BOOTROM_FUNC) ADDR_PUSH_COMMAND_KEY)
 #define PUSH_COMMAND_IV             ((BOOTROM_FUNC) ADDR_PUSH_COMMAND_IV)

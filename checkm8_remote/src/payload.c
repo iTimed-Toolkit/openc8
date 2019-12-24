@@ -195,23 +195,25 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
     for(i = 0; i < nargs; i++)
     {
         args[i + 1] = va_arg(arg_list, unsigned long long);
-        checkm8_debug_indent("\textracted arg %li\n", args[i + 1]);
+        checkm8_debug_indent("\textracted arg %lx\n", args[i + 1]);
     }
     va_end(arg_list);
 
-    resp = dev_exec(dev, 8, nargs + 1, args);
+    resp = dev_exec(dev, 16, nargs + 1, args);
     release_device_bundle(dev);
     return resp;
 }
 
 struct dev_cmd_resp *read_payload(struct pwned_device *dev, long long addr, int len)
 {
+    checkm8_debug_indent("read_payload(dev = %p, addr = %lx, len = %i)\n", dev, addr, len);
     int ret;
     struct dev_cmd_resp *resp;
 
     ret = get_device_bundle(dev);
     if(IS_CHECKM8_FAIL(ret))
     {
+        checkm8_debug_indent("\tfailed to get device bundle\n");
         resp = calloc(1, sizeof(struct dev_cmd_resp));
         resp->ret = ret;
         return resp;
@@ -224,12 +226,14 @@ struct dev_cmd_resp *read_payload(struct pwned_device *dev, long long addr, int 
 
 struct dev_cmd_resp *write_payload(struct pwned_device *dev, long long addr, unsigned char *data, int len)
 {
+    checkm8_debug_indent("write_payload(dev = %p, addr = %lx, data = %p, len = %i)\n", dev, addr, data, len);
     int ret;
     struct dev_cmd_resp *resp;
 
     ret = get_device_bundle(dev);
     if(IS_CHECKM8_FAIL(ret))
     {
+        checkm8_debug_indent("\tfailed to get device bundle\n");
         resp = calloc(1, sizeof(struct dev_cmd_resp));
         resp->ret = ret;
         return resp;

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ipwndfu_rewrite_c)
+project(checkm8_tool)
 enable_language(C)
 
 include_directories(include)

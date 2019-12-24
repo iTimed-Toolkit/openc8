@@ -1,4 +1,4 @@
-enable_language(ASM)
+project(checkm8_payloads ASM)
 include_directories(include)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)

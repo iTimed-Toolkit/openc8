@@ -1,3 +1,5 @@
+project(checkm8_remote C)
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS -g)
 

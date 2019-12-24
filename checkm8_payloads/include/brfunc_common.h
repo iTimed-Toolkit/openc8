@@ -8,6 +8,7 @@ typedef int (*BOOTROM_FUNC)();
 #if CHECKM8_PLATFORM == 8010
 
 /* AES */
+#define ADDR_AES_HW_CRYPTO_CMD              0x100000f0c
 #define ADDR_CREATE_KEY_COMMAND             0x100000e90
 #define ADDR_PUSH_COMMAND_KEY               0x100000c64
 #define ADDR_PUSH_COMMAND_IV                0x100000d18

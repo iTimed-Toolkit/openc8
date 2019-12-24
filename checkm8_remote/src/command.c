@@ -249,6 +249,4 @@ struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, long long addr, 
     memcpy(&cmd_args[40], data, len);
 
     return command(dev, (unsigned char *) &cmd_args, 40 + len, 1 * sizeof(unsigned long long));
-
-    return dev_memcpy(dev, addr, DFU_IMAGE_BASE + 40, len);
 }
