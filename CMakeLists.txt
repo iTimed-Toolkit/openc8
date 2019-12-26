@@ -4,6 +4,7 @@ enable_language(C)
 
 include_directories(include)
 include_directories(checkm8_libusb/src)
+include_directories(checkm8_libusb/src/os)
 add_library(checkm8_libusb
         checkm8_libusb/src/core.c checkm8_libusb/src/descriptor.c checkm8_libusb/src/hotplug.c
         checkm8_libusb/src/io.c checkm8_libusb/src/strerror.c checkm8_libusb/src/sync.c
