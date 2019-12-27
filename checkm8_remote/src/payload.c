@@ -5,7 +5,7 @@
 #include <stdarg.h>
 
 #include "command.h"
-#include "libusb_helpers.h"
+#include "usb_helpers.h"
 
 
 struct payload
@@ -138,14 +138,14 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 
     if(pl == NULL || addr == -1) return CHECKM8_FAIL_INVARGS;
 
-    ret = get_device_bundle(dev);
+    ret = open_device_session(dev);
     if(IS_CHECKM8_FAIL(ret)) return ret;
 
     resp = dev_write_memory(dev, addr, pl->data, pl->len);
     if(IS_CHECKM8_FAIL(resp->ret))
     {
         free_dev_cmd_resp(resp);
-        release_device_bundle(dev);
+        close_device_session(dev);
         return CHECKM8_FAIL_XFER;
     }
 
@@ -154,7 +154,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
     dev_link_payload(dev, pl);
 
     free_dev_cmd_resp(resp);
-    release_device_bundle(dev);
+    close_device_session(dev);
     return ret;
 }
 
@@ -178,7 +178,7 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
         return resp;
     }
 
-    ret = get_device_bundle(dev);
+    ret = open_device_session(dev);
     if(IS_CHECKM8_FAIL(ret))
     {
         resp = calloc(1, sizeof(struct dev_cmd_resp));
@@ -200,7 +200,7 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
     va_end(arg_list);
 
     resp = dev_exec(dev, 16, nargs + 1, args);
-    release_device_bundle(dev);
+    close_device_session(dev);
     return resp;
 }
 
@@ -210,7 +210,7 @@ struct dev_cmd_resp *read_payload(struct pwned_device *dev, long long addr, int 
     int ret;
     struct dev_cmd_resp *resp;
 
-    ret = get_device_bundle(dev);
+    ret = open_device_session(dev);
     if(IS_CHECKM8_FAIL(ret))
     {
         checkm8_debug_indent("\tfailed to get device bundle\n");
@@ -220,7 +220,7 @@ struct dev_cmd_resp *read_payload(struct pwned_device *dev, long long addr, int 
     }
 
     resp = dev_read_memory(dev, addr, len);
-    release_device_bundle(dev);
+    close_device_session(dev);
     return resp;
 }
 
@@ -230,7 +230,7 @@ struct dev_cmd_resp *write_payload(struct pwned_device *dev, long long addr, uns
     int ret;
     struct dev_cmd_resp *resp;
 
-    ret = get_device_bundle(dev);
+    ret = open_device_session(dev);
     if(IS_CHECKM8_FAIL(ret))
     {
         checkm8_debug_indent("\tfailed to get device bundle\n");
@@ -240,6 +240,6 @@ struct dev_cmd_resp *write_payload(struct pwned_device *dev, long long addr, uns
     }
 
     resp = dev_write_memory(dev, addr, data, len);
-    release_device_bundle(dev);
+    close_device_session(dev);
     return resp;
 }

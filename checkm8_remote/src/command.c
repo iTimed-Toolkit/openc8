@@ -1,8 +1,7 @@
 #include "command.h"
 
 #include "checkm8.h"
-#include "libusb_helpers.h"
-#include "libusb.h"
+#include "usb_helpers.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +24,8 @@ int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len)
         else amount = data_len - index;
 
         checkm8_debug_indent("\tsending chunk of size %li at index %li\n", amount, index);
-        ret = libusb_control_transfer(dev->bundle->handle, 0x21, 1, 0, 0, &data[index], amount, 5000);
+
+        ret = ctrl_transfer(dev, 0x21, 1, 0, 0, &data[index], amount, 5000);
         if(ret > 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
         else
         {
@@ -47,7 +47,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
     struct dev_cmd_resp *cmd_resp = calloc(1, sizeof(struct dev_cmd_resp));
     unsigned char resp_buf[response_len];
 
-    if(!is_device_bundle_open(dev))
+    if(!is_device_session_open(dev))
     {
         cmd_resp->ret = CHECKM8_FAIL_NODEV;
         return cmd_resp;
@@ -61,7 +61,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         return cmd_resp;
     }
 
-    ret = libusb_control_transfer(dev->bundle->handle, 0x21, 1, 0, 0, nullbuf, 0, 100);
+    ret = ctrl_transfer(dev, 0x21, 1, 0, 0, nullbuf, 0, 100);
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
@@ -70,7 +70,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         return cmd_resp;
     }
 
-    ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 3, 0, 0, nullbuf, 6, 100);
+    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, nullbuf, 6, 100);
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
@@ -79,7 +79,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         return cmd_resp;
     }
 
-    ret = libusb_control_transfer(dev->bundle->handle, 0xA1, 3, 0, 0, nullbuf, 6, 100);
+    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, nullbuf, 6, 100);
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
@@ -97,10 +97,10 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
 
     if(response_len == 0)
     {
-        ret = libusb_control_transfer(dev->bundle->handle,
-                                      0xA1, 2, 0xFFFF, 0,
-                                      resp_buf, response_len + 1,
-                                      100);
+        ret = ctrl_transfer(dev,
+                            0xA1, 2, 0xFFFF, 0,
+                            resp_buf, response_len + 1,
+                            100);
         if(ret >= 0) checkm8_debug_indent("\tfinal request transferred %i bytes\n", ret);
         else
         {
@@ -111,10 +111,10 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
     }
     else
     {
-        ret = libusb_control_transfer(dev->bundle->handle,
-                                      0xA1, 2, 0xFFFF, 0,
-                                      resp_buf, response_len,
-                                      100);
+        ret = ctrl_transfer(dev,
+                            0xA1, 2, 0xFFFF, 0,
+                            resp_buf, response_len,
+                            100);
         if(ret >= 0) checkm8_debug_indent("\tfinal request transferred %i bytes\n", ret);
         else
         {
@@ -170,7 +170,8 @@ struct dev_cmd_resp *dev_memcpy(struct pwned_device *dev, long long dest, long l
 
 struct dev_cmd_resp *dev_exec(struct pwned_device *dev, int response_len, int nargs, unsigned long long *args)
 {
-    checkm8_debug_indent("dev_exec(dev = %p, response_len = %lu, nargs = %i, args = %p\n", dev, response_len, nargs, args);
+    checkm8_debug_indent("dev_exec(dev = %p, response_len = %lu, nargs = %i, args = %p\n", dev, response_len, nargs,
+                         args);
 
     int i;
     unsigned long long *argbase;

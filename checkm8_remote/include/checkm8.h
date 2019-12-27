@@ -34,8 +34,13 @@ struct pwned_device
     unsigned int idVendor;
     unsigned int idProduct;
 
-    struct libusb_device_bundle *bundle;
     struct payload *installed;
+
+#ifdef WITH_ARDUINO
+    int ard_fd;
+#else
+    struct libusb_device_bundle *bundle;
+#endif
 };
 
 struct pwned_device *exploit_device();
