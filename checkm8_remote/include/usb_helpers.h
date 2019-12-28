@@ -38,12 +38,8 @@ int ctrl_transfer(struct pwned_device *dev,
                   unsigned char *data, unsigned short data_len,
                   unsigned int timeout);
 
-int stall(struct pwned_device *dev);
-int leak(struct pwned_device *dev);
-int no_leak(struct pwned_device *dev);
+int reset(struct pwned_device *dev);
+int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int len);
 
-int usb_req_stall(struct pwned_device *dev);
-int usb_req_leak(struct pwned_device *dev);
-int usb_req_no_leak(struct pwned_device *dev);
 
 #endif //IPWNDFU_REWRITE_C_LIBUSB_HELPERS_H

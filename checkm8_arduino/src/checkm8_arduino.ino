@@ -1,5 +1,6 @@
-#include <Usb.h>
+#include "Usb.h"
 #include "constants.h"
+#include "checkm8_config.h"
 
 USB Usb;
 USB_DEVICE_DESCRIPTOR desc_buf;
@@ -122,11 +123,9 @@ void heap_occupation()
 
 void setup()
 {
-    Serial.begin(115200);
-    Serial.println("checkm8 started");
-    if(Usb.Init() == -1)
-        Serial.println("usb init error");
-    delay(200);
+    Serial.begin(ARDUINO_BAUD);
+    if(Usb.Init() == -1) Serial.println("failed to initialize USB host shield");
+    else Serial.print('\x00');
 }
 
 void loop()
@@ -135,7 +134,8 @@ void loop()
     state = Usb.getUsbTaskState();
     if(state != last_state)
     {
-        Serial.print("usb state: "); Serial.println(state, HEX);
+        Serial.print("usb state: ");
+        Serial.println(state, HEX);
         last_state = state;
     }
     if(state == USB_STATE_ERROR)
@@ -144,7 +144,7 @@ void loop()
     }
     if(state == USB_STATE_RUNNING)
     {
-        Usb.getDevDescr(addr, 0, 0x12, (uint8_t *) &desc_buf);
+        Usb.getDevDescr(addr, 0, 0x12, (uint8_t * ) & desc_buf);
         if(desc_buf.idVendor != 0x5ac || desc_buf.idProduct != 0x1227)
         {
             Usb.setUsbTaskState(USB_ATTACHED_SUBSTATE_RESET_DEVICE);

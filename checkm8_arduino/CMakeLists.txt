@@ -15,4 +15,5 @@ set(checkm8_arduino_PROGRAMMER avrispmkii)
 set(checkm8_arduino_PORT /dev/ttyACM0)
 
 include_directories(include)
+include_directories(../include)
 generate_arduino_firmware(checkm8_arduino)
