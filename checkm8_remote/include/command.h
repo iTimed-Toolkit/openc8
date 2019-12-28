@@ -1,5 +1,5 @@
-#ifndef IPWNDFU_REWRITE_C_COMMAND_H
-#define IPWNDFU_REWRITE_C_COMMAND_H
+#ifndef CHECKM8_TOOL_COMMAND_H
+#define CHECKM8_TOOL_COMMAND_H
 
 #include "checkm8.h"
 
@@ -22,4 +22,4 @@ struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, long long addr, 
 
 void free_dev_cmd_resp(struct dev_cmd_resp *resp);
 
-#endif //IPWNDFU_REWRITE_C_COMMAND_H
+#endif //CHECKM8_TOOL_COMMAND_H

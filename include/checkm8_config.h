@@ -1,5 +1,5 @@
-#ifndef IPWNDFU_REWRITE_C_CHECKM8_CONFIG_H
-#define IPWNDFU_REWRITE_C_CHECKM8_CONFIG_H
+#ifndef CHECKM8_TOOL_CHECKM8_CONFIG_H
+#define CHECKM8_TOOL_CHECKM8_CONFIG_H
 
 //#define LIBUSB_LOGGING
 #define CHECKM8_LOGGING
@@ -13,4 +13,4 @@
 void checkm8_debug_indent(const char *format, ...);
 void checkm8_debug_block(const char *format, ...);
 
-#endif //IPWNDFU_REWRITE_C_CHECKM8_CONFIG_H
+#endif //CHECKM8_TOOL_CHECKM8_CONFIG_H

@@ -1,5 +1,5 @@
-#ifndef IPWNDFU_REWRITE_C_BRFUNC_AES_H
-#define IPWNDFU_REWRITE_C_BRFUNC_AES_H
+#ifndef CHECKM8_TOOL_BRFUNC_AES_H
+#define CHECKM8_TOOL_BRFUNC_AES_H
 
 #include "brfunc_common.h"
 
@@ -15,4 +15,4 @@
 #define rAES_INT_STATUS             (long *) ADDR_AES_CONTROL
 #define rAES_CONTROL                (long *) ADDR_AES_STATUS
 
-#endif //IPWNDFU_REWRITE_C_BRFUNC_AES_H
+#endif //CHECKM8_TOOL_BRFUNC_AES_H

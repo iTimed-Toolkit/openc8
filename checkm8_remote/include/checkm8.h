@@ -1,5 +1,5 @@
-#ifndef IPWNDFU_REWRITE_C_CHECKM8_H
-#define IPWNDFU_REWRITE_C_CHECKM8_H
+#ifndef CHECKM8_TOOL_CHECKM8_H
+#define CHECKM8_TOOL_CHECKM8_H
 
 #include "checkm8_config.h"
 
@@ -46,4 +46,4 @@ struct pwned_device
 struct pwned_device *exploit_device();
 void free_device(struct pwned_device *dev);
 
-#endif //IPWNDFU_REWRITE_C_CHECKM8_H
+#endif //CHECKM8_TOOL_CHECKM8_H

@@ -1,5 +1,5 @@
-#ifndef IPWNDFU_REWRITE_C_BRFUNC_COMMON_H
-#define IPWNDFU_REWRITE_C_BRFUNC_COMMON_H
+#ifndef CHECKM8_TOOL_BRFUNC_COMMON_H
+#define CHECKM8_TOOL_BRFUNC_COMMON_H
 
 #include "checkm8_config.h"
 
@@ -32,4 +32,4 @@ typedef int (*BOOTROM_FUNC)();
 #error "Unsupported checkm8 platform"
 #endif
 
-#endif //IPWNDFU_REWRITE_C_BRFUNC_COMMON_H
+#endif //CHECKM8_TOOL_BRFUNC_COMMON_H

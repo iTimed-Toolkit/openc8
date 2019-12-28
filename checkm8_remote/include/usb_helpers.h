@@ -1,5 +1,5 @@
-#ifndef IPWNDFU_REWRITE_C_LIBUSB_HELPERS_H
-#define IPWNDFU_REWRITE_C_LIBUSB_HELPERS_H
+#ifndef CHECKM8_TOOL_LIBUSB_HELPERS_H
+#define CHECKM8_TOOL_LIBUSB_HELPERS_H
 
 #include "checkm8.h"
 #define LIBUSB_MAX_PACKET_SIZE 0x800
@@ -42,4 +42,4 @@ int reset(struct pwned_device *dev);
 int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int len);
 
 
-#endif //IPWNDFU_REWRITE_C_LIBUSB_HELPERS_H
+#endif //CHECKM8_TOOL_LIBUSB_HELPERS_H

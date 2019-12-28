@@ -1,5 +1,5 @@
-#ifndef IPWNDFU_REWRITE_C_PAYLOAD_H
-#define IPWNDFU_REWRITE_C_PAYLOAD_H
+#ifndef CHECKM8_TOOL_PAYLOAD_H
+#define CHECKM8_TOOL_PAYLOAD_H
 
 #include "checkm8.h"
 
@@ -29,4 +29,4 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
 struct dev_cmd_resp *read_payload(struct pwned_device *dev, long long addr, int len);
 struct dev_cmd_resp *write_payload(struct pwned_device *dev, long long addr, unsigned char *data, int len);
 
-#endif //IPWNDFU_REWRITE_C_PAYLOAD_H
+#endif //CHECKM8_TOOL_PAYLOAD_H
