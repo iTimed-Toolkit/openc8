@@ -367,18 +367,19 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
     if(buf == PROT_ACK)
     {
         checkm8_debug_indent("\treceived ack\n");
+        do
+        {
+            if(buf == PROT_FAIL_USB)
+            {
+                while(read(dev->ard_fd, &buf, 1) == 0);
+                checkm8_debug_indent("\treceived error %X but ignoring\n", buf);
+            }
 
-        while(read(dev->ard_fd, &buf, 1) == 0);
-        if(buf == PROT_SUCCESS)
-        {
-            checkm8_debug_indent("\tsuccess\n");
-            return CHECKM8_SUCCESS;
-        }
-        else
-        {
-            checkm8_debug_indent("\tunexpected response %X\n", buf);
-            return CHECKM8_FAIL_PROT;
-        }
+            while(read(dev->ard_fd, &buf, 1) == 0);
+        } while(buf != PROT_SUCCESS);
+
+        checkm8_debug_indent("\tsuccess\n");
+        return CHECKM8_SUCCESS;
     }
     else
     {
@@ -416,6 +417,7 @@ int no_error_ctrl_transfer_data(struct pwned_device *dev,
             "no_error_ctrl_transfer_data(dev = %p, bmRequestType = %i, bRequest = %i, wValue = %i, wIndex = %i, data = %p, data_len = %i, timeout = %i)\n",
             dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
 #ifdef WITH_ARDUINO
+    int amount, index = 0;
     char buf;
     struct usb_xfer_args args;
     args.bmRequestType = bmRequestType;
@@ -427,28 +429,39 @@ int no_error_ctrl_transfer_data(struct pwned_device *dev,
     checkm8_debug_indent("\tsending data to arduino\n");
     write(dev->ard_fd, &PROT_NO_ERROR_CTRL_XFER_DATA, 1);
     write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
-    write(dev->ard_fd, data, data_len);
 
     while(read(dev->ard_fd, &buf, 1) == 0);
     if(buf == PROT_ACK)
     {
-        checkm8_debug_indent("\treceived ack\n");
+        checkm8_debug_indent("\treceived argument ack\n");
+
+        while(index < data_len)
+        {
+            if(data_len - index > ARD_BUF_SIZE) amount = ARD_BUF_SIZE;
+            else amount = data_len - index;
+
+            checkm8_debug_indent("\twriting data chunk of size %i\n", amount);
+            write(dev->ard_fd, &data[index], amount);
+            do
+            {
+                if(buf == PROT_FAIL_USB)
+                {
+                    while(read(dev->ard_fd, &buf, 1) == 0);
+                    checkm8_debug_indent("\treceived error %X but ignoring\n", buf);
+                }
+
+                while(read(dev->ard_fd, &buf, 1) == 0);
+            } while(buf != PROT_ACK);
+
+            checkm8_debug_indent("\treceived data ack\n");
+            index += amount;
+        }
 
         while(read(dev->ard_fd, &buf, 1) == 0);
-        if(buf == PROT_FAIL_TOOBIG)
-        {
-            checkm8_debug_indent("\tdata packet is too big\n");
-            return CHECKM8_FAIL_INVARGS;
-        }
-        else if(buf == PROT_SUCCESS)
+        if(buf == PROT_SUCCESS)
         {
             checkm8_debug_indent("\tsuccess\n");
             return CHECKM8_SUCCESS;
-        }
-        else
-        {
-            checkm8_debug_indent("\tunexpected response %X\n", buf);
-            return CHECKM8_FAIL_PROT;
         }
     }
     else

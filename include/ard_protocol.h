@@ -1,6 +1,8 @@
 #ifndef CHECKM8_TOOL_ARD_PROTOCOL_H
 #define CHECKM8_TOOL_ARD_PROTOCOL_H
 
+#define ARD_BUF_SIZE 512
+
 static const char PROT_PARTIAL_CTRL_XFER       = 'P';
 static const char PROT_NO_ERROR_CTRL_XFER      = 'N';
 static const char PROT_NO_ERROR_CTRL_XFER_DATA = 'M';

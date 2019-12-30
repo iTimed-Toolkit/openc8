@@ -3,11 +3,7 @@
 
 #include "checkm8.h"
 
-#ifdef WITH_ARDUINO
-#define MAX_PACKET_SIZE 512
-#else
 #define MAX_PACKET_SIZE 0x800
-#endif
 
 #ifndef WITH_ARDUINO
 #include "libusb.h"
