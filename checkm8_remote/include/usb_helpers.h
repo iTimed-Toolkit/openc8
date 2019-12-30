@@ -2,7 +2,12 @@
 #define CHECKM8_TOOL_LIBUSB_HELPERS_H
 
 #include "checkm8.h"
-#define LIBUSB_MAX_PACKET_SIZE 0x800
+
+#ifdef WITH_ARDUINO
+#define MAX_PACKET_SIZE 512
+#else
+#define MAX_PACKET_SIZE 0x800
+#endif
 
 #ifndef WITH_ARDUINO
 #include "libusb.h"
@@ -32,6 +37,12 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
                            unsigned char *data, unsigned short data_len,
                            unsigned int timeout);
 
+int no_error_ctrl_transfer_data(struct pwned_device *dev,
+                                unsigned char bmRequestType, unsigned char bRequest,
+                                unsigned short wValue, unsigned short wIndex,
+                                unsigned char *data, unsigned short data_len,
+                                unsigned int timeout);
+
 int ctrl_transfer(struct pwned_device *dev,
                   unsigned char bmRequestType, unsigned char bRequest,
                   unsigned short wValue, unsigned short wIndex,
@@ -40,6 +51,5 @@ int ctrl_transfer(struct pwned_device *dev,
 
 int reset(struct pwned_device *dev);
 int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int len);
-
 
 #endif //CHECKM8_TOOL_LIBUSB_HELPERS_H

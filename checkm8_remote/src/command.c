@@ -20,7 +20,7 @@ int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len)
 
     while(index < data_len)
     {
-        if(data_len - index >= LIBUSB_MAX_PACKET_SIZE) amount = LIBUSB_MAX_PACKET_SIZE;
+        if(data_len - index >= MAX_PACKET_SIZE) amount = MAX_PACKET_SIZE;
         else amount = data_len - index;
 
         checkm8_debug_indent("\tsending chunk of size %li at index %li\n", amount, index);

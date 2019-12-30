@@ -1,14 +1,16 @@
 #include "usb_helpers.h"
 
+#include <string.h>
+
 #ifdef WITH_ARDUINO
 
 #include <termio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "ard_protocol.h"
 
 #else
 
-#include <string.h>
 #include <stdlib.h>
 #include "libusbi.h"
 
@@ -91,21 +93,15 @@ int open_device_session(struct pwned_device *dev)
 
     // read a setup verification byte
     while(read(ard_fd, &buf, 1) == 0);
-    if(buf == '\x00')
+    if(buf == PROT_SUCCESS)
     {
-        checkm8_debug_block("\tarduino successfully setup\n");
+        checkm8_debug_indent("\tarduino successfully setup\n");
         dev->ard_fd = ard_fd;
         return CHECKM8_SUCCESS;
     }
-    else
+    else if(buf == PROT_FAIL_INITUSB)
     {
-        checkm8_debug_indent("\tarduino error: ");
-        while(buf != '\n')
-        {
-            checkm8_debug_block("%c", buf);
-            while(read(ard_fd, &buf, 1) == 0);
-        }
-
+        checkm8_debug_indent("\tarduino failed to init USB host shield\n");
         close(ard_fd);
         return CHECKM8_FAIL_NOTDONE;
     }
@@ -251,7 +247,47 @@ int partial_ctrl_transfer(struct pwned_device *dev,
             dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
 
 #ifdef WITH_ARDUINO
+    char buf;
+    struct usb_xfer_args args;
+    args.bmRequestType = bmRequestType;
+    args.bRequest = bRequest;
+    args.wValue = wValue;
+    args.wIndex = wIndex;
+    args.data_len = data_len;
 
+    checkm8_debug_indent("\tsending data to arduino\n");
+    write(dev->ard_fd, &PROT_PARTIAL_CTRL_XFER, 1);
+    write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
+
+    while(read(dev->ard_fd, &buf, 1) == 0);
+    if(buf == PROT_ACK)
+    {
+        checkm8_debug_indent("\treceived ack\n");
+
+        while(read(dev->ard_fd, &buf, 1) == 0);
+        if(buf == PROT_SUCCESS)
+        {
+            checkm8_debug_indent("\tsuccess\n");
+            return CHECKM8_SUCCESS;
+        }
+        else if(buf == PROT_FAIL_USB)
+        {
+            while(read(dev->ard_fd, &buf, 1) == 0);
+
+            checkm8_debug_indent("\trequest failed with error %X\n", buf);
+            return CHECKM8_FAIL_XFER;
+        }
+        else
+        {
+            checkm8_debug_indent("\tunexpected response %X\n", buf);
+            return CHECKM8_FAIL_PROT;
+        }
+    }
+    else
+    {
+        checkm8_debug_indent("\tno ack received (got %x)\n", buf);
+        return CHECKM8_FAIL_PROT;
+    }
 #else
     struct timeval start, end;
     unsigned char usb_transfer_buf[8 + data_len];
@@ -302,7 +338,40 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
             dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
 
 #ifdef WITH_ARDUINO
+    unsigned char buf;
+    struct usb_xfer_args args;
+    args.bmRequestType = bmRequestType;
+    args.bRequest = bRequest;
+    args.wValue = wValue;
+    args.wIndex = wIndex;
+    args.data_len = data_len;
 
+    checkm8_debug_indent("\tsending data to arduino\n");
+    write(dev->ard_fd, &PROT_NO_ERROR_CTRL_XFER, 1);
+    write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
+
+    while(read(dev->ard_fd, &buf, 1) == 0);
+    if(buf == PROT_ACK)
+    {
+        checkm8_debug_indent("\treceived ack\n");
+
+        while(read(dev->ard_fd, &buf, 1) == 0);
+        if(buf == PROT_SUCCESS)
+        {
+            checkm8_debug_indent("\tsuccess\n");
+            return CHECKM8_SUCCESS;
+        }
+        else
+        {
+            checkm8_debug_indent("\tunexpected response %X\n", buf);
+            return CHECKM8_FAIL_PROT;
+        }
+    }
+    else
+    {
+        checkm8_debug_indent("\tno ack received (got %x)\n", buf);
+        return CHECKM8_FAIL_PROT;
+    }
 #else
     int ret;
     unsigned char recipient = bmRequestType & 3u;
@@ -324,6 +393,61 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
 #endif
 }
 
+int no_error_ctrl_transfer_data(struct pwned_device *dev,
+                                unsigned char bmRequestType, unsigned char bRequest,
+                                unsigned short wValue, unsigned short wIndex,
+                                unsigned char *data, unsigned short data_len,
+                                unsigned int timeout)
+{
+    checkm8_debug_indent(
+            "no_error_ctrl_transfer_data(dev = %p, bmRequestType = %i, bRequest = %i, wValue = %i, wIndex = %i, data = %p, data_len = %i, timeout = %i)\n",
+            dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
+#ifdef WITH_ARDUINO
+    char buf;
+    struct usb_xfer_args args;
+    args.bmRequestType = bmRequestType;
+    args.bRequest = bRequest;
+    args.wValue = wValue;
+    args.wIndex = wIndex;
+    args.data_len = data_len;
+
+    checkm8_debug_indent("\tsending data to arduino\n");
+    write(dev->ard_fd, &PROT_NO_ERROR_CTRL_XFER_DATA, 1);
+    write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
+    write(dev->ard_fd, data, data_len);
+
+    while(read(dev->ard_fd, &buf, 1) == 0);
+    if(buf == PROT_ACK)
+    {
+        checkm8_debug_indent("\treceived ack\n");
+
+        while(read(dev->ard_fd, &buf, 1) == 0);
+        if(buf == PROT_FAIL_TOOBIG)
+        {
+            checkm8_debug_indent("\tdata packet is too big\n");
+            return CHECKM8_FAIL_INVARGS;
+        }
+        else if(buf == PROT_SUCCESS)
+        {
+            checkm8_debug_indent("\tsuccess\n");
+            return CHECKM8_SUCCESS;
+        }
+        else
+        {
+            checkm8_debug_indent("\tunexpected response %X\n", buf);
+            return CHECKM8_FAIL_PROT;
+        }
+    }
+    else
+    {
+        checkm8_debug_indent("\tno ack received (got %x)\n", buf);
+        return CHECKM8_FAIL_PROT;
+    }
+#else
+    return no_error_ctrl_transfer(dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
+#endif
+}
+
 int ctrl_transfer(struct pwned_device *dev,
                   unsigned char bmRequestType, unsigned char bRequest,
                   unsigned short wValue, unsigned short wIndex,
@@ -335,7 +459,51 @@ int ctrl_transfer(struct pwned_device *dev,
             dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
 
 #ifdef WITH_ARDUINO
-    // TODO
+    char buf;
+    struct usb_xfer_args args;
+    args.bmRequestType = bmRequestType;
+    args.bRequest = bRequest;
+    args.wValue = wValue;
+    args.wIndex = wIndex;
+    args.data_len = data_len;
+
+    checkm8_debug_indent("\tsending data to arduino\n");
+    write(dev->ard_fd, &PROT_CTRL_XFER, 1);
+    write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
+    write(dev->ard_fd, data, data_len);
+
+    while(read(dev->ard_fd, &buf, 1) == 0);
+    if(buf == PROT_ACK)
+    {
+        checkm8_debug_indent("\treceived ack\n");
+
+        while(read(dev->ard_fd, &buf, 1) == 0);
+        if(buf == PROT_FAIL_TOOBIG)
+        {
+            checkm8_debug_indent("\tdata packet is too big\n");
+            return CHECKM8_FAIL_INVARGS;
+        }
+        else if(buf == PROT_FAIL_USB)
+        {
+            while(read(dev->ard_fd, &buf, 1) == 0);
+            checkm8_debug_indent("\tUSB failed with error %x\n", buf);
+        }
+        else if(buf == PROT_SUCCESS)
+        {
+            checkm8_debug_indent("\tsuccess\n");
+            return CHECKM8_SUCCESS;
+        }
+        else
+        {
+            checkm8_debug_indent("\tunexpected response %X\n", buf);
+            return CHECKM8_FAIL_PROT;
+        }
+    }
+    else
+    {
+        checkm8_debug_indent("\tno ack received (got %x)\n", buf);
+        return CHECKM8_FAIL_PROT;
+    }
 #else
     return libusb_control_transfer(dev->bundle->handle,
                                    bmRequestType, bRequest,
@@ -347,8 +515,33 @@ int ctrl_transfer(struct pwned_device *dev,
 
 int reset(struct pwned_device *dev)
 {
+    checkm8_debug_indent("reset(dev = %p)\n", dev);
 #ifdef WITH_ARDUINO
+    char buf;
+    write(dev->ard_fd, &PROT_RESET, 1);
 
+    while(read(dev->ard_fd, &buf, 1) == 0);
+    if(buf == PROT_ACK)
+    {
+        checkm8_debug_indent("\treceived ack\n");
+
+        while(read(dev->ard_fd, &buf, 1) == 0);
+        if(buf == PROT_SUCCESS)
+        {
+            checkm8_debug_indent("\tsuccess\n");
+            return CHECKM8_SUCCESS;
+        }
+        else
+        {
+            checkm8_debug_indent("\tunexpected response %X\n", buf);
+            return CHECKM8_FAIL_PROT;
+        }
+    }
+    else
+    {
+        checkm8_debug_indent("\tno ack received (got %x)\n", buf);
+        return CHECKM8_FAIL_PROT;
+    }
 #else
     return libusb_reset_device(dev->bundle->handle);
 #endif
@@ -356,8 +549,58 @@ int reset(struct pwned_device *dev)
 
 int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int len)
 {
-#ifdef WITH_ARDUINO
+    checkm8_debug_indent("serial_descriptor(dev = %p, serial_buf = %p, len = %i)\n", dev, serial_buf, len);
 
+#ifdef WITH_ARDUINO
+    char buf;
+    int curr, ret;
+    struct serial_desc_args args;
+    args.dev_idVendor = dev->idVendor;
+    args.dev_idProduct = dev->idProduct;
+    args.len = len;
+
+    checkm8_debug_indent("\tsending data to arduino\n");
+    write(dev->ard_fd, &PROT_SERIAL_DESC, 1);
+    write(dev->ard_fd, &args, sizeof(struct serial_desc_args));
+
+    while(read(dev->ard_fd, &buf, 1) == 0);
+    if(buf == PROT_ACK)
+    {
+        checkm8_debug_indent("\treceived ack\n");
+        while(read(dev->ard_fd, &buf, 1) == 0);
+        if(buf == PROT_FAIL_NODEV)
+        {
+            checkm8_debug_indent("\tno device attached\n");
+            return CHECKM8_FAIL_NODEV;
+        }
+        else if(buf == PROT_FAIL_WRONGDEV)
+        {
+            checkm8_debug_indent("\twrong device attached\n");
+            return CHECKM8_FAIL_NODEV;
+        }
+        else if(buf == PROT_SUCCESS)
+        {
+            checkm8_debug_indent("\tsuccess, reading serial descriptor\n");
+            curr = 0;
+            while(curr < len)
+            {
+                ret = read(dev->ard_fd, &serial_buf[curr], len - curr);
+                if(ret > 0) curr += ret;
+            }
+
+            return CHECKM8_SUCCESS;
+        }
+        else
+        {
+            checkm8_debug_indent("\tunexpected response %X\n", buf);
+            return CHECKM8_FAIL_PROT;
+        }
+    }
+    else
+    {
+        checkm8_debug_indent("\tno ack received (got %x)\n", buf);
+        return CHECKM8_FAIL_PROT;
+    }
 #else
     struct libusb_device_handle *handle = dev->bundle->handle;
     struct libusb_device_descriptor *desc = dev->bundle->descriptor;

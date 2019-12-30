@@ -3,7 +3,9 @@
 
 //#define LIBUSB_LOGGING
 #define CHECKM8_LOGGING
-//#define WITH_ARDUINO
+#define ARDUINO_LOGGING
+
+#define WITH_ARDUINO
 #define ARDUINO_DEV "/dev/ttyACM0"
 #define ARDUINO_BAUD 115200
 
