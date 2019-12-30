@@ -105,6 +105,12 @@ int open_device_session(struct pwned_device *dev)
         close(ard_fd);
         return CHECKM8_FAIL_NOTDONE;
     }
+    else
+    {
+        checkm8_debug_indent("\tunexpected response %X\n", buf);
+        close(ard_fd);
+        return CHECKM8_FAIL_PROT;
+    }
 #else
     int i, usb_dev_count, ret = CHECKM8_FAIL_NODEV;
     libusb_device **usb_device_list = NULL;

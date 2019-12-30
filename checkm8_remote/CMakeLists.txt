@@ -1,7 +1,7 @@
 project(checkm8_remote C)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_FLAGS -g)
+set(CMAKE_C_FLAGS "-g -Wall")
 
 include_directories(include)
 add_executable(checkm8_remote main.c src/usb_helpers.c src/exploit.c src/payload.c src/command.c)
