@@ -34,6 +34,8 @@ int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len)
         }
         index += amount;
     }
+
+    return CHECKM8_SUCCESS;
 }
 
 static unsigned char nullbuf[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

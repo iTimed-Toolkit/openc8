@@ -43,25 +43,32 @@ int open_device_session(struct pwned_device *dev)
     switch(ARDUINO_BAUD)
     {
         case 4800:
-            brate = B4800; break;
+            brate = B4800;
+            break;
 
         case 9600:
-            brate = B9600; break;
+            brate = B9600;
+            break;
 
         case 19200:
-            brate = B19200; break;
+            brate = B19200;
+            break;
 
         case 38400:
-            brate = B38400; break;
+            brate = B38400;
+            break;
 
         case 57600:
-            brate = B57600; break;
+            brate = B57600;
+            break;
 
         case 115200:
-            brate = B115200; break;
+            brate = B115200;
+            break;
 
         default:
-            brate = B9600; break;
+            brate = B9600;
+            break;
     }
 
     cfsetispeed(&toptions, brate);
@@ -612,5 +619,6 @@ int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int l
     struct libusb_device_descriptor *desc = dev->bundle->descriptor;
 
     libusb_get_string_descriptor_ascii(handle, desc->iSerialNumber, serial_buf, len);
+    return CHECKM8_SUCCESS;
 #endif
 }
