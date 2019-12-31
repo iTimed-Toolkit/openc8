@@ -43,6 +43,7 @@ struct payload *get_payload(PAYLOAD_T p)
             return NULL;
     }
 
+    checkm8_debug_indent("get_payload(p = %i) -> %s\n", p, path);
     res = malloc(sizeof(struct payload));
     if(res == NULL) return NULL;
 
@@ -131,12 +132,16 @@ int *dev_unlink_payload(struct pwned_device *dev, struct payload *pl)
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 {
     checkm8_debug_indent("install_payload(dev = %p, p = %i, loc = %i)\n", dev, p, loc);
-    int i, ret;
+    int ret;
     struct dev_cmd_resp *resp = NULL;
     struct payload *pl = get_payload(p);
     long long addr = get_address(dev, loc);
 
-    if(pl == NULL || addr == -1) return CHECKM8_FAIL_INVARGS;
+    if(pl == NULL || addr == -1)
+    {
+        checkm8_debug_indent("\tinvalid args (either payload or address)\n");
+        return CHECKM8_FAIL_INVARGS;
+    }
 
     ret = open_device_session(dev);
     if(IS_CHECKM8_FAIL(ret)) return ret;
@@ -161,6 +166,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
     //TODO: free memory in memory allocator
+    return CHECKM8_SUCCESS;
 }
 
 struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int nargs, ...)

@@ -29,7 +29,7 @@ int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len)
         if(ret > 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
         else
         {
-            checkm8_debug_indent("\trequest failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            checkm8_debug_indent("\trequest failed with error code %i\n", ret);
             return CHECKM8_FAIL_XFER;
         }
         index += amount;
@@ -67,7 +67,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
-        checkm8_debug_indent("\trequest failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        checkm8_debug_indent("\trequest failed with error code %i\n", ret);
         cmd_resp->ret = ret;
         return cmd_resp;
     }
@@ -76,7 +76,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
-        checkm8_debug_indent("\trequest failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        checkm8_debug_indent("\trequest failed with error code %i\n", ret);
         cmd_resp->ret = ret;
         return cmd_resp;
     }
@@ -85,7 +85,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
-        checkm8_debug_indent("\trequest failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+        checkm8_debug_indent("\trequest failed with error code %i\n", ret);
         cmd_resp->ret = ret;
         return cmd_resp;
     }
@@ -106,7 +106,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         if(ret >= 0) checkm8_debug_indent("\tfinal request transferred %i bytes\n", ret);
         else
         {
-            checkm8_debug_indent("\tfinal request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            checkm8_debug_indent("\tfinal request failed with error code %i\n", ret);
             cmd_resp->ret = ret;
             return cmd_resp;
         }
@@ -120,7 +120,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         if(ret >= 0) checkm8_debug_indent("\tfinal request transferred %i bytes\n", ret);
         else
         {
-            checkm8_debug_indent("\tfinal request failed with error code %i (%s)\n", ret, libusb_error_name(ret));
+            checkm8_debug_indent("\tfinal request failed with error code %i\n", ret);
             cmd_resp->ret = ret;
             return cmd_resp;
         }

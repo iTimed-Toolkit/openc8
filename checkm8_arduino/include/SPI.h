@@ -14,7 +14,7 @@
 #ifndef _SPI_H_INCLUDED
 #define _SPI_H_INCLUDED
 
-#include "../../../../../../../../../opt/arduino-1.8.10/hardware/arduino/avr/cores/arduino/Arduino.h"
+#include "Arduino.h"
 
 // SPI_HAS_TRANSACTION means SPI has beginTransaction(), endTransaction(),
 // usingInterrupt(), and SPISetting(clock, bitOrder, dataMode)
