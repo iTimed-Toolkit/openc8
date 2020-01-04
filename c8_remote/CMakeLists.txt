@@ -8,7 +8,7 @@ add_executable(checkm8_remote main.c src/usb_helpers.c src/exploit.c src/payload
 add_custom_command(TARGET checkm8_remote POST_BUILD
                     COMMAND ln
                     ARGS -s -f -n
-                        ${CMAKE_SOURCE_DIR}/checkm8_payloads/bin
+                        ${CMAKE_SOURCE_DIR}/c8_payloads/bin
                         ${CMAKE_CURRENT_SOURCE_DIR}/bin/payloads)
 
 target_link_libraries(checkm8_remote checkm8_libusb pthread udev)

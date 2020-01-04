@@ -28,13 +28,13 @@ struct usb_xfer_args
     unsigned short wIndex;
 
     unsigned short data_len;
-};
+} __attribute__ ((packed));
 
 struct serial_desc_args
 {
     unsigned short dev_idVendor;
     unsigned short dev_idProduct;
     unsigned char len;
-};
+} __attribute__ ((packed));
 
 #endif //CHECKM8_TOOL_ARD_PROTOCOL_H

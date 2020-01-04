@@ -39,6 +39,7 @@ void checkm8_debug_block(const char *format, ...)
 int main()
 {
     int ret;
+    struct dev_cmd_resp *resp;
     struct pwned_device *dev = exploit_device();
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
@@ -46,57 +47,6 @@ int main()
         return -1;
     }
 
-    struct dev_cmd_resp *resp;
-    ret = install_payload(dev, PAYLOAD_SYNC, DRAM);
-    if(IS_CHECKM8_FAIL(ret))
-    {
-        printf("Failed to install sync payload\n");
-        return -1;
-    }
-
-    ret = install_payload(dev, PAYLOAD_AES, DRAM);
-    if(IS_CHECKM8_FAIL(ret))
-    {
-        printf("Failed to install AES payload\n");
-        return -1;
-    }
-
-    resp = execute_payload(dev, PAYLOAD_SYNC, 0);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        printf("Failed to execute sync payload\n");
-        return -1;
-    }
-
-    unsigned char data[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe,
-                              0xef};
-    unsigned char key[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe,
-                             0xef};
-
-    free_dev_cmd_resp(resp);
-    resp = write_payload(dev, 0x180152000, data, 16);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        printf("Failed to write AES data\n");
-        return -1;
-    }
-
-    free_dev_cmd_resp(resp);
-    resp = write_payload(dev, 0x180152010, key, 16);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        printf("Failed to write AES key\n");
-        return -1;
-    }
-
-//    free_dev_cmd_resp(resp);
-//    resp = execute_payload(dev, PAYLOAD_AES, 7, 16, 0x180152000, DFU_IMAGE_BASE + 56, 128, 0, 0x180152010, 0);
-//
-//    if(IS_CHECKM8_FAIL(resp->ret))
-//    {
-//        printf("Failed to execute AES\n");
-//        return -1;
-//    }
 
     free_dev_cmd_resp(resp);
     free_device(dev);

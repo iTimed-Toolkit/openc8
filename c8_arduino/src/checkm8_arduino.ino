@@ -296,9 +296,9 @@ void loop()
                 }
                 break;
 
-//            default:
-//                Serial.write(PROT_FAIL_BADCMD);
-//                break;
+            default:
+                Serial.write(PROT_FAIL_BADCMD);
+                break;
         }
     }
 }
