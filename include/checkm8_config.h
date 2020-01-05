@@ -2,7 +2,7 @@
 #define CHECKM8_TOOL_CHECKM8_CONFIG_H
 
 //#define LIBUSB_LOGGING
-#define CHECKM8_LOGGING
+//#define CHECKM8_LOGGING
 
 #define WITH_ARDUINO
 #define ARDUINO_DEV "/dev/ttyACM0"

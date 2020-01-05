@@ -24,9 +24,10 @@ typedef enum
 
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc);
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p);
+struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...);
 
-struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int nargs, ...);
-struct dev_cmd_resp *read_payload(struct pwned_device *dev, long long addr, int len);
-struct dev_cmd_resp *write_payload(struct pwned_device *dev, long long addr, unsigned char *data, int len);
+struct dev_cmd_resp *read_gadget(struct pwned_device *dev, long long addr, int len);
+struct dev_cmd_resp *write_gadget(struct pwned_device *dev, long long addr, unsigned char *data, int len);
+struct dev_cmd_resp *execute_gadget(struct pwned_device *dev, long long addr, int response_len, int nargs, ...);
 
 #endif //CHECKM8_TOOL_PAYLOAD_H

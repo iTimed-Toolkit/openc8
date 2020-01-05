@@ -236,8 +236,8 @@ void loop()
                         if(usb_args.data_len - chunk_i > ARD_BUF_SIZE) chunk_size = ARD_BUF_SIZE;
                         else chunk_size = usb_args.data_len - chunk_i;
 
+                        Serial.write(chunk_size);
                         recv_serial(usb_data_buf, chunk_size);
-                        Serial.write(PROT_ACK);
 
                         i = 0;
                         while(i < chunk_size)

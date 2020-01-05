@@ -46,16 +46,24 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
     checkm8_debug_indent("command(dev = %p, args = %p, arg_len = %i, response_len = %i)\n",
                          dev, args, arg_len, response_len);
 
+    int close, ret;
     struct dev_cmd_resp *cmd_resp = calloc(1, sizeof(struct dev_cmd_resp));
     unsigned char resp_buf[response_len];
 
-    if(!is_device_session_open(dev))
+    if(is_device_session_open(dev)) close = 0;
+    else
     {
-        cmd_resp->ret = CHECKM8_FAIL_NODEV;
-        return cmd_resp;
+        ret = open_device_session(dev);
+        close = 1;
+
+        if(IS_CHECKM8_FAIL(ret))
+        {
+            checkm8_debug_indent("\tfailed to open device session\n");
+            cmd_resp->ret = CHECKM8_FAIL_NODEV;
+            return cmd_resp;
+        }
     }
 
-    int ret;
     ret = dfu_send_data(dev, nullbuf, 16);
     if(IS_CHECKM8_FAIL(ret))
     {
@@ -128,14 +136,16 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
 
     cmd_resp->ret = CHECKM8_SUCCESS;
     memcpy(&cmd_resp->magic, resp_buf, 8);
-    if(response_len - 8 > 0)
+    if(response_len - 16 > 0)
     {
-        checkm8_debug_indent("\tcopying %i bytes of output to response data section\n", response_len - 8);
-        cmd_resp->data = calloc(1, response_len - 8);
-        memcpy(cmd_resp->data, &resp_buf[8], response_len - 8);
+        checkm8_debug_indent("\tcopying %i bytes of output to response data section\n", response_len - 16);
+        cmd_resp->data = calloc(1, response_len - 16);
+        memcpy(cmd_resp->data, &resp_buf[16], response_len - 16);
     }
 
-    cmd_resp->len = response_len - 8;
+    cmd_resp->len = response_len - 16;
+
+    if(close) close_device_session(dev);
     return cmd_resp;
 }
 

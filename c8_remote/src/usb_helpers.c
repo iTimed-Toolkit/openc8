@@ -528,23 +528,12 @@ int ctrl_transfer(struct pwned_device *dev,
             index = 0;
             while(index < data_len)
             {
-                if(data_len - index > ARD_BUF_SIZE) amount = ARD_BUF_SIZE;
-                else amount = data_len - index;
-
+                amount = 0;
+                while(read(dev->ard_fd, &amount, 1) == 0);
                 checkm8_debug_indent("\twriting data chunk of size %i\n", amount);
                 write(dev->ard_fd, &data[index], amount);
 
-                while(read(dev->ard_fd, &buf, 1) == 0);
-                if(buf == PROT_ACK)
-                {
-                    checkm8_debug_indent("\treceived data ack\n");
-                    index += amount;
-                }
-                else
-                {
-                    checkm8_debug_indent("\treceived unexpected response %x\n", buf);
-                    return CHECKM8_FAIL_PROT;
-                }
+                index += amount;
             }
         }
 

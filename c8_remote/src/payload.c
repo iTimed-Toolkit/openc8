@@ -169,7 +169,7 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
     return CHECKM8_SUCCESS;
 }
 
-struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int nargs, ...)
+struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...)
 {
     checkm8_debug_indent("execute_payload(dev = %p, p = %i, nargs = %i, ...)\n", dev, p, nargs);
     int ret, i;
@@ -205,47 +205,39 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
     }
     va_end(arg_list);
 
-    resp = dev_exec(dev, 16, nargs + 1, args);
+    resp = dev_exec(dev, response_len, nargs + 1, args);
     close_device_session(dev);
     return resp;
 }
 
-struct dev_cmd_resp *read_payload(struct pwned_device *dev, long long addr, int len)
+struct dev_cmd_resp *read_gadget(struct pwned_device *dev, long long addr, int len)
 {
-    checkm8_debug_indent("read_payload(dev = %p, addr = %lx, len = %i)\n", dev, addr, len);
-    int ret;
-    struct dev_cmd_resp *resp;
-
-    ret = open_device_session(dev);
-    if(IS_CHECKM8_FAIL(ret))
-    {
-        checkm8_debug_indent("\tfailed to get device bundle\n");
-        resp = calloc(1, sizeof(struct dev_cmd_resp));
-        resp->ret = ret;
-        return resp;
-    }
-
-    resp = dev_read_memory(dev, addr, len);
-    close_device_session(dev);
-    return resp;
+    checkm8_debug_indent("read_gadget(dev = %p, addr = %lx, len = %i)\n", dev, addr, len);
+    return dev_read_memory(dev, addr, len);
 }
 
-struct dev_cmd_resp *write_payload(struct pwned_device *dev, long long addr, unsigned char *data, int len)
+struct dev_cmd_resp *write_gadget(struct pwned_device *dev, long long addr, unsigned char *data, int len)
 {
-    checkm8_debug_indent("write_payload(dev = %p, addr = %lx, data = %p, len = %i)\n", dev, addr, data, len);
-    int ret;
-    struct dev_cmd_resp *resp;
+    checkm8_debug_indent("write_gadget(dev = %p, addr = %lx, data = %p, len = %i)\n", dev, addr, data, len);
+    return dev_write_memory(dev, addr, data, len);
+}
 
-    ret = open_device_session(dev);
-    if(IS_CHECKM8_FAIL(ret))
+struct dev_cmd_resp *execute_gadget(struct pwned_device *dev, long long addr, int response_len, int nargs, ...)
+{
+    checkm8_debug_indent("execute_gadget(dev = %p, addr = %lx, nargs = %i)\n", dev, addr, nargs);
+    int i;
+
+    unsigned long long args[nargs + 1];
+    args[0] = addr;
+
+    va_list arg_list;
+    va_start(arg_list, nargs);
+    for(i = 0; i < nargs; i++)
     {
-        checkm8_debug_indent("\tfailed to get device bundle\n");
-        resp = calloc(1, sizeof(struct dev_cmd_resp));
-        resp->ret = ret;
-        return resp;
+        args[i + 1] = va_arg(arg_list, unsigned long long);
+        checkm8_debug_indent("\textracted arg %lx\n", args[i + 1]);
     }
+    va_end(arg_list);
 
-    resp = dev_write_memory(dev, addr, data, len);
-    close_device_session(dev);
-    return resp;
+    return dev_exec(dev, response_len, nargs + 1, args);
 }

