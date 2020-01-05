@@ -11,4 +11,4 @@ add_custom_command(TARGET checkm8_remote POST_BUILD
                         ${CMAKE_SOURCE_DIR}/c8_payloads/bin
                         ${CMAKE_CURRENT_SOURCE_DIR}/bin/payloads)
 
-target_link_libraries(checkm8_remote checkm8_libusb pthread udev)
+target_link_libraries(checkm8_remote usb-1.0 pthread udev)

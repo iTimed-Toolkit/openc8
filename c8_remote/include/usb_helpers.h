@@ -6,8 +6,6 @@
 #define MAX_PACKET_SIZE 0x800
 
 #ifndef WITH_ARDUINO
-#include "libusb.h"
-
 struct libusb_device_bundle
 {
     struct libusb_context *ctx;

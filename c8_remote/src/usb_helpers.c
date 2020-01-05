@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "libusbi.h"
+#include <libusb.h>
 
 #endif
 
@@ -124,7 +124,6 @@ int open_device_session(struct pwned_device *dev)
     if(dev->bundle->ctx == NULL)
     {
         checkm8_debug_indent("\tbundle ctx is NULL, allocating\n");
-        dev->bundle->ctx = malloc(sizeof(libusb_context));
         libusb_init(&dev->bundle->ctx);
     }
     else
