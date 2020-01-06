@@ -4,9 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "usb_helpers.h"
 #include "command.h"
 #include "payload.h"
+#include "usb_helpers.h"
 
 #ifdef CHECKM8_LOGGING
 #include <stdarg.h>
@@ -41,7 +41,6 @@ void checkm8_debug_block(const char *format, ...)
 #endif
 }
 
-
 int main()
 {
     int ret;
@@ -53,8 +52,8 @@ int main()
         return -1;
     }
 
-    unsigned long long data0 = 0xdeadbeefdeadbeef;
-    unsigned long long data1 = 0xdeadbeefdeadbeef;
+    unsigned char data0[8] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
+    unsigned char data1[8] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
 
     ret = open_device_session(dev);
     if(IS_CHECKM8_FAIL(ret))
@@ -68,12 +67,12 @@ int main()
         printf("encrypting ");
         for(int j = 0; j < 8; j++)
         {
-            printf("%02X", ((unsigned char *) &data0)[j]);
+            printf("%02X", data0[j]);
         }
 
         for(int j = 0; j < 8; j++)
         {
-            printf("%02X", ((unsigned char *) &data1)[j]);
+            printf("%02X", data1[j]);
         }
 
         printf("\n");
@@ -84,7 +83,8 @@ int main()
                               16, // data size
                               0x20000201, // AES_UID_KEY
                               0, 0, // no
-                              data0, data1);
+                              *((unsigned long long *) data0),
+                              *((unsigned long long *) data1));
 
         if(IS_CHECKM8_FAIL(resp->ret))
         {
@@ -107,7 +107,7 @@ int main()
             printf("%02X", ((unsigned char *) &data1)[j]);
         }
         printf("\n");
-        usleep(250000);
+        usleep(333333);
     }
 
     close_device_session(dev);
