@@ -480,7 +480,7 @@ int ctrl_transfer(struct pwned_device *dev,
                   unsigned char bmRequestType, unsigned char bRequest,
                   unsigned short wValue, unsigned short wIndex,
                   unsigned char *data, unsigned short data_len,
-                  unsigned int timeout)
+                  unsigned int timeout, unsigned int trigger)
 {
     checkm8_debug_indent(
             "ctrl_transfer(dev = %p, bmRequestType = %X, bRequest = %X, wValue = %i, wIndex = %i, data = %p, data_len = %i, timeout = %i)\n",
@@ -495,6 +495,7 @@ int ctrl_transfer(struct pwned_device *dev,
     args.wValue = wValue;
     args.wIndex = wIndex;
     args.data_len = data_len;
+    args.trigger = trigger;
 
     checkm8_debug_indent("\tsending data to arduino\n");
     write(dev->ard_fd, &PROT_CTRL_XFER, 1);

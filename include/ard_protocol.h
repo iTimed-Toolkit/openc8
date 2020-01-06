@@ -28,6 +28,7 @@ struct usb_xfer_args
     unsigned short wIndex;
 
     unsigned short data_len;
+    unsigned char trigger;
 } __attribute__ ((packed));
 
 struct serial_desc_args

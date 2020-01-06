@@ -52,6 +52,7 @@ int main()
         return -1;
     }
 
+    unsigned char key[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
     unsigned char data0[8] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
     unsigned char data1[8] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
 
@@ -62,7 +63,15 @@ int main()
         return -1;
     }
 
-    for(int i = 0; i < 100000; i++)
+    resp = write_gadget(dev, 0x180150000, key, 8);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("failed to write key to device\n");
+        return -1;
+    }
+
+    free_dev_cmd_resp(resp);
+    for(int i = 0; i < 257; i++)
     {
         printf("encrypting ");
         for(int j = 0; j < 8; j++)
@@ -81,8 +90,9 @@ int main()
                               16, // action (AES_ENCRYPT)
                               0x1800b0048, 0x1800b0010, // dest and src addresses
                               16, // data size
-                              0x20000201, // AES_UID_KEY
-                              0, 0, // no
+                              0x00000000, // AES_USER_KEY
+                              0x180150000, // key address
+                              0, // no IV
                               *((unsigned long long *) data0),
                               *((unsigned long long *) data1));
 
@@ -107,7 +117,7 @@ int main()
             printf("%02X", ((unsigned char *) &data1)[j]);
         }
         printf("\n");
-        usleep(333333);
+        usleep(1000000);
     }
 
     close_device_session(dev);

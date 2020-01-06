@@ -41,7 +41,7 @@ int ctrl_transfer(struct pwned_device *dev,
                   unsigned char bmRequestType, unsigned char bRequest,
                   unsigned short wValue, unsigned short wIndex,
                   unsigned char *data, unsigned short data_len,
-                  unsigned int timeout);
+                  unsigned int timeout, unsigned int trigger);
 
 int reset(struct pwned_device *dev);
 int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int len);

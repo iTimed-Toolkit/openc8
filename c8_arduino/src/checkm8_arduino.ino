@@ -70,6 +70,7 @@ void setup()
 
 void loop()
 {
+    Usb.Task();
     state = Usb.getUsbTaskState();
     while(state != USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE && state != USB_STATE_RUNNING)
     {
@@ -178,6 +179,8 @@ void loop()
                 Serial.write(PROT_ACK);
 
                 get_dev_descriptor();
+
+                if(usb_args.trigger == 1) digitalWrite(6, HIGH);
                 rcode = Usb.ctrlReq_SETUP(addr, 0,
                                           usb_args.bmRequestType,
                                           usb_args.bRequest,
@@ -222,6 +225,7 @@ void loop()
                     }
 
                     Usb.regWr(rHXFR, tokOUTHS);
+                    if(usb_args.trigger == 1) digitalWrite(6, LOW);
                     Serial.write(PROT_SUCCESS);
                     break;
                 }
@@ -253,6 +257,7 @@ void loop()
                     }
 
                     Usb.regWr(rHXFR, tokINHS);
+                    if(usb_args.trigger == 1) digitalWrite(6, LOW);
                     Serial.write(PROT_SUCCESS);
                     break;
                 }
