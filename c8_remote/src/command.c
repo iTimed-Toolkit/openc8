@@ -98,7 +98,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         return cmd_resp;
     }
 
-    ret = dfu_send_data(dev, args, arg_len, 1);
+    ret = dfu_send_data(dev, args, arg_len, 0);
     if(IS_CHECKM8_FAIL(ret))
     {
         cmd_resp->ret = ret;
@@ -110,7 +110,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         ret = ctrl_transfer(dev,
                             0xA1, 2, 0xFFFF, 0,
                             resp_buf, response_len + 1,
-                            100, 0);
+                            100, 1);
         if(ret >= 0) checkm8_debug_indent("\tfinal request transferred %i bytes\n", ret);
         else
         {
@@ -124,7 +124,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         ret = ctrl_transfer(dev,
                             0xA1, 2, 0xFFFF, 0,
                             resp_buf, response_len,
-                            100, 0);
+                            100, 1);
         if(ret >= 0) checkm8_debug_indent("\tfinal request transferred %i bytes\n", ret);
         else
         {
@@ -261,5 +261,5 @@ struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, long long addr, 
     ((unsigned long *) cmd_args)[4] = len;
     memcpy(&cmd_args[40], data, len);
 
-    return command(dev, (unsigned char *) &cmd_args, 40 + len, 1 * sizeof(unsigned long long));
+    return command(dev, cmd_args, 40 + len, 1 * sizeof(unsigned long long));
 }

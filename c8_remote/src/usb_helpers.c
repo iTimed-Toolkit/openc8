@@ -435,23 +435,12 @@ int no_error_ctrl_transfer_data(struct pwned_device *dev,
         checkm8_debug_indent("\treceived argument ack\n");
         while(index < data_len)
         {
-            if(data_len - index > ARD_BUF_SIZE) amount = ARD_BUF_SIZE;
-            else amount = data_len - index;
-
+            amount = 0;
+            while(read(dev->ard_fd, &amount, 2) == 0);
             checkm8_debug_indent("\twriting data chunk of size %i\n", amount);
             write(dev->ard_fd, &data[index], amount);
 
-            while(read(dev->ard_fd, &buf, 1) == 0);
-            if(buf == PROT_ACK)
-            {
-                checkm8_debug_indent("\treceived data ack\n");
-                index += amount;
-            }
-            else
-            {
-                checkm8_debug_indent("\treceived unexpected response %x\n", buf);
-                return CHECKM8_FAIL_PROT;
-            }
+            index += amount;
         }
 
         while(read(dev->ard_fd, &buf, 1) == 0);
@@ -487,7 +476,7 @@ int ctrl_transfer(struct pwned_device *dev,
             dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
 
 #ifdef WITH_ARDUINO
-    int amount, index;
+    int amount, index, size;
     char buf;
     struct usb_xfer_args args;
     args.bmRequestType = bmRequestType;
@@ -511,16 +500,16 @@ int ctrl_transfer(struct pwned_device *dev,
             while(amount < data_len)
             {
                 // get the size of this chunk
-                while(read(dev->ard_fd, &buf, 1) == 0);
-                checkm8_debug_indent("\treceiving data chunk of size %i\n", buf);
+                while(read(dev->ard_fd, &size, 2) == 0);
+                checkm8_debug_indent("\treceiving data chunk of size %i\n", size);
 
                 index = 0;
-                while(index < buf)
+                while(index < size)
                 {
-                    index += read(dev->ard_fd, &data[amount + index], buf - index);
+                    index += read(dev->ard_fd, &data[amount + index], size - index);
                 }
 
-                amount += buf;
+                amount += size;
             }
         }
         else
@@ -529,7 +518,7 @@ int ctrl_transfer(struct pwned_device *dev,
             while(index < data_len)
             {
                 amount = 0;
-                while(read(dev->ard_fd, &amount, 1) == 0);
+                while(read(dev->ard_fd, &amount, 2) == 0);
                 checkm8_debug_indent("\twriting data chunk of size %i\n", amount);
                 write(dev->ard_fd, &data[index], amount);
 
