@@ -100,7 +100,7 @@ void loop()
                                           (usb_args.wValue >> 8u) & 0xFFu,
                                           usb_args.wIndex,
                                           usb_args.data_len);
-                if(respond_rcode()) break;
+                if(respond_rcode()) return;
 
                 if(usb_args.bmRequestType & 0x80u)
                 {
@@ -109,7 +109,7 @@ void loop()
                 }
                 else rcode = Usb.dispatchPkt(tokOUTHS, 0, 0);
 
-                if(respond_rcode()) break;
+                if(respond_rcode()) return;
                 Serial.write(PROT_SUCCESS);
                 break;
 
@@ -133,7 +133,7 @@ void loop()
                 else rcode = Usb.dispatchPkt(tokOUTHS, 0, 0);
 
                 Serial.write(PROT_SUCCESS);
-                break;
+                return;
 
             case PROT_NO_ERROR_CTRL_XFER_DATA:
                 recv_serial((uint8_t *) &usb_args, sizeof(struct usb_xfer_args));
@@ -172,7 +172,7 @@ void loop()
                 }
 
                 Serial.write(PROT_SUCCESS);
-                break;
+                return;
 
             case PROT_CTRL_XFER:
                 recv_serial((uint8_t *) &usb_args, sizeof(struct usb_xfer_args));
@@ -228,13 +228,13 @@ void loop()
 
                             Serial.write(PROT_FAIL_USB);
                             Serial.write(rcode);
-                            break;
+                            return;
                         }
                     }
 
                     Usb.regWr(rHXFR, tokOUTHS);
                     Serial.write(PROT_SUCCESS);
-                    break;
+                    return;
                 }
                 else
                 {
@@ -265,7 +265,7 @@ void loop()
 
                     Usb.regWr(rHXFR, tokINHS);
                     Serial.write(PROT_SUCCESS);
-                    break;
+                    return;
                 }
 
             case PROT_RESET:
@@ -275,7 +275,7 @@ void loop()
                 while((state = Usb.getUsbTaskState()) != USB_STATE_RUNNING) Usb.Task();
 
                 Serial.write(PROT_SUCCESS);
-                break;
+                return;
 
             case PROT_SERIAL_DESC:
                 recv_serial((uint8_t *) &sd_args, sizeof(struct serial_desc_args));
@@ -285,7 +285,7 @@ void loop()
                 if(state == USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE)
                 {
                     Serial.write(PROT_FAIL_NODEV);
-                    break;
+                    return;
                 }
 
                 get_dev_descriptor();
@@ -293,7 +293,7 @@ void loop()
                    desc_buf.idProduct != sd_args.dev_idProduct)
                 {
                     Serial.write(PROT_FAIL_WRONGDEV);
-                    break;
+                    return;
                 }
 
                 // multiplication by 2 is necessary here because iphone returns 16-bit characters
@@ -305,11 +305,11 @@ void loop()
                 {
                     Serial.write(((uint16_t *) usb_data_buf)[i]);
                 }
-                break;
+                return;
 
             default:
                 Serial.write(PROT_FAIL_BADCMD);
-                break;
+                return;
         }
     }
 }

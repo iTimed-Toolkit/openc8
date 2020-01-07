@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <libusb.h>
+#include <libusb-1.0/libusb.h>
 
 #endif
 
@@ -246,6 +246,17 @@ int is_device_session_open(struct pwned_device *dev)
 #endif
 }
 
+#ifdef WITH_ARDUINO
+void ard_read(struct pwned_device *dev, unsigned char *target, int nbytes)
+{
+    int index = 0;
+    while(index < nbytes)
+    {
+        index += read(dev->ard_fd, &target[index], nbytes - index);
+    }
+}
+#endif
+
 
 int partial_ctrl_transfer(struct pwned_device *dev,
                           unsigned char bmRequestType, unsigned char bRequest,
@@ -270,12 +281,12 @@ int partial_ctrl_transfer(struct pwned_device *dev,
     write(dev->ard_fd, &PROT_PARTIAL_CTRL_XFER, 1);
     write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
 
-    while(read(dev->ard_fd, &buf, 1) == 0);
+    ard_read(dev, (unsigned char *) &buf, 1);
     if(buf == PROT_ACK)
     {
         checkm8_debug_indent("\treceived ack\n");
 
-        while(read(dev->ard_fd, &buf, 1) == 0);
+        ard_read(dev, (unsigned char *) &buf, 1);
         if(buf == PROT_SUCCESS)
         {
             checkm8_debug_indent("\tsuccess\n");
@@ -283,7 +294,7 @@ int partial_ctrl_transfer(struct pwned_device *dev,
         }
         else if(buf == PROT_FAIL_USB)
         {
-            while(read(dev->ard_fd, &buf, 1) == 0);
+            ard_read(dev, (unsigned char *) &buf, 1);
 
             checkm8_debug_indent("\trequest failed with error %X\n", buf);
             return CHECKM8_FAIL_XFER;
@@ -349,7 +360,7 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
             dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
 
 #ifdef WITH_ARDUINO
-    unsigned char buf;
+    char buf;
     struct usb_xfer_args args;
     args.bmRequestType = bmRequestType;
     args.bRequest = bRequest;
@@ -361,7 +372,7 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
     write(dev->ard_fd, &PROT_NO_ERROR_CTRL_XFER, 1);
     write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
 
-    while(read(dev->ard_fd, &buf, 1) == 0);
+    ard_read(dev, (unsigned char *) &buf, 1);
     if(buf == PROT_ACK)
     {
         checkm8_debug_indent("\treceived ack\n");
@@ -369,11 +380,11 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
         {
             if(buf == PROT_FAIL_USB)
             {
-                while(read(dev->ard_fd, &buf, 1) == 0);
+                ard_read(dev, (unsigned char *) &buf, 1);
                 checkm8_debug_indent("\treceived error %X but ignoring\n", buf);
             }
 
-            while(read(dev->ard_fd, &buf, 1) == 0);
+            ard_read(dev, (unsigned char *) &buf, 1);
         } while(buf != PROT_SUCCESS);
 
         checkm8_debug_indent("\tsuccess\n");
@@ -429,21 +440,21 @@ int no_error_ctrl_transfer_data(struct pwned_device *dev,
     write(dev->ard_fd, &PROT_NO_ERROR_CTRL_XFER_DATA, 1);
     write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
 
-    while(read(dev->ard_fd, &buf, 1) == 0);
+    ard_read(dev, (unsigned char *) &buf, 1);
     if(buf == PROT_ACK)
     {
         checkm8_debug_indent("\treceived argument ack\n");
         while(index < data_len)
         {
             amount = 0;
-            while(read(dev->ard_fd, &amount, 2) == 0);
+            ard_read(dev, (unsigned char *) &amount, 2);
             checkm8_debug_indent("\twriting data chunk of size %i\n", amount);
             write(dev->ard_fd, &data[index], amount);
 
             index += amount;
         }
 
-        while(read(dev->ard_fd, &buf, 1) == 0);
+        ard_read(dev, (unsigned char *) &buf, 1);
         if(buf == PROT_SUCCESS)
         {
             checkm8_debug_indent("\tsuccess\n");
@@ -490,25 +501,20 @@ int ctrl_transfer(struct pwned_device *dev,
     write(dev->ard_fd, &PROT_CTRL_XFER, 1);
     write(dev->ard_fd, &args, sizeof(struct usb_xfer_args));
 
-    while(read(dev->ard_fd, &buf, 1) == 0);
+    ard_read(dev, (unsigned char *) &buf, 1);
     if(buf == PROT_ACK)
     {
         checkm8_debug_indent("\treceived argument ack\n");
-        if(bmRequestType & 0x80)
+        if(bmRequestType & 0x80u)
         {
             amount = 0;
             while(amount < data_len)
             {
                 // get the size of this chunk
-                while(read(dev->ard_fd, &size, 2) == 0);
+                ard_read(dev, (unsigned char *) &size, 2);
                 checkm8_debug_indent("\treceiving data chunk of size %i\n", size);
 
-                index = 0;
-                while(index < size)
-                {
-                    index += read(dev->ard_fd, &data[amount + index], size - index);
-                }
-
+                ard_read(dev, (unsigned char *) &data[amount], size);
                 amount += size;
             }
         }
@@ -518,15 +524,15 @@ int ctrl_transfer(struct pwned_device *dev,
             while(index < data_len)
             {
                 amount = 0;
-                while(read(dev->ard_fd, &amount, 2) == 0);
+                ard_read(dev, (unsigned char *) &amount, 2);
                 checkm8_debug_indent("\twriting data chunk of size %i\n", amount);
-                write(dev->ard_fd, &data[index], amount);
 
+                write(dev->ard_fd, &data[index], amount);
                 index += amount;
             }
         }
 
-        while(read(dev->ard_fd, &buf, 1) == 0);
+        ard_read(dev, (unsigned char *) &buf, 1);
         if(buf == PROT_SUCCESS)
         {
             checkm8_debug_indent("\tsuccess\n");

@@ -101,7 +101,7 @@ int main()
     free_dev_cmd_resp(resp);
     for(int i = 0; i < 100000; i++)
     {
-        resp = execute_payload(dev, PAYLOAD_AES_BUSY, 16, 4, 0x180153000, 0x1800b0010, 0x180150000, 16);
+        resp = execute_payload(dev, PAYLOAD_AES_BUSY, 16, 4, 0x180153000, 0x1800b0010, 0x180150000, 8);
         if(IS_CHECKM8_FAIL(resp->ret))
         {
             printf("failed to execute busy AES payload\n");
