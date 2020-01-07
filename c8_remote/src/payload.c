@@ -27,12 +27,16 @@ struct payload *get_payload(PAYLOAD_T p)
 
     switch(p)
     {
-        case PAYLOAD_SYNC:
-            path = PAYLOAD_SYNC_BIN;
-            break;
-
         case PAYLOAD_AES:
             path = PAYLOAD_AES_BIN;
+            break;
+
+        case PAYLOAD_AES_BUSY:
+            path = PAYLOAD_AES_BUSY_BIN;
+            break;
+
+        case PAYLOAD_SYNC:
+            path = PAYLOAD_SYNC_BIN;
             break;
 
         case PAYLOAD_SYSREG:

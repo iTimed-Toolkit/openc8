@@ -9,8 +9,10 @@
 #include "usb_helpers.h"
 
 #ifdef CHECKM8_LOGGING
+
 #include <stdarg.h>
 #include <execinfo.h>
+
 #endif
 
 void checkm8_debug_indent(const char *format, ...)
@@ -53,71 +55,69 @@ int main()
     }
 
     unsigned char key[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
-    unsigned char data0[8] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
-    unsigned char data1[8] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
+    unsigned char data[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe,
+                              0xef};
 
-    ret = open_device_session(dev);
-    if(IS_CHECKM8_FAIL(ret))
+    if(IS_CHECKM8_FAIL(open_device_session(dev)))
     {
         printf("failed to open device session\n");
         return -1;
     }
 
-    resp = write_gadget(dev, 0x180150000, key, 8);
+    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_SYNC, SRAM)))
+    {
+        printf("failed to install sync payload\n");
+        return -1;
+    }
+
+    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_AES_BUSY, SRAM)))
+    {
+        printf("failed to install aes busy payload\n");
+        return -1;
+    }
+
+    resp = write_gadget(dev, 0x180152000, key, 8);
     if(IS_CHECKM8_FAIL(resp->ret))
     {
         printf("failed to write key to device\n");
         return -1;
     }
 
-    free_dev_cmd_resp(resp);
-    for(int i = 0; i < 257; i++)
+    resp = write_gadget(dev, 0x180153000, data, 16);
+    if(IS_CHECKM8_FAIL(resp->ret))
     {
-        printf("encrypting ");
-        for(int j = 0; j < 8; j++)
-        {
-            printf("%02X", data0[j]);
-        }
+        printf("failed to write aes data\n");
+        return -1;
+    }
 
-        for(int j = 0; j < 8; j++)
-        {
-            printf("%02X", data1[j]);
-        }
+    free_dev_cmd_resp(resp);
+    resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("failed to execute sync payload\n");
+        return -1;
+    }
 
-        printf("\n");
-        resp = execute_gadget(dev,
-                              0x100000f0c, 16, 9,
-                              16, // action (AES_ENCRYPT)
-                              0x1800b0048, 0x1800b0010, // dest and src addresses
-                              16, // data size
-                              0x00000000, // AES_USER_KEY
-                              0x180150000, // key address
-                              0, // no IV
-                              *((unsigned long long *) data0),
-                              *((unsigned long long *) data1));
-
+    free_dev_cmd_resp(resp);
+    for(int i = 0; i < 100000; i++)
+    {
+        resp = execute_payload(dev, PAYLOAD_AES_BUSY, 16, 4, 0x180153000, 0x1800b0010, 0x180150000, 16);
         if(IS_CHECKM8_FAIL(resp->ret))
         {
-            printf("failed\n");
+            printf("failed to execute busy AES payload\n");
             return -1;
         }
 
-        memcpy(&data0, &resp->data[0], 8);
-        memcpy(&data1, &resp->data[8], 8);
+        memcpy(data, resp->data, 16);
         free_dev_cmd_resp(resp);
 
-        printf("\t-> ");
-        for(int j = 0; j < 8; j++)
+        printf("got ");
+        for(int j = 0; j < 16; j++)
         {
-            printf("%02X", ((unsigned char *) &data0)[j]);
-        }
-
-        for(int j = 0; j < 8; j++)
-        {
-            printf("%02X", ((unsigned char *) &data1)[j]);
+            printf("%02x", data[j]);
         }
         printf("\n");
-        usleep(1000000);
+        usleep(3000000);
     }
 
     close_device_session(dev);

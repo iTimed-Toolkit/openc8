@@ -3,15 +3,17 @@
 
 #include "checkm8.h"
 
-#define PAYLOAD_AES_BIN     CHECKM8_BIN_BASE "payloads/payload_aes.bin"
-#define PAYLOAD_SYSREG_BIN  CHECKM8_BIN_BASE "payloads/payload_sysreg.bin"
-#define PAYLOAD_SYNC_BIN    CHECKM8_BIN_BASE "payloads/payload_sync.bin"
+#define PAYLOAD_AES_BIN      CHECKM8_BIN_BASE "payloads/payload_aes.bin"
+#define PAYLOAD_AES_BUSY_BIN CHECKM8_BIN_BASE "payloads/payload_aes_busy.bin"
+#define PAYLOAD_SYNC_BIN     CHECKM8_BIN_BASE "payloads/payload_sync.bin"
+#define PAYLOAD_SYSREG_BIN   CHECKM8_BIN_BASE "payloads/payload_sysreg.bin"
 
 typedef enum
 {
-    PAYLOAD_SYNC,
     PAYLOAD_AES,
-    PAYLOAD_SYSREG
+    PAYLOAD_AES_BUSY,
+    PAYLOAD_SYNC,
+    PAYLOAD_SYSREG,
 } PAYLOAD_T;
 
 typedef enum
