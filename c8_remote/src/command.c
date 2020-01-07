@@ -254,11 +254,11 @@ struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, long long addr, 
     checkm8_debug_indent("dev_write_memory(dev = %p, addr = %lx, data = %p, len = %i)\n", dev, addr, data, len);
 
     unsigned char cmd_args[40 + len];
-    ((unsigned long *) cmd_args)[0] = MEMC_MAGIC;
-    ((unsigned long *) cmd_args)[1] = 0;
-    ((unsigned long *) cmd_args)[2] = addr;
-    ((unsigned long *) cmd_args)[3] = DFU_IMAGE_BASE + 40;
-    ((unsigned long *) cmd_args)[4] = len;
+    ((unsigned long long *) cmd_args)[0] = MEMC_MAGIC;
+    ((unsigned long long *) cmd_args)[1] = 0;
+    ((unsigned long long *) cmd_args)[2] = addr;
+    ((unsigned long long *) cmd_args)[3] = DFU_IMAGE_BASE + 40;
+    ((unsigned long long *) cmd_args)[4] = len;
     memcpy(&cmd_args[40], data, len);
 
     return command(dev, cmd_args, 40 + len, 1 * sizeof(unsigned long long));
