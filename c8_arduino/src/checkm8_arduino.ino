@@ -12,11 +12,12 @@ USB_DEVICE_DESCRIPTOR desc_buf;
 struct serial_desc_args sd_args;
 struct usb_xfer_args usb_args;
 
-int i, chunk_i;
-int size, chunk_size;
+unsigned int i, chunk_i;
+unsigned int size, chunk_size;
+int nak_count;
 char cmd;
 
-void recv_serial(uint8_t *target, int len)
+void recv_serial(uint8_t *target, unsigned int len)
 {
     for(i = 0; i < len; i = i + 1)
     {
@@ -31,7 +32,7 @@ void get_dev_descriptor()
 {
     if(!desc_buf_val)
     {
-        Usb.getDevDescr(addr, 0, sizeof(USB_DEVICE_DESCRIPTOR), (uint8_t * ) & desc_buf);
+        Usb.getDevDescr(addr, 0, sizeof(USB_DEVICE_DESCRIPTOR), (uint8_t *) &desc_buf);
         desc_buf_val = 1;
     }
 }
@@ -89,7 +90,7 @@ void loop()
         switch(cmd)
         {
             case PROT_PARTIAL_CTRL_XFER:
-                recv_serial((uint8_t * ) & usb_args, sizeof(struct usb_xfer_args));
+                recv_serial((uint8_t *) &usb_args, sizeof(struct usb_xfer_args));
                 Serial.write(PROT_ACK);
 
                 rcode = Usb.ctrlReq_SETUP(addr, 0,
@@ -113,7 +114,7 @@ void loop()
                 break;
 
             case PROT_NO_ERROR_CTRL_XFER:
-                recv_serial((uint8_t * ) & usb_args, sizeof(struct usb_xfer_args));
+                recv_serial((uint8_t *) &usb_args, sizeof(struct usb_xfer_args));
                 Serial.write(PROT_ACK);
 
                 rcode = Usb.ctrlReq_SETUP(addr, 0,
@@ -135,7 +136,7 @@ void loop()
                 break;
 
             case PROT_NO_ERROR_CTRL_XFER_DATA:
-                recv_serial((uint8_t * ) & usb_args, sizeof(struct usb_xfer_args));
+                recv_serial((uint8_t *) &usb_args, sizeof(struct usb_xfer_args));
                 Serial.write(PROT_ACK);
 
                 rcode = Usb.ctrlReq_SETUP(addr, 0,
@@ -154,11 +155,10 @@ void loop()
                     if(usb_args.data_len - chunk_i > ARD_BUF_SIZE) chunk_size = ARD_BUF_SIZE;
                     else chunk_size = usb_args.data_len - chunk_i;
 
+                    Serial.write((unsigned char *) &chunk_size, 2);
                     recv_serial(usb_data_buf, chunk_size);
-                    Serial.write(PROT_ACK);
 
-                    // i is the current data index
-                    i = 0;
+                    i = 0; // current data index
                     while(i < chunk_size)
                     {
                         if(chunk_size - i > 64) size = 64;
@@ -175,7 +175,7 @@ void loop()
                 break;
 
             case PROT_CTRL_XFER:
-                recv_serial((uint8_t * ) & usb_args, sizeof(struct usb_xfer_args));
+                recv_serial((uint8_t *) &usb_args, sizeof(struct usb_xfer_args));
                 Serial.write(PROT_ACK);
 
                 get_dev_descriptor();
@@ -188,6 +188,7 @@ void loop()
                                           (usb_args.wValue >> 8u) & 0xFFu,
                                           usb_args.wIndex,
                                           usb_args.data_len);
+                if(usb_args.trigger == 1) digitalWrite(6, LOW);
 
                 if(usb_args.bmRequestType & 0x80u)
                 {
@@ -203,11 +204,18 @@ void loop()
 
                         if(Usb.regRd(rHIRQ) & bmRCVDAVIRQ)
                         {
+                            if(usb_args.trigger == 1)
+                            {
+                                digitalWrite(6, HIGH);
+                                delayMicroseconds(15);
+                                digitalWrite(6, LOW);
+                            }
+
                             size = Usb.regRd(rRCVBC);
                             Usb.bytesRd(rRCVFIFO, size, usb_data_buf);
                             Usb.regWr(rHIRQ, bmRCVDAVIRQ);
 
-                            Serial.write(size);
+                            Serial.write((unsigned char *) &size, 2);
                             Serial.write(usb_data_buf, size);
                             i += size;
 
@@ -215,7 +223,7 @@ void loop()
                         }
                         else
                         {
-                            rcode =  (Usb.regRd(rHRSL) & 0x0f);
+                            rcode = (Usb.regRd(rHRSL) & 0x0f);
                             if(rcode == hrNAK) continue;
 
                             Serial.write(PROT_FAIL_USB);
@@ -225,7 +233,6 @@ void loop()
                     }
 
                     Usb.regWr(rHXFR, tokOUTHS);
-                    if(usb_args.trigger == 1) digitalWrite(6, LOW);
                     Serial.write(PROT_SUCCESS);
                     break;
                 }
@@ -240,7 +247,7 @@ void loop()
                         if(usb_args.data_len - chunk_i > ARD_BUF_SIZE) chunk_size = ARD_BUF_SIZE;
                         else chunk_size = usb_args.data_len - chunk_i;
 
-                        Serial.write(chunk_size);
+                        Serial.write((unsigned char *) &chunk_size, 2);
                         recv_serial(usb_data_buf, chunk_size);
 
                         i = 0;
@@ -257,7 +264,6 @@ void loop()
                     }
 
                     Usb.regWr(rHXFR, tokINHS);
-                    if(usb_args.trigger == 1) digitalWrite(6, LOW);
                     Serial.write(PROT_SUCCESS);
                     break;
                 }
@@ -272,7 +278,7 @@ void loop()
                 break;
 
             case PROT_SERIAL_DESC:
-                recv_serial((uint8_t * ) & sd_args, sizeof(struct serial_desc_args));
+                recv_serial((uint8_t *) &sd_args, sizeof(struct serial_desc_args));
                 Serial.write(PROT_ACK);
 
                 state = Usb.getUsbTaskState();
