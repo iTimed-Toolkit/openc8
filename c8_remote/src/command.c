@@ -149,10 +149,10 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
     return cmd_resp;
 }
 
-#define EXEC_MAGIC 0x6578656365786563ul // 'execexec'[::-1]
-#define MEMC_MAGIC 0x6d656d636d656d63ul // 'memcmemc'[::-1]
-#define MEMS_MAGIC 0x6d656d736d656d73ul // 'memsmems'[::-1]
-#define DONE_MAGIC 0x646f6e65646f6e65ul // 'donedone'[::-1]
+#define EXEC_MAGIC 0x6578656365786563ull // 'execexec'[::-1]
+#define MEMC_MAGIC 0x6d656d636d656d63ull // 'memcmemc'[::-1]
+#define MEMS_MAGIC 0x6d656d736d656d73ull // 'memsmems'[::-1]
+#define DONE_MAGIC 0x646f6e65646f6e65ull // 'donedone'[::-1]
 
 struct dev_cmd_resp *dev_memset(struct pwned_device *dev, long long addr, unsigned char c, int len)
 {
