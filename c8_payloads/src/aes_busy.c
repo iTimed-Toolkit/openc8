@@ -1,5 +1,6 @@
 #include "util.h"
 #include "brfunc_aes.h"
+#include "brfunc_timing.h"
 
 
 TEXT_SECTION
@@ -12,10 +13,12 @@ int _start(void *src, void *dst, void *key, int rep)
         src_data[j] = ((unsigned char *) src)[j];
     }
 
+    task_sleep(100);
     for(i = 0; i < rep; i++)
     {
         if(i % 2 == 0) aes_hw_crypto_cmd(16, src_data, dst, 16, 0, key, 0);
         else aes_hw_crypto_cmd(16, dst, src_data, 16, 0, key, 0);
+        task_sleep(15);
     }
 
     return 0;

@@ -27,6 +27,7 @@ typedef int (*BOOTROM_FUNC)();
 #define ADDR_CLOCK_GATE                     0x100009d4c
 #define ADDR_SYSTEM_TIME                    0x10000B0E0
 #define ADDR_TIME_HAS_ELAPSED               0x10000B04F
+#define ADDR_TASK_SLEEP                     0x10000ADF0
 
 #else
 #error "Unsupported checkm8 platform"
