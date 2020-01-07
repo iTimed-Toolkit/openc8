@@ -11,9 +11,12 @@ endif()
 
 set(CMAKE_C_FLAGS "-nostdlib -O")
 
-set(PAYLOADS payload_sync payload_aes payload_sysreg)
+set(PAYLOADS payload_sync payload_aes payload_sysreg payload_aes_busy)
 add_executable(payload_sync src/sync.c)
+
 add_executable(payload_aes src/aes.c)
+add_executable(payload_aes_busy src/aes_busy.c)
+
 add_executable(payload_sysreg src/sysreg.c)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
