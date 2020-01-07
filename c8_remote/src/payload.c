@@ -136,7 +136,7 @@ int *dev_unlink_payload(struct pwned_device *dev, struct payload *pl)
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 {
     checkm8_debug_indent("install_payload(dev = %p, p = %i, loc = %i)\n", dev, p, loc);
-    int ret;
+
     struct dev_cmd_resp *resp = NULL;
     struct payload *pl = get_payload(p);
     long long addr = get_address(dev, loc);
@@ -146,9 +146,6 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
         checkm8_debug_indent("\tinvalid args (either payload or address)\n");
         return CHECKM8_FAIL_INVARGS;
     }
-
-    ret = open_device_session(dev);
-    if(IS_CHECKM8_FAIL(ret)) return ret;
 
     resp = dev_write_memory(dev, addr, pl->data, pl->len);
     if(IS_CHECKM8_FAIL(resp->ret))
@@ -163,8 +160,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
     dev_link_payload(dev, pl);
 
     free_dev_cmd_resp(resp);
-    close_device_session(dev);
-    return ret;
+    return CHECKM8_SUCCESS;
 }
 
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
@@ -176,7 +172,7 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...)
 {
     checkm8_debug_indent("execute_payload(dev = %p, p = %i, nargs = %i, ...)\n", dev, p, nargs);
-    int ret, i;
+    int i;
     struct dev_cmd_resp *resp;
     struct payload *pl;
 
@@ -185,14 +181,6 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
         checkm8_debug_indent("\tpayload is not installed\n");
         resp = calloc(1, sizeof(struct dev_cmd_resp));
         resp->ret = CHECKM8_FAIL_NOINST;
-        return resp;
-    }
-
-    ret = open_device_session(dev);
-    if(IS_CHECKM8_FAIL(ret))
-    {
-        resp = calloc(1, sizeof(struct dev_cmd_resp));
-        resp->ret = ret;
         return resp;
     }
 
@@ -209,9 +197,7 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
     }
     va_end(arg_list);
 
-    resp = dev_exec(dev, response_len, nargs + 1, args);
-    close_device_session(dev);
-    return resp;
+    return dev_exec(dev, response_len, nargs + 1, args);
 }
 
 struct dev_cmd_resp *read_gadget(struct pwned_device *dev, long long addr, int len)
