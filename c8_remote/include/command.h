@@ -9,6 +9,7 @@ struct dev_cmd_resp
 {
     int ret;
     unsigned long long magic;
+    unsigned long long retval;
     unsigned char *data;
     int len;
 };

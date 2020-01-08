@@ -136,14 +136,17 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
 
     cmd_resp->ret = CHECKM8_SUCCESS;
     memcpy(&cmd_resp->magic, resp_buf, 8);
+    memcpy(&cmd_resp->retval, &resp_buf[8], 8);
+
     if(response_len - 16 > 0)
     {
         checkm8_debug_indent("\tcopying %i bytes of output to response data section\n", response_len - 16);
+
+        cmd_resp->len = response_len - 16;
         cmd_resp->data = calloc(1, response_len - 16);
         memcpy(cmd_resp->data, &resp_buf[16], response_len - 16);
     }
-
-    cmd_resp->len = response_len - 16;
+    else cmd_resp->len = 0;
 
     if(close) close_device_session(dev);
     return cmd_resp;
