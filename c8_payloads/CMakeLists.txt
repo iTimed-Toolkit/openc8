@@ -11,12 +11,17 @@ endif()
 
 set(CMAKE_C_FLAGS "-nostdlib -O")
 
-set(PAYLOADS payload_sync payload_aes payload_sysreg payload_aes_busy)
-add_executable(payload_sync src/sync.c)
+set(PAYLOADS
+        payload_aes
+        payload_aes_busy
+        payload_aes_sw
+        payload_sync
+        payload_sysreg)
 
 add_executable(payload_aes src/aes.c)
 add_executable(payload_aes_busy src/aes_busy.c)
-
+add_executable(payload_aes_sw src/aes_sw.c)
+add_executable(payload_sync src/sync.c)
 add_executable(payload_sysreg src/sysreg.c)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
@@ -26,7 +31,7 @@ foreach(BINARY ${PAYLOADS})
     add_custom_command(TARGET ${BINARY} POST_BUILD
                         BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/bin/${BINARY}.bin
                         COMMAND ${CMAKE_OBJCOPY}
-                        ARGS -O binary -j .text -j .payload_text
+                        ARGS -O binary -j .text -j .payload_text -j .payload_data
                             ${CMAKE_CURRENT_BINARY_DIR}/${BINARY}
                             ${CMAKE_CURRENT_SOURCE_DIR}/bin/${BINARY}.bin)
 endforeach(BINARY)

@@ -35,6 +35,10 @@ struct payload *get_payload(PAYLOAD_T p)
             path = PAYLOAD_AES_BUSY_BIN;
             break;
 
+        case PAYLOAD_AES_SW:
+            path = PAYLOAD_AES_SW_BIN;
+            break;
+
         case PAYLOAD_SYNC:
             path = PAYLOAD_SYNC_BIN;
             break;
