@@ -202,7 +202,7 @@ int main()
     write_aes_utils(dev);
 
     free_dev_cmd_resp(resp);
-    for(int i = 0; i < 32; i++)
+    for(int i = 0; i < 65536; i++)
     {
         resp = execute_payload(dev, PAYLOAD_AES_SW, 0, 7,
                                0x180153000, 16, 0x180152000,
@@ -221,15 +221,14 @@ int main()
             printf("failed to read encrypted data from memory\n");
         }
 
-        memcpy(data, resp->data, 16);
-        free_dev_cmd_resp(resp);
-
         printf("got ");
         for(int j = 0; j < 16; j++)
         {
-            printf("%02x", data[j]);
+            printf("%02x", resp->data[j]);
         }
-        printf("\n");
+
+        printf(" (%llu)\n", resp->retval);
+        free_dev_cmd_resp(resp);
     }
 
     close_device_session(dev);

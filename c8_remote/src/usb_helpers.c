@@ -249,10 +249,12 @@ int is_device_session_open(struct pwned_device *dev)
 #ifdef WITH_ARDUINO
 void ard_read(struct pwned_device *dev, unsigned char *target, int nbytes)
 {
-    int index = 0;
+    int index = 0, amount;
     while(index < nbytes)
     {
-        index += read(dev->ard_fd, &target[index], nbytes - index);
+        amount = read(dev->ard_fd, &target[index], nbytes - index);
+        if(amount == 0) usleep(5000);
+        else index += amount;
     }
 }
 #endif
