@@ -1,4 +1,5 @@
 #include "util.h"
+#include "brfunc_timing.h"
 
 PAYLOAD_SECTION
 void sub_bytes(unsigned char block[16], unsigned char sbox[16][16])
@@ -145,6 +146,10 @@ unsigned int _start(unsigned char *msg, unsigned int msg_len, unsigned char *key
                     unsigned char sbox[16][16], unsigned char rc_lookup[11],
                     unsigned char mul2[256], unsigned char mul3[256])
 {
-    aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
+    while(1)
+    {
+        aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
+        task_sleep(1000);
+    }
     return 0xDEADBEEF;
 }

@@ -202,7 +202,9 @@ int main()
     write_aes_utils(dev);
 
     free_dev_cmd_resp(resp);
-    for(int i = 0; i < 65536; i++)
+
+    int i = 0;
+    while(1)
     {
         resp = execute_payload(dev, PAYLOAD_AES_SW, 0, 7,
                                0x180153000, 16, 0x180152000,
@@ -221,7 +223,7 @@ int main()
             printf("failed to read encrypted data from memory\n");
         }
 
-        printf("got ");
+        printf("%i) got ", i++);
         for(int j = 0; j < 16; j++)
         {
             printf("%02x", resp->data[j]);
