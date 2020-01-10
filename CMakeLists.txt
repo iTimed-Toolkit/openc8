@@ -3,5 +3,7 @@ project(checkm8_tool)
 enable_language(C)
 
 include_directories(include)
+
+#add_subdirectory(c8_arduino)
 add_subdirectory(c8_remote)
 add_subdirectory(c8_payloads)

@@ -228,10 +228,12 @@ struct dev_cmd_resp *dev_read_memory(struct pwned_device *dev, long long addr, i
 
         resp = command(dev, (unsigned char *) &cmd_args, 5 * sizeof(unsigned long long), 16 + amount);
         ret->ret = resp->ret;
+        ret->retval = resp->retval;
 
         if(IS_CHECKM8_FAIL(resp->ret))
         {
             checkm8_debug_indent("\tlast transfer failed, aborting\n");
+
             free_dev_cmd_resp(resp);
             free(ret->data);
             ret->data = NULL;
@@ -240,7 +242,7 @@ struct dev_cmd_resp *dev_read_memory(struct pwned_device *dev, long long addr, i
         else
         {
             checkm8_debug_indent("\tsuccessfully copied chunk\n");
-            memcpy(&ret->data[index], &resp->data[8], amount);
+            memcpy(&ret->data[index], resp->data, amount);
             free_dev_cmd_resp(resp);
         }
 
