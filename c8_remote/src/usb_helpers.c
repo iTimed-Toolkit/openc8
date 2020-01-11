@@ -489,7 +489,7 @@ int ctrl_transfer(struct pwned_device *dev,
             dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
 
 #ifdef WITH_ARDUINO
-    int amount, index, size;
+    unsigned int amount, index, size;
     char buf;
     struct usb_xfer_args args;
     args.bmRequestType = bmRequestType;
@@ -513,6 +513,7 @@ int ctrl_transfer(struct pwned_device *dev,
             while(amount < data_len)
             {
                 // get the size of this chunk
+                size = 0;
                 ard_read(dev, (unsigned char *) &size, 2);
                 checkm8_debug_indent("\treceiving data chunk of size %i\n", size);
 
