@@ -567,12 +567,12 @@ int reset(struct pwned_device *dev)
     char buf;
     write(dev->ard_fd, &PROT_RESET, 1);
 
-    while(read(dev->ard_fd, &buf, 1) == 0);
+    ard_read(dev, (unsigned char *) &buf, 1);
     if(buf == PROT_ACK)
     {
         checkm8_debug_indent("\treceived ack\n");
 
-        while(read(dev->ard_fd, &buf, 1) == 0);
+        ard_read(dev, (unsigned char *) &buf, 1);
         if(buf == PROT_SUCCESS)
         {
             checkm8_debug_indent("\tsuccess\n");
@@ -600,7 +600,6 @@ int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int l
 
 #ifdef WITH_ARDUINO
     char buf;
-    int curr, ret;
     struct serial_desc_args args;
     args.dev_idVendor = dev->idVendor;
     args.dev_idProduct = dev->idProduct;
@@ -610,7 +609,7 @@ int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int l
     write(dev->ard_fd, &PROT_SERIAL_DESC, 1);
     write(dev->ard_fd, &args, sizeof(struct serial_desc_args));
 
-    while(read(dev->ard_fd, &buf, 1) == 0);
+    ard_read(dev, (unsigned char *) &buf, 1);
     if(buf == PROT_ACK)
     {
         checkm8_debug_indent("\treceived ack\n");
@@ -628,13 +627,7 @@ int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int l
         else if(buf == PROT_SUCCESS)
         {
             checkm8_debug_indent("\tsuccess, reading serial descriptor\n");
-            curr = 0;
-            while(curr < len)
-            {
-                ret = read(dev->ard_fd, &serial_buf[curr], len - curr);
-                if(ret > 0) curr += ret;
-            }
-
+            ard_read(dev, serial_buf, len);
             return CHECKM8_SUCCESS;
         }
         else

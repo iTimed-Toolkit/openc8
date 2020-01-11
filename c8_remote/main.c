@@ -171,7 +171,7 @@ int main()
 
     if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_AES_SW, SRAM)))
     {
-        printf("failed to install aes busy payload\n");
+        printf("failed to install task sleep payload\n");
         return -1;
     }
 
@@ -202,7 +202,6 @@ int main()
     write_aes_utils(dev);
 
     free_dev_cmd_resp(resp);
-
     int i = 0;
     while(1)
     {
@@ -216,6 +215,8 @@ int main()
             return -1;
         }
 
+        printf("%i) op took %llu", i++, resp->retval);
+
         free_dev_cmd_resp(resp);
         resp = read_gadget(dev, 0x180153000, 16);
         if(IS_CHECKM8_FAIL(resp->ret))
@@ -223,14 +224,22 @@ int main()
             printf("failed to read encrypted data from memory\n");
         }
 
-        printf("%i) got ", i++);
+        printf(" -> ");
         for(int j = 0; j < 16; j++)
         {
             printf("%02x", resp->data[j]);
         }
+        printf("\n");
 
-        printf(" (%llu)\n", resp->retval);
         free_dev_cmd_resp(resp);
+        resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed to execute sync\n");
+        }
+
+        free_dev_cmd_resp(resp);
+        usleep(1000000);
     }
 
     close_device_session(dev);

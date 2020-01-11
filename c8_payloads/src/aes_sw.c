@@ -2,6 +2,12 @@
 #include "brfunc_timing.h"
 
 PAYLOAD_SECTION
+void task_sleep(unsigned int usec)
+{
+    ((BOOTROM_FUNC) ADDR_TASK_SLEEP)(usec);
+}
+
+PAYLOAD_SECTION
 void sub_bytes(unsigned char block[16], unsigned char sbox[16][16])
 {
     int i;
@@ -133,6 +139,7 @@ void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char 
             shift_rows(block);
             mix_cols(block, mul2, mul3);
             add_key(block, &key_sched[16 * (j + 1)]);
+            task_sleep(20);
         }
 
         sub_bytes(block, sbox);
@@ -146,10 +153,31 @@ unsigned int _start(unsigned char *msg, unsigned int msg_len, unsigned char *key
                     unsigned char sbox[16][16], unsigned char rc_lookup[11],
                     unsigned char mul2[256], unsigned char mul3[256])
 {
-    while(1)
-    {
-        aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
-        task_sleep(1000);
-    }
-    return 0xDEADBEEF;
+    unsigned long long start, end;
+
+    __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
+    aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
+    task_sleep(120);
+    __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
+
+//    for(i = 0; i < 256; i++)
+//    {
+//        __asm__ volatile ("dc civac, %0" : : "r" (&sbox[i % 16][i / 16]) : "memory");
+//        __asm__ volatile ("dc civac, %0" : : "r" (&mul2[i]) : "memory");
+//        __asm__ volatile ("dc civac, %0" : : "r" (&mul3[i]) : "memory");
+//    }
+//
+//    for(i = 0; i < 16; i++)
+//    {
+//        __asm__ volatile ("dc civac, %0" : : "r" (&msg[i]) : "memory");
+//        __asm__ volatile ("dc civac, %0" : : "r" (&key[i]) : "memory");
+//    }
+//
+//    for(i = 0; i < 12; i++)
+//    {
+//        __asm__ volatile ("dc civac, %0" : : "r" (&rc_lookup[i]) : "memory");
+//    }
+//
+//    __asm__ volatile ("dsb sy");
+    return end - start;
 }
