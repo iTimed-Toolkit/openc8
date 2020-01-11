@@ -3,7 +3,6 @@
 
 #include "brfunc_common.h"
 
-PAYLOAD_SECTION
 int aes_hw_crypto_cmd(unsigned long long cmd,
                       unsigned char *src, unsigned char *dst,
                       int len, unsigned long long opts,

@@ -8,6 +8,7 @@
 #define PAYLOAD_AES_SW_BIN   CHECKM8_BIN_BASE "payloads/payload_aes_sw.bin"
 #define PAYLOAD_SYNC_BIN     CHECKM8_BIN_BASE "payloads/payload_sync.bin"
 #define PAYLOAD_SYSREG_BIN   CHECKM8_BIN_BASE "payloads/payload_sysreg.bin"
+#define PAYLOAD_TASK_SLEEP_TEST_BIN CHECKM8_BIN_BASE "payloads/payload_task_sleep_test.bin"
 
 typedef enum
 {
@@ -16,6 +17,7 @@ typedef enum
     PAYLOAD_AES_SW,
     PAYLOAD_SYNC,
     PAYLOAD_SYSREG,
+    PAYLOAD_TASK_SLEEP_TEST
 } PAYLOAD_T;
 
 typedef enum

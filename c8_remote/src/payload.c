@@ -47,6 +47,10 @@ struct payload *get_payload(PAYLOAD_T p)
             path = PAYLOAD_SYSREG_BIN;
             break;
 
+        case PAYLOAD_TASK_SLEEP_TEST:
+            path = PAYLOAD_TASK_SLEEP_TEST_BIN;
+            break;
+
         default:
             return NULL;
     }
