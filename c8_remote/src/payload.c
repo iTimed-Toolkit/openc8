@@ -55,7 +55,7 @@ struct payload *get_payload(PAYLOAD_T p)
             return NULL;
     }
 
-    checkm8_debug_indent("get_payload(p = %i)\n", p);
+    checkm8_debug_indent("get_payload(p = %i) -> %p\n", p, pl);
     res = malloc(sizeof(struct payload));
     if(res == NULL) return NULL;
 
@@ -147,7 +147,6 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
     if(IS_CHECKM8_FAIL(resp->ret))
     {
         free_dev_cmd_resp(resp);
-        close_device_session(dev);
         return CHECKM8_FAIL_XFER;
     }
 
