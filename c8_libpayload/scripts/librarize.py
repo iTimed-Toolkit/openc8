@@ -24,7 +24,7 @@ if __name__ == '__main__':
     for n in bin_names:
         payload_name = os.path.basename(n).split('.')[0]
         with open(n, 'rb') as fbin:
-                fbytes = fbin.read()
+            fbytes = fbin.read()
 
         source_lines[payload_name].append('const unsigned char %s[%i] =\n' % (payload_name, len(fbytes)))
         source_lines[payload_name].append('\t{')

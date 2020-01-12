@@ -24,31 +24,38 @@ struct payload *get_payload(PAYLOAD_T p)
 {
     struct payload *res;
     const unsigned char *pl;
+    int len;
 
     switch(p)
     {
         case PAYLOAD_AES:
             pl = payload_aes;
+            len = PAYLOAD_AES_SZ;
             break;
 
         case PAYLOAD_AES_BUSY:
             pl = payload_aes_busy;
+            len = PAYLOAD_AES_BUSY_SZ;
             break;
 
         case PAYLOAD_AES_SW:
             pl = payload_aes_sw;
+            len = PAYLOAD_AES_SW_SZ;
             break;
 
         case PAYLOAD_SYNC:
             pl = payload_sync;
+            len = PAYLOAD_SYNC_SZ;
             break;
 
         case PAYLOAD_SYSREG:
             pl = payload_sysreg;
+            len = PAYLOAD_SYSREG_SZ;
             break;
 
         case PAYLOAD_TASK_SLEEP_TEST:
             pl = payload_task_sleep_test;
+            len = PAYLOAD_TASK_SLEEP_TEST_SZ;
             break;
 
         default:
@@ -60,7 +67,7 @@ struct payload *get_payload(PAYLOAD_T p)
     if(res == NULL) return NULL;
 
     res->type = p;
-    res->len = sizeof(pl);
+    res->len = len;
     res->data = pl;
     res->install_base = -1;
     res->next = NULL;

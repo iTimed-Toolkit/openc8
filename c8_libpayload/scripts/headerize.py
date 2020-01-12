@@ -21,13 +21,21 @@ if __name__ == '__main__':
                     '#define CHECKM8_TOOL_LIBPAYLOAD_H\n',
                     '\n']
 
+    name_lines = []
+    size_lines = []
+
     for n in lib_names:
         with open(n, 'r') as f:
             line = f.readline() # looks like "const unsigned char PAYLOAD_NAME[PAYLOAD_SIZE] = "
             name = line.split(' ')[3].split('[')[0]
             size = line.split(' ')[3].split('[')[1][:-1]
 
-            header_lines.append('extern const unsigned char %s[%s];\n' % (name, size))
+            name_lines.append('extern const unsigned char %s[%s_SZ];\n' % (name, name.upper()))
+            size_lines.append('#define %s_SZ %s\n' % (name.upper(), size))
+
+    header_lines.extend(size_lines)
+    header_lines.append('\n')
+    header_lines.extend(name_lines)
 
     header_lines.append('\n')
     header_lines.append('#endif //CHECKM8_TOOL_LIBPAYLOAD_H\n')
