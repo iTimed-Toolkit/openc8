@@ -21,19 +21,11 @@ if __name__ == '__main__':
             bin_names.append(os.path.abspath(n))
 
     source_lines = defaultdict(list)
-    header_lines = ['#ifndef CHECKM8_TOOL_LIBPAYLOAD_H\n',
-                    '#define CHECKM8_TOOL_LIBPAYLOAD_H\n',
-                    '\n']
-
     for n in bin_names:
         payload_name = os.path.basename(n).split('.')[0]
         with open(n, 'rb') as fbin:
                 fbytes = fbin.read()
 
-        header_lines.append('extern const unsigned char %s[%i];\n' % (payload_name, len(fbytes)))
-
-        source_lines[payload_name].append('#include "libpayload.h"\n')
-        source_lines[payload_name].append('\n')
         source_lines[payload_name].append('const unsigned char %s[%i] =\n' % (payload_name, len(fbytes)))
         source_lines[payload_name].append('\t{')
 
@@ -48,10 +40,6 @@ if __name__ == '__main__':
 
         source_lines[payload_name].append('\t};\n')
 
-    header_lines.append('\n')
-    header_lines.append('#endif //CHECKM8_TOOL_LIBPAYLOAD_H\n')
-
-    files_updated = False
     for sname, lines in source_lines.items():
         sfname = lib_dir + '/' + sname + '.c'
 
@@ -63,9 +51,4 @@ if __name__ == '__main__':
                 continue
 
         with open(sfname, 'w+') as f:
-            files_updated = True
             f.writelines(lines)
-
-    if files_updated:
-        with open(lib_dir + '/libpayload.h', 'w+') as f:
-            f.writelines(header_lines)

@@ -1,0 +1,36 @@
+import sys
+import os
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print('Usage: headerize.py [lib names ...] [header dir]')
+        exit(1)
+
+    lib_names = []
+    hdr_dir = os.path.abspath(sys.argv[-1])
+
+    if os.path.isdir(sys.argv[1]):
+        lib_folder = os.path.abspath(sys.argv[1])
+        for lib_fname in os.listdir(lib_folder):
+            lib_names.append(lib_folder + '/' + lib_fname)
+    else:
+        for n in sys.argv[1:-1]:
+            lib_names.append(os.path.abspath(n))
+
+    header_lines = ['#ifndef CHECKM8_TOOL_LIBPAYLOAD_H\n',
+                    '#define CHECKM8_TOOL_LIBPAYLOAD_H\n',
+                    '\n']
+
+    for n in lib_names:
+        with open(n, 'r') as f:
+            line = f.readline() # looks like "const unsigned char PAYLOAD_NAME[PAYLOAD_SIZE] = "
+            name = line.split(' ')[3].split('[')[0]
+            size = line.split(' ')[3].split('[')[1][:-1]
+
+            header_lines.append('extern const unsigned char %s[%s];\n' % (name, size))
+
+    header_lines.append('\n')
+    header_lines.append('#endif //CHECKM8_TOOL_LIBPAYLOAD_H\n')
+
+    with open(hdr_dir + '/libpayload.h', 'w+') as f:
+        f.writelines(header_lines)

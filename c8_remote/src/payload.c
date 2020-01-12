@@ -7,8 +7,7 @@
 #include "command.h"
 #include "usb_helpers.h"
 
-// TODO: this is so ugly ...
-#include "../../cmake-build-debug/c8_libpayload/lib/libpayload.h"
+#include "libpayload.h"
 
 struct payload
 {

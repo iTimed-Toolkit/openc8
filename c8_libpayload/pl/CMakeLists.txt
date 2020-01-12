@@ -19,4 +19,6 @@ foreach(PL ${PL_NAMES_SHORT})
                         ARGS        -O binary -j .text -j .payload_text -j .payload_data
                                     ${CMAKE_CURRENT_BINARY_DIR}/payload_${PL}
                                     ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${PL}.bin)
+
+    add_custom_target(payload_${PL}_bin DEPENDS payload_${PL})
 endforeach(PL)
