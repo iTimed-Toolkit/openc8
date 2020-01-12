@@ -1,3 +1,9 @@
+# configuration files
 .idea/*
+
+# build directories
 cmake-build-debug/
 /c8_arduino/cmake-build-debug/
+
+# generated files
+/c8_remote/include/libpayload.h
