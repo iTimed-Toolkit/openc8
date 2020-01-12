@@ -1,6 +1,6 @@
 project(checkm8_libpayload)
 
-set(PL_NAMES_SHORT
+set(PL_NAMES
         aes
         aes_busy
         aes_sw
@@ -8,29 +8,28 @@ set(PL_NAMES_SHORT
         sysreg
         task_sleep_test)
 
-foreach(NAME ${PL_NAMES_SHORT})
+foreach(NAME ${PL_NAMES})
     list(APPEND PL_TARGETS      "payload_${NAME}")
-    list(APPEND PL_SRC_SHORT    "${CMAKE_CURRENT_LIST_DIR}/pl/src/${NAME}.c")
+    list(APPEND PL_SRC_BIN      "${CMAKE_CURRENT_LIST_DIR}/pl/src/${NAME}.c")
 endforeach(NAME)
 
-foreach(NAME ${PL_TARGETS})
-    list(APPEND PL_SRC_LONG     "${CMAKE_CURRENT_BINARY_DIR}/lib/${NAME}.c")
-    list(APPEND PL_BIN          "${CMAKE_CURRENT_BINARY_DIR}/pl/bin/${NAME}.bin")
-    list(APPEND PL_TARGETS_BIN  ${NAME}_bin)
-endforeach(NAME)
+foreach(TARGET ${PL_TARGETS})
+    list(APPEND PL_SRC_LIB      "${CMAKE_CURRENT_BINARY_DIR}/lib/${TARGET}.c")
+    list(APPEND PL_BIN          "${CMAKE_CURRENT_BINARY_DIR}/pl/bin/${TARGET}.bin")
+endforeach(TARGET)
 
 add_subdirectory(pl)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 add_custom_target(payload_sources
-                    BYPRODUCTS  ${PL_SRC_LONG}
-                    DEPENDS     ${PL_TARGETS_BIN}
+                    BYPRODUCTS  ${PL_SRC_LIB}
+                    DEPENDS     ${PL_TARGETS}
                     COMMENT     "Refreshing payload library"
                     COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/librarize.py
-                                ${CMAKE_CURRENT_BINARY_DIR}/pl/bin
-                                ${CMAKE_CURRENT_BINARY_DIR}/lib)
+                                        ${CMAKE_CURRENT_BINARY_DIR}/pl/bin
+                                        ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
-add_library(payload ${PL_SRC_LONG})
+add_library(payload ${PL_SRC_LIB})
 add_dependencies(payload payload_sources)
 
 add_custom_command(TARGET       payload POST_BUILD
