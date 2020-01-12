@@ -1,9 +1,10 @@
 import sys
-from collections import defaultdict
 import os
 
+from collections import defaultdict
+from operator import eq
+
 if __name__ == '__main__':
-    print('ffffffffffffffffff')
     if len(sys.argv) < 3:
         print('Usage: librarize.py [bin names ...] [lib dir]')
         exit(1)
@@ -38,18 +39,33 @@ if __name__ == '__main__':
 
         for i, b in enumerate(fbytes):
             if i % 16 == 0:
-                source_lines[payload_name].append('\n\t\t')
+                source_lines[payload_name][-1] += '\n'
+                source_lines[payload_name].append('\t\t')
 
             source_lines[payload_name][-1] += '0x%02x, ' % b
+            if i == len(fbytes) - 1:
+                source_lines[payload_name][-1] += '\n'
 
-        source_lines[payload_name].append('\n\t};\n')
+        source_lines[payload_name].append('\t};\n')
 
     header_lines.append('\n')
     header_lines.append('#endif //CHECKM8_TOOL_LIBPAYLOAD_H\n')
 
-    with open(lib_dir + '/libpayload.h', 'w+') as f:
-        f.writelines(header_lines)
-
+    files_updated = False
     for sname, lines in source_lines.items():
-        with open(lib_dir + '/' + sname + '.c', 'w+') as f:
+        sfname = lib_dir + '/' + sname + '.c'
+
+        if os.path.exists(sfname):
+            with open(sfname, 'r') as f:
+                old_lines = f.readlines()
+
+            if all(map(eq, lines, old_lines)):
+                continue
+
+        with open(sfname, 'w+') as f:
+            files_updated = True
             f.writelines(lines)
+
+    if files_updated:
+        with open(lib_dir + '/libpayload.h', 'w+') as f:
+            f.writelines(header_lines)

@@ -1,5 +1,5 @@
-#include "../include/User_Setup.h"
-#include "../include/Usb.h"
+#include "include/User_Setup.h"
+#include "include/Usb.h"
 #include "checkm8_config.h"
 #include "ard_protocol.h"
 

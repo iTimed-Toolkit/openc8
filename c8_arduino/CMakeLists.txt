@@ -10,7 +10,7 @@ generate_arduino_library(checkm8_arduino_libhostshield)
 set(checkm8_arduino_BOARD uno)
 set(checkm8_arduino_HDRS include/User_Setup.h include/Usb.h)
 set(checkm8_arduino_LIBS checkm8_arduino_libhostshield)
-set(checkm8_arduino_SKETCH src/checkm8_arduino.ino)
+set(checkm8_arduino_SKETCH checkm8_arduino.ino)
 set(checkm8_arduino_PROGRAMMER avrispmkii)
 set(checkm8_arduino_PORT /dev/ttyACM0)
 

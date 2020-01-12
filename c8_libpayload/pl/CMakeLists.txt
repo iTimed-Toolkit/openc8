@@ -13,11 +13,10 @@ set(CMAKE_C_FLAGS "-nostdlib -O")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 foreach(PL ${PL_NAMES_SHORT})
     add_executable(payload_${PL} src/${PL}.c)
-    add_custom_command(TARGET payload_${PL} POST_BUILD
-                        BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${PL}.bin
-                        COMMENT "objcopying ${PL}"
-                        COMMAND ${CMAKE_OBJCOPY}
-                        ARGS -O binary -j .text -j .payload_text -j .payload_data
-                            ${CMAKE_CURRENT_BINARY_DIR}/payload_${PL}
-                            ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${PL}.bin)
+    add_custom_command(TARGET       payload_${PL} POST_BUILD
+                        BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${PL}.bin
+                        COMMAND     ${CMAKE_OBJCOPY}
+                        ARGS        -O binary -j .text -j .payload_text -j .payload_data
+                                    ${CMAKE_CURRENT_BINARY_DIR}/payload_${PL}
+                                    ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${PL}.bin)
 endforeach(PL)
