@@ -247,6 +247,7 @@ int is_device_session_open(struct pwned_device *dev)
 }
 
 #ifdef WITH_ARDUINO
+
 void ard_read(struct pwned_device *dev, unsigned char *target, int nbytes)
 {
     int index = 0, amount;
@@ -257,6 +258,7 @@ void ard_read(struct pwned_device *dev, unsigned char *target, int nbytes)
         else index += amount;
     }
 }
+
 #endif
 
 
@@ -648,5 +650,42 @@ int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int l
 
     libusb_get_string_descriptor_ascii(handle, desc->iSerialNumber, serial_buf, len);
     return CHECKM8_SUCCESS;
+#endif
+}
+
+const char *usb_error_name(int code)
+{
+#ifdef WITH_ARDUINO
+    switch(code)
+    {
+        case CHECKM8_SUCCESS:
+            return "CHECKM8_SUCCESS";
+
+        case CHECKM8_FAIL_INVARGS:
+            return "CHECKM8_FAIL_INVARGS";
+
+        case CHECKM8_FAIL_NODEV:
+            return "CHECKM8_FAIL_NODEV";
+
+        case CHECKM8_FAIL_NOEXP:
+            return "CHECKM8_FAIL_NOEXP";
+
+        case CHECKM8_FAIL_NOTDONE:
+            return "CHECKM8_FAIL_NOTDONE";
+
+        case CHECKM8_FAIL_XFER:
+            return "CHECKM8_FAIL_XFER";
+
+        case CHECKM8_FAIL_NOINST:
+            return "CHECKM8_FAIL_NOINST";
+
+        case CHECKM8_FAIL_PROT:
+            return "CHECKM8_FAIL_PROT";
+
+        default:
+            return "UNKNOWN";
+    }
+#else
+    return libusb_error_name(code);
 #endif
 }

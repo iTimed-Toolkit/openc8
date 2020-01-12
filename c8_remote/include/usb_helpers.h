@@ -46,4 +46,6 @@ int ctrl_transfer(struct pwned_device *dev,
 int reset(struct pwned_device *dev);
 int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int len);
 
+const char *usb_error_name(int ret);
+
 #endif //CHECKM8_TOOL_LIBUSB_HELPERS_H
