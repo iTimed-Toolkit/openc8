@@ -3,13 +3,6 @@
 
 #include "checkm8.h"
 
-#define PAYLOAD_AES_BIN      CHECKM8_BIN_BASE "payloads/payload_aes.bin"
-#define PAYLOAD_AES_BUSY_BIN CHECKM8_BIN_BASE "payloads/payload_aes_busy.bin"
-#define PAYLOAD_AES_SW_BIN   CHECKM8_BIN_BASE "payloads/payload_aes_sw.bin"
-#define PAYLOAD_SYNC_BIN     CHECKM8_BIN_BASE "payloads/payload_sync.bin"
-#define PAYLOAD_SYSREG_BIN   CHECKM8_BIN_BASE "payloads/payload_sysreg.bin"
-#define PAYLOAD_TASK_SLEEP_TEST_BIN CHECKM8_BIN_BASE "payloads/payload_task_sleep_test.bin"
-
 typedef enum
 {
     PAYLOAD_AES,
@@ -25,8 +18,6 @@ typedef enum
     SRAM,
     DRAM
 } LOCATION_T;
-
-#define RESP_VALUE(buf, type, i) ((type *) buf)[i]
 
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc);
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p);

@@ -154,11 +154,9 @@ unsigned int _start(unsigned char *msg, unsigned int msg_len, unsigned char *key
                     unsigned char mul2[256], unsigned char mul3[256])
 {
     unsigned long long start, end;
-    unsigned char msg_copy[16];
-    for(int i = 0; i < 16; i++) msg_copy[i] = msg[i];
 
     __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
-    aes128_encrypt_ecb(msg_copy, msg_len, key, sbox, rc_lookup, mul2, mul3);
+    aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
     __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
 
 //    for(i = 0; i < 256; i++)

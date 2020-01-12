@@ -232,13 +232,6 @@ int main()
         printf("\n");
 
         free_dev_cmd_resp(resp);
-        resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
-        if(IS_CHECKM8_FAIL(resp->ret))
-        {
-            printf("failed to execute sync\n");
-        }
-
-        free_dev_cmd_resp(resp);
         usleep(1000000);
     }
 

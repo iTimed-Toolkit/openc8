@@ -7,6 +7,8 @@
 #include "command.h"
 #include "usb_helpers.h"
 
+// TODO: this is so ugly ...
+#include "../../cmake-build-debug/c8_libpayload/lib/libpayload.h"
 
 struct payload
 {
@@ -21,68 +23,55 @@ struct payload
 
 struct payload *get_payload(PAYLOAD_T p)
 {
-    FILE *payload_file;
     struct payload *res;
-    char *path;
+    unsigned char *pl;
 
     switch(p)
     {
         case PAYLOAD_AES:
-            path = PAYLOAD_AES_BIN;
+            pl = payload_aes;
             break;
 
         case PAYLOAD_AES_BUSY:
-            path = PAYLOAD_AES_BUSY_BIN;
+            pl = payload_aes_busy;
             break;
 
         case PAYLOAD_AES_SW:
-            path = PAYLOAD_AES_SW_BIN;
+            pl = payload_aes_sw;
             break;
 
         case PAYLOAD_SYNC:
-            path = PAYLOAD_SYNC_BIN;
+            pl = payload_sync;
             break;
 
         case PAYLOAD_SYSREG:
-            path = PAYLOAD_SYSREG_BIN;
+            pl = payload_sysreg;
             break;
 
         case PAYLOAD_TASK_SLEEP_TEST:
-            path = PAYLOAD_TASK_SLEEP_TEST_BIN;
+            pl = payload_task_sleep_test;
             break;
 
         default:
             return NULL;
     }
 
-    checkm8_debug_indent("get_payload(p = %i) -> %s\n", p, path);
+    checkm8_debug_indent("get_payload(p = %i)\n", p);
     res = malloc(sizeof(struct payload));
     if(res == NULL) return NULL;
 
-    if((payload_file = fopen(path, "rb")) == NULL)
-    {
-        free(res);
-        return NULL;
-    }
-
-    fseek(payload_file, 0, SEEK_END);
     res->type = p;
-    res->len = ftell(payload_file);
-    res->data = malloc(res->len);
+    res->len = sizeof(pl);
+    res->data = pl;
     res->install_base = -1;
     res->next = NULL;
     res->prev = NULL;
-
-    rewind(payload_file);
-    fread(res->data, 1, res->len, payload_file);
-    fclose(payload_file);
 
     return res;
 }
 
 void free_payload(struct payload *p)
 {
-    free(p->data);
     free(p);
 }
 

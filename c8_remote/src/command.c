@@ -167,7 +167,7 @@ struct dev_cmd_resp *dev_memset(struct pwned_device *dev, long long addr, unsign
     cmd_args[3] = (unsigned long long) c;
     cmd_args[4] = len;
 
-    return command(dev, (unsigned char *) &cmd_args, 5 * sizeof(unsigned long long), 1 * sizeof(unsigned long long));
+    return command(dev, (unsigned char *) &cmd_args, 5 * sizeof(unsigned long long), 8);
 }
 
 struct dev_cmd_resp *dev_memcpy(struct pwned_device *dev, long long dest, long long src, int len)
@@ -180,7 +180,7 @@ struct dev_cmd_resp *dev_memcpy(struct pwned_device *dev, long long dest, long l
     cmd_args[3] = src;
     cmd_args[4] = len;
 
-    return command(dev, (unsigned char *) &cmd_args, 5 * sizeof(unsigned long long), 1 * sizeof(unsigned long long));
+    return command(dev, (unsigned char *) &cmd_args, 5 * sizeof(unsigned long long), 8);
 }
 
 struct dev_cmd_resp *dev_exec(struct pwned_device *dev, int response_len, int nargs, unsigned long long *args)
@@ -266,5 +266,5 @@ struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, long long addr, 
     ((unsigned long long *) cmd_args)[4] = len;
     memcpy(&cmd_args[40], data, len);
 
-    return command(dev, cmd_args, 40 + len, 1 * sizeof(unsigned long long));
+    return command(dev, cmd_args, 40 + len, 8);
 }

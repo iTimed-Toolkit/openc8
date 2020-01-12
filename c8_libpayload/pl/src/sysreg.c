@@ -13,5 +13,5 @@ long long _start()
     __asm__("mrs %0, ttbr0_el1" : "=r" (res.pt_base));
     __asm__("mrs %0, vbar_el1"  : "=r" (res.evt_base));
 
-    return res.evt_base;
+    return res.pt_base;
 }

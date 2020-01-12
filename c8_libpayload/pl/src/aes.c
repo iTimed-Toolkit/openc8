@@ -18,7 +18,7 @@ int aes_hw_crypto_command(unsigned int cmd,
     long start = 0, timeout = 0;
 
     __asm__("orr %0, xzr, #0x3c" : "=r" (cgvar));
-    CLOCK_GATE(cgvar, 1);
+    CLOCK_GATE(cgvar, 0);
 
 //    seeded = DPA_SEEDED();
 //    if(!(seeded & 1))
