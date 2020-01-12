@@ -13,7 +13,7 @@
 struct payload
 {
     PAYLOAD_T type;
-    unsigned char *data;
+    const unsigned char *data;
     int len;
 
     long long install_base;
@@ -24,7 +24,7 @@ struct payload
 struct payload *get_payload(PAYLOAD_T p)
 {
     struct payload *res;
-    unsigned char *pl;
+    const unsigned char *pl;
 
     switch(p)
     {
@@ -144,7 +144,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
         return CHECKM8_FAIL_INVARGS;
     }
 
-    resp = dev_write_memory(dev, addr, pl->data, pl->len);
+    resp = dev_write_memory(dev, addr, (unsigned char *) pl->data, pl->len);
     if(IS_CHECKM8_FAIL(resp->ret))
     {
         free_dev_cmd_resp(resp);
