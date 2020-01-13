@@ -3,10 +3,12 @@ include_directories(include)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+    # regular desktop
     set(CMAKE_C_COMPILER    /usr/bin/aarch64-linux-gnu-gcc)
     set(CMAKE_ASM_COMPILER  /usr/bin/aarch64-linux-gnu-as)
     set(CMAKE_OBJCOPY       /usr/bin/aarch64-linux-gnu-objcopy)
-else()
+elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "armv7l")
+    # raspberry pi
     set(CMAKE_C_COMPILER    /opt/cross/bin/aarch64-linux-gcc)
     set(CMAKE_ASM_COMPILER  /opt/cross/bin/aarch64-linux-as)
     set(CMAKE_OBJCOPY       /opt/cross/bin/aarch64-linux-objcopy)
