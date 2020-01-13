@@ -199,7 +199,7 @@ struct dev_cmd_resp *dev_exec(struct pwned_device *dev, int response_len, int na
     for(i = 0; i < nargs; i++)
     {
         argbase[i] = args[i];
-        checkm8_debug_indent("\t\t0x%lx (0d%li) (%s)\n", args[i], args[i], (char *) &args[i]);
+        checkm8_debug_indent("\t\t0x%llx\n", args[i]);
     }
 
     return command(dev, (unsigned char *) cmd_args, (1 + nargs) * sizeof(unsigned long long), 16 + response_len);
