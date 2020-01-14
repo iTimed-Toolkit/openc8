@@ -12,13 +12,13 @@ if __name__ == '__main__':
     bin_names = []
     lib_dir = os.path.abspath(sys.argv[-1])
 
-    if os.path.isdir(sys.argv[1]):
-        bin_folder = os.path.abspath(sys.argv[1])
-        for bin_fname in os.listdir(bin_folder):
-            bin_names.append(bin_folder + '/' + bin_fname)
-    else:
-        for n in sys.argv[1:-1]:
-            bin_names.append(os.path.abspath(n))
+    for binarg in sys.argv[1:-1]:
+        if os.path.isdir(binarg):
+            bin_folder = os.path.abspath(binarg)
+            for bin_fname in os.listdir(bin_folder):
+                bin_names.append(bin_folder + '/' + bin_fname)
+        else:
+            bin_names.append(os.path.abspath(binarg))
 
     source_lines = defaultdict(list)
     for n in bin_names:

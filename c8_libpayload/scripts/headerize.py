@@ -9,13 +9,13 @@ if __name__ == '__main__':
     lib_names = []
     hdr_dir = os.path.abspath(sys.argv[-1])
 
-    if os.path.isdir(sys.argv[1]):
-        lib_folder = os.path.abspath(sys.argv[1])
-        for lib_fname in os.listdir(lib_folder):
-            lib_names.append(lib_folder + '/' + lib_fname)
-    else:
-        for n in sys.argv[1:-1]:
-            lib_names.append(os.path.abspath(n))
+    for libarg in sys.argv[1:-1]:
+        if os.path.isdir(libarg):
+            lib_folder = os.path.abspath(libarg)
+            for lib_fname in os.listdir(lib_folder):
+                lib_names.append(lib_folder + '/' + lib_fname)
+        else:
+            lib_names.append(os.path.abspath(libarg))
 
     header_lines = ['#ifndef CHECKM8_TOOL_LIBPAYLOAD_H\n',
                     '#define CHECKM8_TOOL_LIBPAYLOAD_H\n',
