@@ -29,10 +29,10 @@ unsigned long long _start(float *init_a)
 
     while(1)
     {
-        __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
+        __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (start));
         fs_load(init_a, 1);
         for(i = 0; i < 8; i++) fs_routine();
-        __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
+        __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (end));
 
         if(2 * end - start - 64 > 0)
         {
@@ -41,6 +41,7 @@ unsigned long long _start(float *init_a)
         }
     }
 
-    __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (report));
-    return end - start;
+
+    __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (report));
+    return report - end;
 }
