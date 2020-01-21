@@ -34,9 +34,12 @@ unsigned long long _start(float *init_a)
     for(i = 0; i < 8; i++) check = fs_routine();
     __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
 
-    ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
-    ((BOOTROM_FUNC) halt)();
-
+    if(2 * end - start - 64 > 0)
+    {
+        ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
+        ((BOOTROM_FUNC) halt)();
+    }
+    
     __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (report));
     return report - start;
 }
