@@ -18,7 +18,12 @@ set(CMAKE_C_FLAGS "-nostdlib -O")
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 foreach(NAME ${PL_NAMES})
-    add_executable(payload_${NAME} src/${NAME}.c)
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.S)
+        add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c
+                                       ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.S)
+    else()
+        add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c)
+    endif()
     add_custom_command(TARGET       payload_${NAME} POST_BUILD
                         BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin
                         COMMAND     ${CMAKE_OBJCOPY}
