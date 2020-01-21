@@ -4,6 +4,8 @@ set(PL_NAMES
         aes
         aes_busy
         aes_sw
+        bootstrap
+        floppysleep
         sync
         sysreg
         task_sleep_test)

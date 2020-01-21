@@ -4,6 +4,7 @@
 #include "checkm8_config.h"
 
 typedef int (*BOOTROM_FUNC)();
+typedef unsigned char (*(*BOOTROM_FUNC_PTR)());
 
 #if CHECKM8_PLATFORM == 8010
 
@@ -28,6 +29,9 @@ typedef int (*BOOTROM_FUNC)();
 #define ADDR_SYSTEM_TIME                    0x10000B0E0
 #define ADDR_TIME_HAS_ELAPSED               0x10000B04F
 #define ADDR_TASK_SLEEP                     0x10000ADF0
+
+/* Boot */
+#define ADDR_NVME_INIT                      0x1000080B4
 
 #else
 #error "Unsupported checkm8 platform"

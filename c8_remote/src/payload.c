@@ -43,6 +43,16 @@ struct payload *get_payload(PAYLOAD_T p)
             len = PAYLOAD_AES_SW_SZ;
             break;
 
+        case PAYLOAD_BOOTSTRAP:
+            pl = payload_bootstrap;
+            len = PAYLOAD_BOOTSTRAP_SZ;
+            break;
+
+        case PAYLOAD_FLOPPYSLEEP:
+            pl = payload_floppysleep;
+            len = PAYLOAD_FLOPPYSLEEP_SZ;
+            break;
+
         case PAYLOAD_SYNC:
             pl = payload_sync;
             len = PAYLOAD_SYNC_SZ;
