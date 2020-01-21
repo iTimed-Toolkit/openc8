@@ -11,142 +11,141 @@ fs_load:
     mov     v0.s[2],    v0.s[0]
     mov     v0.s[3],    v0.s[0]
     fmov    s31,        1.0
-    ucvtf   s30,         w1
+    ucvtf   s30,        w1
     
     mov     v1.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v1.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v1.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v1.s[0],    v30.s[0]
         
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v2.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v2.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v2.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v2.s[0],    v30.s[0]
         
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v3.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v3.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v3.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v3.s[0],    v30.s[0]
 
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v4.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v4.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v4.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v4.s[0],    v30.s[0]
         
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v5.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v5.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v5.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v5.s[0],    v30.s[0]
 
-        
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v6.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v6.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v6.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v6.s[0],    v30.s[0]
 
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v7.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v7.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v7.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v7.s[0],    v30.s[0]
 
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v8.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v8.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v8.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v8.s[0],    v30.s[0]
 
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v9.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v9.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v9.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
+    fadd    s30,        s30,     s31
     mov     v9.s[0],    v30.s[0]
 
-    fadd    s30,         s30,     s31
-    mov     v10.s[3],    v10.s[0]
-    fadd    s30,         s30,     s31
-    mov     v10.s[2],    v10.s[0]
-    fadd    s30,         s30,     s31
-    mov     v10.s[1],    v10.s[0]
-    fadd    s30,         s30,     s31
-    mov     v10.s[0],    v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v10.s[3],   v10.s[0]
+    fadd    s30,        s30,     s31
+    mov     v10.s[2],   v10.s[0]
+    fadd    s30,        s30,     s31
+    mov     v10.s[1],   v10.s[0]
+    fadd    s30,        s30,     s31
+    mov     v10.s[0],   v30.s[0]
 
-    fadd    s30,         s30,     s31
-    mov     v11.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v11.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v11.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v11.s[0],    v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v11.s[3],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v11.s[2],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v11.s[1],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v11.s[0],   v30.s[0]
 
-    fadd    s30,         s30,     s31
-    mov     v12.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v12.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v12.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v12.s[0],    v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v12.s[3],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v12.s[2],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v12.s[1],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v12.s[0],   v30.s[0]
 
-    fadd    s30,         s30,     s31
-    mov     v13.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v13.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v13.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v13.s[0],    v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v13.s[3],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v13.s[2],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v13.s[1],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v13.s[0],   v30.s[0]
 
-    fadd    s30,         s30,     s31
-    mov     v14.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v14.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v14.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v14.s[0],    v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v14.s[3],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v14.s[2],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v14.s[1],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v14.s[0],   v30.s[0]
 
-    fadd    s30,         s30,     s31
-    mov     v15.s[3],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v15.s[2],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v15.s[1],    v30.s[0]
-    fadd    s30,         s30,     s31
-    mov     v15.s[0],    v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v15.s[3],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v15.s[2],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v15.s[1],   v30.s[0]
+    fadd    s30,        s30,     s31
+    mov     v15.s[0],   v30.s[0]
 
     #mov    s30,        wzr
     #mov    s31,        wzr
@@ -185,5 +184,4 @@ fs_routine:
     fdiv    v29.4s,     v29.4s,     v2.4s
     fdiv    v30.4s,     v30.4s,     v1.4s
 
-    mov     w0,         v16.s[3]
     ret
