@@ -48,6 +48,11 @@ struct payload *get_payload(PAYLOAD_T p)
             len = PAYLOAD_BOOTSTRAP_SZ;
             break;
 
+        case PAYLOAD_EXIT_USB_TASK:
+            pl = payload_exit_usb_task;
+            len = PAYLOAD_EXIT_USB_TASK_SZ;
+            break;
+
         case PAYLOAD_FLOPPYSLEEP:
             pl = payload_floppysleep;
             len = PAYLOAD_FLOPPYSLEEP_SZ;

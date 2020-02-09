@@ -5,6 +5,7 @@ set(PL_NAMES
         aes_busy
         aes_sw
         bootstrap
+        exit_usb_task
         floppysleep
         sync
         sysreg

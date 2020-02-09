@@ -23,6 +23,8 @@ TEXT_SECTION
 unsigned long long _start(float *init_a)
 {
     int i;
+    volatile int j = 0;
+
     unsigned long long start, end, report;
     unsigned long long timer_deadline_enter = 0x10000b874;
     unsigned long long halt = 0x1000004fc;
@@ -39,9 +41,10 @@ unsigned long long _start(float *init_a)
             ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
             ((BOOTROM_FUNC) halt)();
         }
+
+        __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (report));
+        j++;
     }
 
-
-    __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (report));
-    return report - end;
+    return end - start;
 }

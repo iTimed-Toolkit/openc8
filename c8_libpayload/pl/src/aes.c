@@ -55,5 +55,6 @@ int _start(void *src,
            void *dst,
            void *key)
 {
-    return aes_hw_crypto_command(0, src, dst, 128, 0, key, 0);
+    return ((BOOTROM_FUNC) ADDR_AES_HW_CRYPTO_CMD)(0, src, dst, 128, 0, key, 0);
+    // return aes_hw_crypto_command(0, src, dst, 128, 0, key, 0);
 }

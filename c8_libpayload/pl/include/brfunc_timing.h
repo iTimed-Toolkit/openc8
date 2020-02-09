@@ -7,4 +7,6 @@
 #define SYSTEM_TIME                 ((BOOTROM_FUNC) ADDR_SYSTEM_TIME)
 #define TIME_HAS_ELAPSED            ((BOOTROM_FUNC) ADDR_TIME_HAS_ELAPSED)
 
+#define GET_PLL                     ((BOOTROM_FUNC) ADDR_GET_PLL)
+
 #endif //CHECKM8_TOOL_BRFUNC_TIMING_H
