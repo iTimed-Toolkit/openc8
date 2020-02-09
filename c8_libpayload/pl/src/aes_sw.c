@@ -162,24 +162,21 @@ void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char 
 
 TEXT_SECTION
 unsigned long long _start(unsigned char *msg, unsigned int msg_len, unsigned char *key,
-                    unsigned char sbox[16][16], unsigned char rc_lookup[11],
-                    unsigned char mul2[256], unsigned char mul3[256])
+                          unsigned char sbox[16][16], unsigned char rc_lookup[11],
+                          unsigned char mul2[256], unsigned char mul3[256])
 {
     unsigned long long start = 0, end = 0;
     unsigned long long timer_deadline_enter = 0x10000b874;
     unsigned long long halt = 0x1000004fc;
 
-    while(1)
-    {
-        __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
-        aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
-        __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
+    __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
+    aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
+    __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
 
-        if(2 * end - start - 64 > 0)
-        {
-            ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
-            ((BOOTROM_FUNC) halt)();
-        }
+    if(2 * end - start - 64 > 0)
+    {
+        ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
+        ((BOOTROM_FUNC) halt)();
     }
 
     return end - start;

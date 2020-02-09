@@ -98,8 +98,17 @@ int floppysleep(struct pwned_device *dev)
     free_device(dev);
 }
 
-void write_aes_utils(struct pwned_device *dev)
+void aes_sw(struct pwned_device *dev)
 {
+    int i = 0;
+    struct dev_cmd_resp *resp;
+    unsigned long long addr_sbox, addr_rc, addr_mul2, addr_mul3, addr_key, addr_data;
+
+    unsigned char key[16] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+                             0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
+    unsigned char data[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef,
+                              0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
+
     unsigned char sbox[256] =
             {
                     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -162,101 +171,81 @@ void write_aes_utils(struct pwned_device *dev)
                     0x0b, 0x08, 0x0d, 0x0e, 0x07, 0x04, 0x01, 0x02, 0x13, 0x10, 0x15, 0x16, 0x1f, 0x1c, 0x19, 0x1a
             };
 
-    struct dev_cmd_resp *resp;
+    if(IS_CHECKM8_FAIL(open_device_session(dev)))
+    {
+        printf("failed to open device session\n");
+        return;
+    }
 
-    resp = write_gadget(dev, 0x180154000, sbox, 256);
-    if(IS_CHECKM8_FAIL(resp->ret))
+    addr_sbox = install_data(dev, SRAM, sbox, 256);
+    if(addr_sbox == -1)
     {
         printf("failed to write sbox\n");
         return;
     }
 
-    free_dev_cmd_resp(resp);
-    resp = write_gadget(dev, 0x180154000 + 256, rc_lookup, 11);
-    if(IS_CHECKM8_FAIL(resp->ret))
+    addr_rc = install_data(dev, SRAM, rc_lookup, 11);
+    if(addr_rc == -1)
     {
         printf("failed to write rc lookup\n");
         return;
     }
 
-    free_dev_cmd_resp(resp);
-    resp = write_gadget(dev, 0x180154000 + 256 + 16, mul2_lookup, 256);
-    if(IS_CHECKM8_FAIL(resp->ret))
+    addr_mul2 = install_data(dev, SRAM, mul2_lookup, 256);
+    if(addr_mul2 == -1)
     {
         printf("failed to write mul2 lookup\n");
         return;
     }
 
-    free_dev_cmd_resp(resp);
-    resp = write_gadget(dev, 0x180154000 + 512 + 16, mul3_lookup, 256);
-    if(IS_CHECKM8_FAIL(resp->ret))
+    addr_mul3 = install_data(dev, SRAM, mul3_lookup, 256);
+    if(addr_mul3 == -1)
     {
         printf("failed to write mul3 lookup\n");
         return;
     }
-}
 
-int aes_sw(struct pwned_device *dev)
-{
-    int i = 0;
-    struct dev_cmd_resp *resp;
-    unsigned char key[16] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
-                             0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
-    unsigned char data[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef,
-                              0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
-
-    if(IS_CHECKM8_FAIL(open_device_session(dev)))
+    addr_key = install_data(dev, SRAM, key, 16);
+    if(addr_key == -1)
     {
-        printf("failed to open device session\n");
-        return -1;
+        printf("failed to write key\n");
+        return;
+    }
+
+    addr_data = install_data(dev, SRAM, data, 16);
+    if(addr_data == -1)
+    {
+        printf("failed to write data\n");
+        return;
     }
 
     if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_SYNC, SRAM)))
     {
         printf("failed to install sync payload\n");
-        return -1;
+        return;
     }
 
     if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_AES_SW, SRAM)))
     {
         printf("failed to install task sleep payload\n");
-        return -1;
+        return;
     }
 
-    resp = write_gadget(dev, 0x180152000, key, 16);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        printf("failed to write key to device\n");
-        return -1;
-    }
-
-    free_dev_cmd_resp(resp);
-    resp = write_gadget(dev, 0x180153000, data, 16);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        printf("failed to write aes data\n");
-        return -1;
-    }
-
-    free_dev_cmd_resp(resp);
-    write_aes_utils(dev);
-
-    while(1)
+    for(int i = 0; i < 100; i++)
     {
         resp = execute_payload(dev, PAYLOAD_AES_SW, 0, 7,
-                               0x180153000, 16, 0x180152000,
-                               0x180154000, 0x180154000 + 256,
-                               0x180154000 + 256 + 16, 0x180154000 + 512 + 16);
+                               addr_data, 16, addr_key,
+                               addr_sbox, addr_rc, addr_mul2, addr_mul3);
         if(IS_CHECKM8_FAIL(resp->ret))
         {
             printf("failed to execute sw AES payload\n");
-            return -1;
+            return;
         }
 
         printf("%i) op took %llu\n", i++, resp->retval);
 
         free_dev_cmd_resp(resp);
-        resp = read_gadget(dev, 0x180153000, 16);
+        resp = read_gadget(dev, addr_data, 16);
         if(IS_CHECKM8_FAIL(resp->ret))
         {
             printf("failed to read encrypted data from memory\n");
@@ -273,8 +262,17 @@ int aes_sw(struct pwned_device *dev)
         usleep(1000000);
     }
 
+    uninstall_payload(dev, PAYLOAD_AES_SW);
+    uninstall_payload(dev, PAYLOAD_SYNC);
+
+    uninstall_data(dev, addr_data);
+    uninstall_data(dev, addr_key);
+    uninstall_data(dev, addr_mul3);
+    uninstall_data(dev, addr_mul2);
+    uninstall_data(dev, addr_rc);
+    uninstall_data(dev, addr_sbox);
+
     close_device_session(dev);
-    free_device(dev);
 }
 
 int main()

