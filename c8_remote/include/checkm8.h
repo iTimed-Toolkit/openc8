@@ -19,6 +19,7 @@
 #define DEV_IDVENDOR    0x05AC
 #define DEV_IDPRODUCT   0x1227
 #define DFU_IMAGE_BASE  0x1800B0000ull
+#define DEMOTE_REG      0x2102BC000ull
 
 #else
 #error "Unspported checkm8 platform"
@@ -45,6 +46,7 @@ struct pwned_device
 };
 
 struct pwned_device *exploit_device();
+int demote_device(struct pwned_device *dev);
 void free_device(struct pwned_device *dev);
 
 #endif //CHECKM8_TOOL_CHECKM8_H

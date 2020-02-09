@@ -25,7 +25,7 @@ int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len, 
 
         checkm8_debug_indent("\tsending chunk of size %li at index %li\n", amount, index);
 
-        ret = ctrl_transfer(dev, 0x21, 1, 0, 0, &data[index], amount, 5000, trigger);
+        ret = ctrl_transfer(dev, 0x21, 1, 0, 0, &data[index], amount, 0, trigger);
         if(ret > 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
         else
         {
@@ -71,7 +71,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         return cmd_resp;
     }
 
-    ret = ctrl_transfer(dev, 0x21, 1, 0, 0, nullbuf, 0, 100, 0);
+    ret = ctrl_transfer(dev, 0x21, 1, 0, 0, nullbuf, 0, 0, 0);
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
@@ -80,7 +80,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         return cmd_resp;
     }
 
-    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, nullbuf, 6, 100, 0);
+    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, nullbuf, 6, 0, 0);
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
@@ -89,7 +89,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         return cmd_resp;
     }
 
-    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, nullbuf, 6, 100, 0);
+    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, nullbuf, 6, 0, 0);
     if(ret >= 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
     else
     {
@@ -110,7 +110,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         ret = ctrl_transfer(dev,
                             0xA1, 2, 0xFFFF, 0,
                             resp_buf, response_len + 1,
-                            100, 1);
+                            0, 1);
         if(ret >= 0) checkm8_debug_indent("\tfinal request transferred %i bytes\n", ret);
         else
         {
@@ -124,7 +124,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
         ret = ctrl_transfer(dev,
                             0xA1, 2, 0xFFFF, 0,
                             resp_buf, response_len,
-                            100, 1);
+                            0, 1);
         if(ret >= 0) checkm8_debug_indent("\tfinal request transferred %i bytes\n", ret);
         else
         {
