@@ -231,7 +231,7 @@ void aes_sw(struct pwned_device *dev)
         return;
     }
 
-    for(int i = 0; i < 100; i++)
+    for(i = 0; i < 100; i++)
     {
         resp = execute_payload(dev, PAYLOAD_AES_SW, 0, 7,
                                addr_data, 16, addr_key,
@@ -286,46 +286,47 @@ int main()
     }
 
     demote_device(dev);
+    aes_sw(dev);
 
-    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_SYNC, SRAM)))
-    {
-        printf("failed to install sync payload\n");
-        return -1;
-    }
-
-    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_TASK_SLEEP_TEST, SRAM)))
-    {
-        printf("failed to install exit usb task payload\n");
-        return -1;
-    }
-
-    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_FLOPPYSLEEP, SRAM)))
-    {
-        printf("failed to install floppysleep\n");
-        return -1;
-    }
-
-    float init_a = -7.504355E-39f;
-    resp = write_gadget(dev, 0x180154000, (unsigned char *) &init_a, sizeof(float));
-    free_dev_cmd_resp(resp);
-
-    resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        printf("failed to execute bootstrap\n");
-        return -1;
-    }
-    free_dev_cmd_resp(resp);
-
-    resp = execute_payload(dev, PAYLOAD_TASK_SLEEP_TEST, 0, 2, 0x180152000, 0x180154000);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        printf("failed to exit usb task\n");
-        return -1;
-    }
-    free_dev_cmd_resp(resp);
-
-    close_device_session(dev);
+//    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_SYNC, SRAM)))
+//    {
+//        printf("failed to install sync payload\n");
+//        return -1;
+//    }
+//
+//    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_TASK_SLEEP_TEST, SRAM)))
+//    {
+//        printf("failed to install exit usb task payload\n");
+//        return -1;
+//    }
+//
+//    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_FLOPPYSLEEP, SRAM)))
+//    {
+//        printf("failed to install floppysleep\n");
+//        return -1;
+//    }
+//
+//    float init_a = -7.504355E-39f;
+//    resp = write_gadget(dev, 0x180154000, (unsigned char *) &init_a, sizeof(float));
+//    free_dev_cmd_resp(resp);
+//
+//    resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
+//    if(IS_CHECKM8_FAIL(resp->ret))
+//    {
+//        printf("failed to execute bootstrap\n");
+//        return -1;
+//    }
+//    free_dev_cmd_resp(resp);
+//
+//    resp = execute_payload(dev, PAYLOAD_TASK_SLEEP_TEST, 0, 2, 0x180152000, 0x180154000);
+//    if(IS_CHECKM8_FAIL(resp->ret))
+//    {
+//        printf("failed to exit usb task\n");
+//        return -1;
+//    }
+//    free_dev_cmd_resp(resp);
+//
+//    close_device_session(dev);
     free_device(dev);
 }
 

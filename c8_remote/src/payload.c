@@ -98,7 +98,7 @@ void free_payload(struct payload *p)
 
 unsigned long long get_address(struct pwned_device *dev, LOCATION_T l, int len)
 {
-    checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n");
+    checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n", dev, l, len);
     unsigned long long addr_malloc = 0x10000efe0, retval;
     unsigned long long malloc_args[2] = {addr_malloc, (unsigned long long) len};
 
@@ -113,7 +113,7 @@ unsigned long long get_address(struct pwned_device *dev, LOCATION_T l, int len)
     retval = resp->retval;
     free_dev_cmd_resp(resp);
 
-    checkm8_debug_indent("\tgot address %X\n", retval);
+    checkm8_debug_indent("\tgot address %llX\n", retval);
     return retval;
 }
 
@@ -224,7 +224,7 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 
 unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len)
 {
-    checkm8_debug_indent("install_data(dev = %p, loc = %i, data = %p, len = %i)\n");
+    checkm8_debug_indent("install_data(dev = %p, loc = %i, data = %p, len = %i)\n", dev, loc, data, len);
     struct dev_cmd_resp *resp;
     unsigned long long addr = get_address(dev, loc, len);
 
