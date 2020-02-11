@@ -15,7 +15,7 @@ struct payload
     const unsigned char *data;
     int len;
 
-    unsigned long long install_base;
+    DEV_PTR_T install_base;
     struct payload *next;
     struct payload *prev;
 };
@@ -79,7 +79,7 @@ struct payload *get_payload(PAYLOAD_T p)
     res->type = p;
     res->len = len;
     res->data = pl;
-    res->install_base = -1;
+    res->install_base = DEV_PTR_NULL;
     res->next = NULL;
     res->prev = NULL;
 
@@ -94,7 +94,7 @@ void free_payload(struct payload *p)
 unsigned long long get_address(struct pwned_device *dev, LOCATION_T l, int len)
 {
     checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n", dev, l, len);
-    unsigned long long addr_malloc = 0x10000efe0, retval;
+    DEV_PTR_T addr_malloc = 0x10000efe0, retval;
     unsigned long long malloc_args[2] = {addr_malloc, (unsigned long long) len};
 
     struct dev_cmd_resp *resp = dev_exec(dev, 0, 2, malloc_args);
@@ -166,7 +166,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 
     struct dev_cmd_resp *resp = NULL;
     struct payload *pl = get_payload(p);
-    unsigned long long addr = get_address(dev, loc, pl->len);
+    DEV_PTR_T addr = get_address(dev, loc, pl->len);
 
     if(pl == NULL || addr == -1)
     {
@@ -192,7 +192,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
     checkm8_debug_indent("uninstall payload(dev = %p, p = %i)\n", dev, p);
-    unsigned long long addr_free = 0x10000f1b0;
+    DEV_PTR_T addr_free = 0x10000f1b0;
     unsigned long long free_args[2];
     struct dev_cmd_resp *resp;
     struct payload *pl = dev_retrieve_payload(dev, p);
@@ -221,7 +221,15 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 
 unsigned long long get_payload_address(struct pwned_device *dev, PAYLOAD_T p)
 {
-    return dev_retrieve_payload(dev, p)->install_base;
+    struct payload *pl = dev_retrieve_payload(dev, p);
+    if(pl == NULL)
+    {
+        return DEV_PTR_NULL;
+    }
+    else
+    {
+        return pl->install_base;
+    }
 }
 
 
@@ -229,7 +237,7 @@ unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsign
 {
     checkm8_debug_indent("install_data(dev = %p, loc = %i, data = %p, len = %i)\n", dev, loc, data, len);
     struct dev_cmd_resp *resp;
-    unsigned long long addr = get_address(dev, loc, len);
+    DEV_PTR_T addr = get_address(dev, loc, len);
 
     if(addr == -1)
     {
@@ -249,11 +257,11 @@ unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsign
     return addr;
 }
 
-int uninstall_data(struct pwned_device *dev, unsigned long long addr)
+int uninstall_data(struct pwned_device *dev, DEV_PTR_T addr)
 {
     checkm8_debug_indent("uninstall_data(dev = %p, addr = %X)\n", dev, addr);
     struct dev_cmd_resp *resp;
-    unsigned long long addr_free = 0x10000f1b0;
+    DEV_PTR_T addr_free = 0x10000f1b0;
     unsigned long long free_args[2] = {addr_free, addr};
 
     resp = dev_exec(dev, 0, 2, free_args);
@@ -268,7 +276,8 @@ int uninstall_data(struct pwned_device *dev, unsigned long long addr)
 
 struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...)
 {
-    checkm8_debug_indent("execute_payload(dev = %p, p = %i, response_len = %i, nargs = %i, ...)\n", dev, p, response_len, nargs);
+    checkm8_debug_indent("execute_payload(dev = %p, p = %i, response_len = %i, nargs = %i, ...)\n",
+                         dev, p, response_len, nargs);
     int i;
     struct dev_cmd_resp *resp;
     struct payload *pl;
@@ -297,19 +306,34 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
     return dev_exec(dev, response_len, nargs + 1, args);
 }
 
-struct dev_cmd_resp *read_gadget(struct pwned_device *dev, unsigned long long addr, int len)
+unsigned long long execute_payload_async(struct pwned_device *dev, PAYLOAD_T p, int bufsize, int nargs, ...)
+{
+    checkm8_debug_indent("execute_payload_async(dev = %p, p = %i, bufsize = %i, nargs = %i, ...)\n",
+                         dev, p, bufsize, bufsize, nargs);
+    int i;
+    struct dev_cmd_resp *resp;
+    struct payload *pl;
+
+    if((pl = dev_retrieve_payload(dev, p)) == NULL)
+    {
+        checkm8_debug_indent("\tpayload is not installed\n");
+        return DEV_PTR_NULL;
+    }
+}
+
+struct dev_cmd_resp *read_gadget(struct pwned_device *dev, DEV_PTR_T addr, int len)
 {
     checkm8_debug_indent("read_gadget(dev = %p, addr = %lx, len = %i)\n", dev, addr, len);
     return dev_read_memory(dev, addr, len);
 }
 
-struct dev_cmd_resp *write_gadget(struct pwned_device *dev, unsigned long long addr, unsigned char *data, int len)
+struct dev_cmd_resp *write_gadget(struct pwned_device *dev, DEV_PTR_T addr, unsigned char *data, int len)
 {
     checkm8_debug_indent("write_gadget(dev = %p, addr = %lx, data = %p, len = %i)\n", dev, addr, data, len);
     return dev_write_memory(dev, addr, data, len);
 }
 
-struct dev_cmd_resp *execute_gadget(struct pwned_device *dev, unsigned long long addr, int response_len, int nargs, ...)
+struct dev_cmd_resp *execute_gadget(struct pwned_device *dev, DEV_PTR_T addr, int response_len, int nargs, ...)
 {
     checkm8_debug_indent("execute_gadget(dev = %p, addr = %lx, nargs = %i)\n", dev, addr, nargs);
     int i;

@@ -21,16 +21,20 @@ typedef enum
     DRAM
 } LOCATION_T;
 
+#define DEV_PTR_NULL       -1ull;
+typedef unsigned long long DEV_PTR_T;
+
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc);
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p);
 struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...);
-unsigned long long get_payload_address(struct pwned_device *dev, PAYLOAD_T p);
+DEV_PTR_T execute_payload_async(struct pwned_device *dev, PAYLOAD_T p, int bufsize, int nargs, ...);
+DEV_PTR_T get_payload_address(struct pwned_device *dev, PAYLOAD_T p);
 
-unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len);
-int uninstall_data(struct pwned_device *dev, unsigned long long ptr);
+DEV_PTR_T install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len);
+int uninstall_data(struct pwned_device *dev, DEV_PTR_T ptr);
 
-struct dev_cmd_resp *read_gadget(struct pwned_device *dev, unsigned long long addr, int len);
-struct dev_cmd_resp *write_gadget(struct pwned_device *dev, unsigned long long addr, unsigned char *data, int len);
-struct dev_cmd_resp *execute_gadget(struct pwned_device *dev, unsigned long long addr, int response_len, int nargs, ...);
+struct dev_cmd_resp *read_gadget(struct pwned_device *dev, DEV_PTR_T addr, int len);
+struct dev_cmd_resp *write_gadget(struct pwned_device *dev, DEV_PTR_T addr, unsigned char *data, int len);
+struct dev_cmd_resp *execute_gadget(struct pwned_device *dev, DEV_PTR_T addr, int response_len, int nargs, ...);
 
 #endif //CHECKM8_TOOL_PAYLOAD_H
