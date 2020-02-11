@@ -1,35 +1,32 @@
 project(checkm8_libpayload)
 
 set(PL_NAMES
-        aes
         aes_busy
         aes_sw
         exit_usb_task
         floppysleep
-        sync
-        sysreg
-        task_sleep_test)
+        sync)
 
 foreach(NAME ${PL_NAMES})
     list(APPEND PL_TARGETS      "payload_${NAME}")
-    list(APPEND PL_SRC_BIN      "${CMAKE_CURRENT_LIST_DIR}/pl/src/${NAME}.c")
+    list(APPEND PL_SRC_BIN      "${CMAKE_CURRENT_LIST_DIR}/payload/src/${NAME}.c")
 endforeach(NAME)
 
 foreach(TARGET ${PL_TARGETS})
-    list(APPEND PL_SRC_LIB      "${CMAKE_CURRENT_BINARY_DIR}/lib/${TARGET}.c")
-    list(APPEND PL_BIN          "${CMAKE_CURRENT_BINARY_DIR}/pl/bin/${TARGET}.bin")
+    list(APPEND PL_SRC_LIB      "${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles/${TARGET}.c")
+    list(APPEND PL_BIN          "${CMAKE_CURRENT_BINARY_DIR}/payload/bin/${TARGET}.bin")
 endforeach(TARGET)
 
-add_subdirectory(pl)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/payload)
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles)
 add_custom_target(payload_sources
                     BYPRODUCTS  ${PL_SRC_LIB}
                     DEPENDS     ${PL_TARGETS}
                     COMMENT     "Refreshing payload library"
                     COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/librarize.py
-                                        ${CMAKE_CURRENT_BINARY_DIR}/pl/bin
-                                        ${CMAKE_CURRENT_BINARY_DIR}/lib)
+                                        ${CMAKE_CURRENT_BINARY_DIR}/payload/bin
+                                        ${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles)
 
 add_library(payload ${PL_SRC_LIB})
 add_dependencies(payload payload_sources)

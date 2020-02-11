@@ -1,11 +1,4 @@
-#include "util.h"
-#include "brfunc_timing.h"
-
-PAYLOAD_SECTION
-void task_sleep(unsigned int usec)
-{
-    ((BOOTROM_FUNC) ADDR_TASK_SLEEP)(usec);
-}
+#include "bootrom_func.h"
 
 PAYLOAD_SECTION
 void sub_bytes(unsigned char block[16], unsigned char sbox[16][16])
@@ -117,25 +110,12 @@ void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
 }
 
 PAYLOAD_SECTION
-void busy_sleep(int usec)
-{
-    unsigned long long halt = 0x1000004fc;
-    unsigned long long timer_deadline_enter = 0x10000b874;
-    unsigned long long now;
-
-    __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (now));
-    ((BOOTROM_FUNC) timer_deadline_enter)(now + 24 * usec, ((BOOTROM_FUNC) 0x10000b924));
-    ((BOOTROM_FUNC) halt)();
-}
-
-PAYLOAD_SECTION
 void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char key[16],
                         unsigned char sbox[16][16], unsigned char rc_lookup[11],
                         unsigned char mul2[256], unsigned char mul3[256])
 {
     unsigned char key_sched[176];
     expand_key(key, key_sched, 11, sbox, rc_lookup);
-    busy_sleep(10);
 
     unsigned int num_blocks = msg_len / 16;
     unsigned char *block;
@@ -175,8 +155,8 @@ unsigned long long _start(unsigned char *msg, unsigned int msg_len, unsigned cha
 
     if(2 * end - start - 64 > 0)
     {
-        ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
-        ((BOOTROM_FUNC) halt)();
+        timer_register_int(2 * end - start - 64);
+        wfi();
     }
 
     return end - start;

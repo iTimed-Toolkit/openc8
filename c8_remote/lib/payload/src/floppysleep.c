@@ -1,5 +1,4 @@
-#include "brfunc_common.h"
-#include "util.h"
+#include "bootrom_func.h"
 
 extern unsigned long long fs_routine(void);
 
@@ -24,10 +23,7 @@ unsigned long long _start(float *init_a)
 {
     int i;
     volatile int j = 0;
-
     unsigned long long start, end, report;
-    unsigned long long timer_deadline_enter = 0x10000b874;
-    unsigned long long halt = 0x1000004fc;
 
     __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (start));
     fs_load(init_a, 1);
@@ -36,8 +32,8 @@ unsigned long long _start(float *init_a)
 
     if(2 * end - start - 64 > 0)
     {
-        ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
-        ((BOOTROM_FUNC) halt)();
+        timer_register_int(2 * end - start - 64);
+        wfi();
     }
 
     __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (report));

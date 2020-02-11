@@ -1,6 +1,6 @@
 project(checkm8_libpayload_sources C ASM)
-include_directories(include)
-include_directories(include/openssl)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
+
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
@@ -15,9 +15,11 @@ elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "armv7l")
     set(CMAKE_OBJCOPY       /opt/cross/bin/aarch64-linux-objcopy)
 endif()
 
-set(CMAKE_C_FLAGS "-nostdlib -O")
-
+set(CMAKE_C_FLAGS "-nostdlib -O -Wl,--gc-sections")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+
+add_library(bootrom_dev bootrom_dev.c)
+
 foreach(NAME ${PL_NAMES})
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.S)
         add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c
@@ -25,10 +27,12 @@ foreach(NAME ${PL_NAMES})
     else()
         add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c)
     endif()
+
+    target_link_libraries(payload_${NAME} bootrom_dev)
     add_custom_command(TARGET       payload_${NAME} POST_BUILD
                         BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin
                         COMMAND     ${CMAKE_OBJCOPY}
-                        ARGS        -O binary -j .text -j .payload_text -j .payload_data
+                        ARGS        -O binary -j .text -j .payload_text -j .bootrom_lib.*
                                     ${CMAKE_CURRENT_BINARY_DIR}/payload_${NAME}
                                     ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin)
 endforeach(NAME)

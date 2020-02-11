@@ -7,6 +7,7 @@
 #include "command.h"
 #include "usb_helpers.h"
 
+#include "bootrom_addr.h"
 #include "libpayload.h"
 
 struct payload
@@ -28,11 +29,6 @@ struct payload *get_payload(PAYLOAD_T p)
 
     switch(p)
     {
-        case PAYLOAD_AES:
-            pl = payload_aes;
-            len = PAYLOAD_AES_SZ;
-            break;
-
         case PAYLOAD_AES_BUSY:
             pl = payload_aes_busy;
             len = PAYLOAD_AES_BUSY_SZ;
@@ -56,16 +52,6 @@ struct payload *get_payload(PAYLOAD_T p)
         case PAYLOAD_SYNC:
             pl = payload_sync;
             len = PAYLOAD_SYNC_SZ;
-            break;
-
-        case PAYLOAD_SYSREG:
-            pl = payload_sysreg;
-            len = PAYLOAD_SYSREG_SZ;
-            break;
-
-        case PAYLOAD_TASK_SLEEP_TEST:
-            pl = payload_task_sleep_test;
-            len = PAYLOAD_TASK_SLEEP_TEST_SZ;
             break;
 
         default:
@@ -94,8 +80,8 @@ void free_payload(struct payload *p)
 DEV_PTR_T get_address(struct pwned_device *dev, LOCATION_T l, int len)
 {
     checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n", dev, l, len);
-    DEV_PTR_T addr_malloc = 0x10000efe0, retval;
-    unsigned long long malloc_args[2] = {addr_malloc, (unsigned long long) len};
+    DEV_PTR_T retval;
+    unsigned long long malloc_args[2] = {ADDR_DEV_MALLOC, (unsigned long long) len};
 
     struct dev_cmd_resp *resp = dev_exec(dev, 0, 2, malloc_args);
     if(IS_CHECKM8_FAIL(resp->ret))
@@ -192,7 +178,6 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
     checkm8_debug_indent("uninstall payload(dev = %p, p = %i)\n", dev, p);
-    DEV_PTR_T addr_free = 0x10000f1b0;
     unsigned long long free_args[2];
     struct dev_cmd_resp *resp;
     struct payload *pl = dev_retrieve_payload(dev, p);
@@ -203,7 +188,7 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
         return CHECKM8_FAIL_INVARGS;
     }
 
-    free_args[0] = addr_free;
+    free_args[0] = ADDR_DEV_FREE;
     free_args[1] = pl->install_base;
 
     resp = dev_exec(dev, 0, 2, free_args);
@@ -261,8 +246,7 @@ int uninstall_data(struct pwned_device *dev, DEV_PTR_T addr)
 {
     checkm8_debug_indent("uninstall_data(dev = %p, addr = %X)\n", dev, addr);
     struct dev_cmd_resp *resp;
-    DEV_PTR_T addr_free = 0x10000f1b0;
-    unsigned long long free_args[2] = {addr_free, addr};
+    unsigned long long free_args[2] = {ADDR_DEV_FREE, addr};
 
     resp = dev_exec(dev, 0, 2, free_args);
     if(IS_CHECKM8_FAIL(resp->ret))
@@ -319,6 +303,14 @@ unsigned long long execute_payload_async(struct pwned_device *dev, PAYLOAD_T p, 
         checkm8_debug_indent("\tpayload is not installed\n");
         return DEV_PTR_NULL;
     }
+
+    if(bufsize < nargs * sizeof(unsigned long long))
+    {
+        checkm8_debug_indent("\texpanding buffer to fit (at least) provided arguments\n");
+        bufsize = nargs * sizeof(unsigned long long);
+    }
+
+    
 }
 
 struct dev_cmd_resp *read_gadget(struct pwned_device *dev, DEV_PTR_T addr, int len)
