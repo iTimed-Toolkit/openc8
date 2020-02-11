@@ -1,3 +1,4 @@
+#include "bootrom_addr.h"
 #include "dev_util.h"
 
 extern uint64_t entry_sync(uint64_t *args);
@@ -10,7 +11,7 @@ uint64_t _start(uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3,
     uint64_t entry, args[8];
     __asm__ volatile ("mov %0, x30" : "=r" (entry));
 
-    if(entry == 0xbea /* todo: correct entry */)
+    if(entry == ADDR_SYNC_ENTRY /* todo: correct entry */)
     {
         args[0] = arg0;
         args[1] = arg1;

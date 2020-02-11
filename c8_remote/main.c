@@ -235,6 +235,13 @@ void aes_sw(struct pwned_device *dev)
         return;
     }
 
+    resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("failed to execute sync payload\n");
+        return;
+    }
+
     for(i = 0; i < 100; i++)
     {
         resp = execute_payload(dev, PAYLOAD_AES_SW, 0, 7,
@@ -341,9 +348,7 @@ int main()
 
     demote_device(dev);
 
-    //  usb_task_exit(dev);
-
-    floppysleep(dev);
+    aes_sw(dev);
     free_device(dev);
 }
 

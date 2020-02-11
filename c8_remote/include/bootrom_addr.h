@@ -36,6 +36,7 @@
 
 /* Misc */
 #define ADDR_RANDOM_RET                     0x10000b924
+#define ADDR_SYNC_ENTRY                     0x1800afc84
 
 #define ADDR_DFU_RETVAL                     (int *)                 0x180088ac8
 #define ADDR_DFU_STATUS                     (unsigned char *)       0x180088ac0
