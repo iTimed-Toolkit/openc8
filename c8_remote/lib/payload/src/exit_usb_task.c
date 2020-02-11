@@ -39,8 +39,7 @@ void fix_heap()
     check_all_chksums();
 }
 
-TEXT_SECTION
-void _start(unsigned long long *ptr_self)
+extern uint64_t entry_sync(uint64_t *args)
 {
     fix_heap();
 
@@ -48,5 +47,10 @@ void _start(unsigned long long *ptr_self)
     *(ADDR_DFU_STATUS) = 1;
 
     event_notify(ADDR_DFU_EVENT);
-    dev_free(ptr_self);
+    return 0;
+}
+
+extern uint64_t entry_async(uint64_t *base)
+{
+    return 0;
 }

@@ -1,32 +1,30 @@
 #include "bootrom_func.h"
 
-extern unsigned long long fs_routine(void);
+extern uint64_t fs_routine(void);
+extern uint64_t fs_load(float *dividend, int divisor_base);
+// extern uint64_t check_subnormal();
 
-extern unsigned long long fs_load(float *dividend, int divisor_base);
-// extern unsigned long long check_subnormal();
+//PAYLOAD_SECTION
+//unsigned int is_subnormal(float val)
+//{
+//    unsigned int bytes = *((unsigned int *) &val);
+//    bytes = bytes >> 23u;
+//
+//    if(bytes & 0x7u)
+//    {
+//        return 0;
+//    }
+//    else return 1;
+//}
 
 PAYLOAD_SECTION
-unsigned int is_subnormal(float val)
-{
-    unsigned int bytes = *((unsigned int *) &val);
-    bytes = bytes >> 23u;
-
-    if(bytes & 0x7u)
-    {
-        return 0;
-    }
-    else return 1;
-}
-
-TEXT_SECTION
-unsigned long long _start(float *init_a)
+uint64_t floppysleep_iteration(float *init)
 {
     int i;
-    volatile int j = 0;
-    unsigned long long start, end, report;
+    uint64_t start, end, report;
 
     __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (start));
-    fs_load(init_a, 1);
+    fs_load(init, 1);
     for(i = 0; i < 8; i++) fs_routine();
     __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (end));
 
@@ -37,7 +35,26 @@ unsigned long long _start(float *init_a)
     }
 
     __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (report));
-    j++;
-
     return end - start;
+}
+
+PAYLOAD_SECTION
+uint64_t entry_sync(uint64_t *args)
+{
+    return floppysleep_iteration((float *) args[0]);
+}
+
+PAYLOAD_SECTION
+uint64_t entry_async(uint64_t *args)
+{
+    float *init_ptr = (float *) args[0];
+    args[0] = 0;
+
+    while(1)
+    {
+        floppysleep_iteration(init_ptr);
+
+        args[0]++;
+        if(args[0] % 100000 == 0) task_resched();
+    }
 }

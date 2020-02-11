@@ -140,14 +140,18 @@ void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char 
     }
 }
 
-TEXT_SECTION
-unsigned long long _start(unsigned char *msg, unsigned int msg_len, unsigned char *key,
-                          unsigned char sbox[16][16], unsigned char rc_lookup[11],
-                          unsigned char mul2[256], unsigned char mul3[256])
+PAYLOAD_SECTION
+uint64_t entry_sync(uint64_t *args)
 {
     unsigned long long start = 0, end = 0;
-    unsigned long long timer_deadline_enter = 0x10000b874;
-    unsigned long long halt = 0x1000004fc;
+
+    unsigned char *msg = (unsigned char *) args[0];
+    unsigned int msg_len = (unsigned int) args[1];
+    unsigned char *key = (unsigned char *) args[2];
+    unsigned char *sbox = (unsigned char *) args[3];
+    unsigned char *rc_lookup = (unsigned char *) args[4];
+    unsigned char *mul2 = (unsigned char *) args[5];
+    unsigned char *mul3 = (unsigned char *) args[6];
 
     __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
     aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
@@ -160,4 +164,35 @@ unsigned long long _start(unsigned char *msg, unsigned int msg_len, unsigned cha
     }
 
     return end - start;
+}
+
+PAYLOAD_SECTION
+uint64_t entry_async(uint64_t *base)
+{
+    unsigned long long start = 0, end = 0;
+
+    unsigned char *msg = (unsigned char *) base[0];
+    unsigned int msg_len = (unsigned int) base[1];
+    unsigned char *key = (unsigned char *) base[2];
+    unsigned char *sbox = (unsigned char *) base[3];
+    unsigned char *rc_lookup = (unsigned char *) base[4];
+    unsigned char *mul2 = (unsigned char *) base[5];
+    unsigned char *mul3 = (unsigned char *) base[6];
+
+    base[0] = 0;
+    while(1)
+    {
+        __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
+        aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
+        __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
+
+        if(2 * end - start - 64 > 0)
+        {
+            timer_register_int(2 * end - start - 64);
+            wfi();
+        }
+
+        base[0]++;
+        if(base[0] % 100000 == 0) task_resched();
+    }
 }

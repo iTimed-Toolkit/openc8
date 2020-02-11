@@ -20,13 +20,14 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 foreach(NAME ${PL_NAMES})
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.S)
-        add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c
+        add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/payload_entry.c
+                                       ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c
                                        ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.S)
     else()
-        add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c)
+        add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/payload_entry.c
+                                       ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c)
     endif()
 
-    target_link_libraries(payload_${NAME} bootrom_dev)
     add_custom_command(TARGET       payload_${NAME} POST_BUILD
                         BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin
                         COMMAND     ${CMAKE_OBJCOPY}

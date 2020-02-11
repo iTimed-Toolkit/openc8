@@ -332,7 +332,6 @@ void usb_task_exit(struct pwned_device *dev)
 
 int main()
 {
-    struct dev_cmd_resp *resp;
     struct pwned_device *dev = exploit_device();
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
