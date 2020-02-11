@@ -68,7 +68,7 @@ int floppysleep(struct pwned_device *dev)
 
     float init_a = -7.504355E-39f;
     unsigned long long init_a_ptr = install_data(dev, SRAM, (unsigned char *) &init_a, sizeof(float));
-    if(init_a_ptr == -1)
+    if(init_a_ptr == DEV_PTR_NULL)
     {
         printf("failed to write initial data\n");
         return -1;
@@ -182,42 +182,42 @@ void aes_sw(struct pwned_device *dev)
     }
 
     addr_sbox = install_data(dev, SRAM, sbox, 256);
-    if(addr_sbox == -1)
+    if(addr_sbox == DEV_PTR_NULL)
     {
         printf("failed to write sbox\n");
         return;
     }
 
     addr_rc = install_data(dev, SRAM, rc_lookup, 11);
-    if(addr_rc == -1)
+    if(addr_rc == DEV_PTR_NULL)
     {
         printf("failed to write rc lookup\n");
         return;
     }
 
     addr_mul2 = install_data(dev, SRAM, mul2_lookup, 256);
-    if(addr_mul2 == -1)
+    if(addr_mul2 == DEV_PTR_NULL)
     {
         printf("failed to write mul2 lookup\n");
         return;
     }
 
     addr_mul3 = install_data(dev, SRAM, mul3_lookup, 256);
-    if(addr_mul3 == -1)
+    if(addr_mul3 == DEV_PTR_NULL)
     {
         printf("failed to write mul3 lookup\n");
         return;
     }
 
     addr_key = install_data(dev, SRAM, key, 16);
-    if(addr_key == -1)
+    if(addr_key == DEV_PTR_NULL)
     {
         printf("failed to write key\n");
         return;
     }
 
     addr_data = install_data(dev, SRAM, data, 16);
-    if(addr_data == -1)
+    if(addr_data == DEV_PTR_NULL)
     {
         printf("failed to write data\n");
         return;

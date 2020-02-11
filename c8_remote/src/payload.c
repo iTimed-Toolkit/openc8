@@ -91,7 +91,7 @@ void free_payload(struct payload *p)
     free(p);
 }
 
-unsigned long long get_address(struct pwned_device *dev, LOCATION_T l, int len)
+DEV_PTR_T get_address(struct pwned_device *dev, LOCATION_T l, int len)
 {
     checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n", dev, l, len);
     DEV_PTR_T addr_malloc = 0x10000efe0, retval;
@@ -102,7 +102,7 @@ unsigned long long get_address(struct pwned_device *dev, LOCATION_T l, int len)
     {
         free_dev_cmd_resp(resp);
         checkm8_debug_indent("\tfailed to malloc an address\n");
-        return -1;
+        return DEV_PTR_NULL;
     }
 
     retval = resp->retval;
@@ -219,7 +219,7 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
     return CHECKM8_SUCCESS;
 }
 
-unsigned long long get_payload_address(struct pwned_device *dev, PAYLOAD_T p)
+DEV_PTR_T get_payload_address(struct pwned_device *dev, PAYLOAD_T p)
 {
     struct payload *pl = dev_retrieve_payload(dev, p);
     if(pl == NULL)
@@ -233,7 +233,7 @@ unsigned long long get_payload_address(struct pwned_device *dev, PAYLOAD_T p)
 }
 
 
-unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len)
+DEV_PTR_T install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len)
 {
     checkm8_debug_indent("install_data(dev = %p, loc = %i, data = %p, len = %i)\n", dev, loc, data, len);
     struct dev_cmd_resp *resp;
@@ -242,7 +242,7 @@ unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsign
     if(addr == -1)
     {
         checkm8_debug_indent("\tfailed to get an address\n");
-        return -1;
+        return DEV_PTR_NULL;
     }
 
     checkm8_debug_indent("\twriting data to address %X\n", addr);
