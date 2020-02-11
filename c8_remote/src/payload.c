@@ -23,6 +23,15 @@ struct payload
     struct payload *prev;
 };
 
+struct data
+{
+    DEV_PTR_T addr;
+    int len;
+
+    struct data *next;
+    struct data *prev;
+};
+
 struct payload *get_payload(PAYLOAD_T p)
 {
     struct payload *res;
@@ -75,15 +84,10 @@ struct payload *get_payload(PAYLOAD_T p)
     return res;
 }
 
-void free_payload(struct payload *p)
-{
-    free(p);
-}
-
 struct payload *dev_retrieve_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
     struct payload *curr;
-    for(curr = dev->installed; curr != NULL; curr = curr->next)
+    for(curr = dev->inst_pl; curr != NULL; curr = curr->next)
     {
         if(curr->type == p) return curr;
     }
@@ -94,14 +98,14 @@ struct payload *dev_retrieve_payload(struct pwned_device *dev, PAYLOAD_T p)
 int dev_link_payload(struct pwned_device *dev, struct payload *pl)
 {
     struct payload *curr;
-    if(dev->installed == NULL)
+    if(dev->inst_pl == NULL)
     {
-        dev->installed = pl;
+        dev->inst_pl = pl;
         return CHECKM8_SUCCESS;
     }
     else
     {
-        for(curr = dev->installed; curr->next != NULL; curr = curr->next);
+        for(curr = dev->inst_pl; curr->next != NULL; curr = curr->next);
 
         curr->next = pl;
         pl->prev = curr;
@@ -109,11 +113,11 @@ int dev_link_payload(struct pwned_device *dev, struct payload *pl)
     }
 }
 
-int *dev_unlink_payload(struct pwned_device *dev, struct payload *pl)
+int dev_unlink_payload(struct pwned_device *dev, struct payload *pl)
 {
-    if(dev->installed == pl)
+    if(dev->inst_pl == pl)
     {
-        dev->installed = pl->next;
+        dev->inst_pl = pl->next;
         return CHECKM8_SUCCESS;
     }
     else
@@ -126,11 +130,58 @@ int *dev_unlink_payload(struct pwned_device *dev, struct payload *pl)
     }
 }
 
+struct data *dev_retrieve_data(struct pwned_device *dev, DEV_PTR_T addr)
+{
+    struct data *curr;
+    for(curr = dev->inst_data; curr != NULL; curr = curr->next)
+    {
+        if(curr->addr == addr) return curr;
+    }
+
+    return NULL;
+}
+
+int dev_link_data(struct pwned_device *dev, struct data *data)
+{
+    struct data *curr;
+    if(dev->inst_data == NULL)
+    {
+        dev->inst_data = data;
+        return CHECKM8_SUCCESS;
+    }
+    else
+    {
+        for(curr = dev->inst_data; curr->next != NULL; curr = curr->next);
+
+        curr->next = data;
+        data->prev = curr;
+        return CHECKM8_SUCCESS;
+    }
+}
+
+int dev_unlink_data(struct pwned_device *dev, struct data *data)
+{
+    if(dev->inst_data == data)
+    {
+        dev->inst_data = data->next;
+        return CHECKM8_SUCCESS;
+    }
+    else
+    {
+        data->prev->next = data->next;
+        if(data->next != NULL)
+            data->next->prev = data->prev;
+
+        return CHECKM8_SUCCESS;
+    }
+}
+
 DEV_PTR_T get_address(struct pwned_device *dev, LOCATION_T l, int len)
 {
     checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n", dev, l, len);
     DEV_PTR_T retval;
     unsigned long long malloc_args[2] = {ADDR_DEV_MALLOC, (unsigned long long) len};
+    struct data *new_entry;
 
     struct dev_cmd_resp *resp = dev_exec(dev, 0, 2, malloc_args);
     if(IS_CHECKM8_FAIL(resp->ret))
@@ -143,6 +194,11 @@ DEV_PTR_T get_address(struct pwned_device *dev, LOCATION_T l, int len)
     retval = resp->retval;
     free_dev_cmd_resp(resp);
 
+    new_entry = malloc(sizeof(struct data));
+    new_entry->addr = retval;
+    new_entry->len = len;
+    dev_link_data(dev, new_entry);
+
     checkm8_debug_indent("\tgot address %llX\n", retval);
     return retval;
 }
@@ -150,7 +206,15 @@ DEV_PTR_T get_address(struct pwned_device *dev, LOCATION_T l, int len)
 int free_address(struct pwned_device *dev, LOCATION_T l, DEV_PTR_T ptr)
 {
     struct dev_cmd_resp *resp;
+    struct data *entry;
     unsigned long long free_args[2] = {ADDR_DEV_FREE, ptr};
+
+    entry = dev_retrieve_data(dev, ptr);
+    if(entry == NULL)
+    {
+        checkm8_debug_indent("\tthis pointer was not allocated through the payload interface, not freeing\n");
+        return CHECKM8_FAIL_NOINST;
+    }
 
     resp = dev_exec(dev, 0, 2, free_args);
     if(IS_CHECKM8_FAIL(resp->ret))
@@ -161,6 +225,9 @@ int free_address(struct pwned_device *dev, LOCATION_T l, DEV_PTR_T ptr)
     }
 
     free_dev_cmd_resp(resp);
+    dev_unlink_data(dev, entry);
+    free(entry);
+
     return CHECKM8_SUCCESS;
 }
 
@@ -211,7 +278,24 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
     }
 
     dev_unlink_payload(dev, pl);
-    free_payload(pl);
+    free(pl);
+    return CHECKM8_SUCCESS;
+}
+
+int uninstall_all_payloads(struct pwned_device *dev)
+{
+    checkm8_debug_indent("uninstall_all_payloads(dev = %p)\n");
+    int ret;
+    while(dev->inst_pl != NULL)
+    {
+        ret = uninstall_payload(dev, dev->inst_pl->type);
+        if(IS_CHECKM8_FAIL(ret))
+        {
+            checkm8_debug_indent("\terror while uninstalling\n");
+            return ret;
+        }
+    }
+
     return CHECKM8_SUCCESS;
 }
 
@@ -436,6 +520,24 @@ int uninstall_data(struct pwned_device *dev, DEV_PTR_T addr)
 {
     checkm8_debug_indent("uninstall_data(dev = %p, addr = %X)\n", dev, addr);
     return free_address(dev, SRAM, addr);
+}
+
+int uninstall_all_data(struct pwned_device *dev)
+{
+    checkm8_debug_indent("uninstall_all_data(dev = %p)\n", dev);
+    int retval;
+
+    while(dev->inst_data != NULL)
+    {
+        retval = uninstall_data(dev, dev->inst_data->addr);
+        if(IS_CHECKM8_FAIL(retval))
+        {
+            checkm8_debug_indent("\terror while uninstalling data\n");
+            return retval;
+        }
+    }
+
+    return CHECKM8_SUCCESS;
 }
 
 struct dev_cmd_resp *read_gadget(struct pwned_device *dev, DEV_PTR_T addr, int len)

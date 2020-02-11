@@ -23,6 +23,7 @@ typedef unsigned long long DEV_PTR_T;
 
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc);
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p);
+int uninstall_all_payloads(struct pwned_device *dev);
 DEV_PTR_T get_payload_address(struct pwned_device *dev, PAYLOAD_T p);
 
 struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...);
@@ -32,6 +33,7 @@ int kill_payload_async(struct pwned_device *dev, PAYLOAD_T p, DEV_PTR_T buf_addr
 
 DEV_PTR_T install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len);
 int uninstall_data(struct pwned_device *dev, DEV_PTR_T ptr);
+int uninstall_all_data(struct pwned_device *dev);
 
 struct dev_cmd_resp *read_gadget(struct pwned_device *dev, DEV_PTR_T addr, int len);
 struct dev_cmd_resp *write_gadget(struct pwned_device *dev, DEV_PTR_T addr, unsigned char *data, int len);

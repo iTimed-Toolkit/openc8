@@ -36,7 +36,8 @@ struct pwned_device
     unsigned int idVendor;
     unsigned int idProduct;
 
-    struct payload *installed;
+    struct payload *inst_pl;
+    struct data *inst_data;
 
 #ifdef WITH_ARDUINO
     int ard_fd;
