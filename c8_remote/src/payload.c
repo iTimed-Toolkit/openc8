@@ -197,6 +197,8 @@ DEV_PTR_T get_address(struct pwned_device *dev, LOCATION_T l, int len)
     new_entry = malloc(sizeof(struct data));
     new_entry->addr = retval;
     new_entry->len = len;
+    new_entry->prev = NULL;
+    new_entry->next = NULL;
     dev_link_data(dev, new_entry);
 
     checkm8_debug_indent("\tgot address %llX\n", retval);
