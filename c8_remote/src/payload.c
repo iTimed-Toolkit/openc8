@@ -17,6 +17,8 @@ struct payload
     int len;
 
     DEV_PTR_T install_base;
+    DEV_PTR_T async_base;
+
     struct payload *next;
     struct payload *prev;
 };
@@ -66,6 +68,7 @@ struct payload *get_payload(PAYLOAD_T p)
     res->len = len;
     res->data = pl;
     res->install_base = DEV_PTR_NULL;
+    res->async_base = DEV_PTR_NULL;
     res->next = NULL;
     res->prev = NULL;
 
@@ -76,28 +79,6 @@ void free_payload(struct payload *p)
 {
     free(p);
 }
-
-DEV_PTR_T get_address(struct pwned_device *dev, LOCATION_T l, int len)
-{
-    checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n", dev, l, len);
-    DEV_PTR_T retval;
-    unsigned long long malloc_args[2] = {ADDR_DEV_MALLOC, (unsigned long long) len};
-
-    struct dev_cmd_resp *resp = dev_exec(dev, 0, 2, malloc_args);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        free_dev_cmd_resp(resp);
-        checkm8_debug_indent("\tfailed to malloc an address\n");
-        return DEV_PTR_NULL;
-    }
-
-    retval = resp->retval;
-    free_dev_cmd_resp(resp);
-
-    checkm8_debug_indent("\tgot address %llX\n", retval);
-    return retval;
-}
-
 
 struct payload *dev_retrieve_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
@@ -145,6 +126,43 @@ int *dev_unlink_payload(struct pwned_device *dev, struct payload *pl)
     }
 }
 
+DEV_PTR_T get_address(struct pwned_device *dev, LOCATION_T l, int len)
+{
+    checkm8_debug_indent("get_address(dev = %p, loc = %i, len = %i)\n", dev, l, len);
+    DEV_PTR_T retval;
+    unsigned long long malloc_args[2] = {ADDR_DEV_MALLOC, (unsigned long long) len};
+
+    struct dev_cmd_resp *resp = dev_exec(dev, 0, 2, malloc_args);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        free_dev_cmd_resp(resp);
+        checkm8_debug_indent("\tfailed to malloc an address\n");
+        return DEV_PTR_NULL;
+    }
+
+    retval = resp->retval;
+    free_dev_cmd_resp(resp);
+
+    checkm8_debug_indent("\tgot address %llX\n", retval);
+    return retval;
+}
+
+int free_address(struct pwned_device *dev, LOCATION_T l, DEV_PTR_T ptr)
+{
+    struct dev_cmd_resp *resp;
+    unsigned long long free_args[2] = {ADDR_DEV_FREE, ptr};
+
+    resp = dev_exec(dev, 0, 2, free_args);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        free_dev_cmd_resp(resp);
+        checkm8_debug_indent("\tfailed to free allocated payload memory\n");
+        return CHECKM8_FAIL_XFER;
+    }
+
+    free_dev_cmd_resp(resp);
+    return CHECKM8_SUCCESS;
+}
 
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 {
@@ -178,8 +196,6 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc)
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
     checkm8_debug_indent("uninstall payload(dev = %p, p = %i)\n", dev, p);
-    unsigned long long free_args[2];
-    struct dev_cmd_resp *resp;
     struct payload *pl = dev_retrieve_payload(dev, p);
 
     if(pl == NULL)
@@ -188,14 +204,9 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
         return CHECKM8_FAIL_INVARGS;
     }
 
-    free_args[0] = ADDR_DEV_FREE;
-    free_args[1] = pl->install_base;
-
-    resp = dev_exec(dev, 0, 2, free_args);
-    if(IS_CHECKM8_FAIL(resp->ret))
+    if(IS_CHECKM8_FAIL(free_address(dev, SRAM, pl->install_base)))
     {
-        free_dev_cmd_resp(resp);
-        checkm8_debug_indent("\tfailed to free allocated payload memory\n");
+        checkm8_debug_indent("\tfailed to free memory used by payload!\n");
         return CHECKM8_FAIL_XFER;
     }
 
@@ -215,47 +226,6 @@ DEV_PTR_T get_payload_address(struct pwned_device *dev, PAYLOAD_T p)
     {
         return pl->install_base;
     }
-}
-
-
-DEV_PTR_T install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len)
-{
-    checkm8_debug_indent("install_data(dev = %p, loc = %i, data = %p, len = %i)\n", dev, loc, data, len);
-    struct dev_cmd_resp *resp;
-    DEV_PTR_T addr = get_address(dev, loc, len);
-
-    if(addr == -1)
-    {
-        checkm8_debug_indent("\tfailed to get an address\n");
-        return DEV_PTR_NULL;
-    }
-
-    checkm8_debug_indent("\twriting data to address %X\n", addr);
-    resp = dev_write_memory(dev, addr, data, len);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        checkm8_debug_indent("\tfailed to write data\n");
-        return -1;
-    }
-
-    free_dev_cmd_resp(resp);
-    return addr;
-}
-
-int uninstall_data(struct pwned_device *dev, DEV_PTR_T addr)
-{
-    checkm8_debug_indent("uninstall_data(dev = %p, addr = %X)\n", dev, addr);
-    struct dev_cmd_resp *resp;
-    unsigned long long free_args[2] = {ADDR_DEV_FREE, addr};
-
-    resp = dev_exec(dev, 0, 2, free_args);
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        checkm8_debug_indent("failed to free memory at %x\n", addr);
-        return CHECKM8_FAIL_XFER;
-    }
-
-    return CHECKM8_SUCCESS;
 }
 
 struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...)
@@ -290,13 +260,15 @@ struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int 
     return dev_exec(dev, response_len, nargs + 1, args);
 }
 
-unsigned long long execute_payload_async(struct pwned_device *dev, PAYLOAD_T p, int bufsize, int nargs, ...)
+unsigned long long setup_payload_async(struct pwned_device *dev, PAYLOAD_T p, int bufsize, int nargs, ...)
 {
-    checkm8_debug_indent("execute_payload_async(dev = %p, p = %i, bufsize = %i, nargs = %i, ...)\n",
+    checkm8_debug_indent("setup_payload_async(dev = %p, p = %i, bufsize = %i, nargs = %i, ...)\n",
                          dev, p, bufsize, bufsize, nargs);
     int i;
     struct dev_cmd_resp *resp;
     struct payload *pl;
+    DEV_PTR_T buf_addr;
+    unsigned long long buf_args[nargs], task_args[5];
 
     if((pl = dev_retrieve_payload(dev, p)) == NULL)
     {
@@ -304,13 +276,166 @@ unsigned long long execute_payload_async(struct pwned_device *dev, PAYLOAD_T p, 
         return DEV_PTR_NULL;
     }
 
+    checkm8_debug_indent("\tadjusting buffer size (if necessary)\n");
     if(bufsize < nargs * sizeof(unsigned long long))
     {
         checkm8_debug_indent("\texpanding buffer to fit (at least) provided arguments\n");
         bufsize = nargs * sizeof(unsigned long long);
     }
 
-    
+    buf_addr = get_address(dev, SRAM, bufsize);
+    if(buf_addr == DEV_PTR_NULL)
+    {
+        checkm8_debug_indent("\tfailed to get a shared buffer for the payload\n");
+        return DEV_PTR_NULL;
+    }
+
+    va_list arg_list;
+    va_start(arg_list, nargs);
+    for(i = 0; i < nargs; i++)
+    {
+        buf_args[i] = va_arg(arg_list, unsigned long long);
+        checkm8_debug_indent("\textracted arg %lx\n", buf_args[i]);
+    }
+    va_end(arg_list);
+
+    resp = dev_write_memory(dev, buf_addr, (unsigned char *) buf_args, nargs * sizeof(unsigned long long));
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        checkm8_debug_indent("\tfailed to write args to shared buffer\n");
+        if(IS_CHECKM8_FAIL(free_address(dev, SRAM, buf_addr)))
+        {
+            checkm8_debug_indent("\talso failed to free buffer (something is really wrong)\n");
+        }
+
+        free_dev_cmd_resp(resp);
+        return DEV_PTR_NULL;
+    }
+
+    task_args[0] = ADDR_TASK_NEW;
+    task_args[1] = 0; // todo: name pointer
+    task_args[2] = pl->install_base;
+    task_args[3] = buf_addr;
+    task_args[4] = 0x4000;
+
+    resp = dev_exec(dev, 0, 4, task_args);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        checkm8_debug_indent("\tfailed to create a new task\n");
+        if(IS_CHECKM8_FAIL(free_address(dev, SRAM, buf_addr)))
+        {
+            checkm8_debug_indent("\talso failed to free buffer (something is really wrong)\n");
+        }
+
+        free_dev_cmd_resp(resp);
+        return DEV_PTR_NULL;
+    }
+
+    pl->async_base = resp->retval;
+    free_dev_cmd_resp(resp);
+    return buf_addr;
+}
+
+int run_payload_async(struct pwned_device *dev, PAYLOAD_T p)
+{
+    checkm8_debug_indent("run_payload_async(dev = %p, payload = %i)\n", dev, p);
+    struct payload *pl;
+    struct dev_cmd_resp *resp;
+    unsigned long long args[2];
+    int retval;
+
+    if((pl = dev_retrieve_payload(dev, p)) == NULL)
+    {
+        checkm8_debug_indent("\tpayload is not installed!\n");
+        return CHECKM8_FAIL_NOINST;
+    }
+
+    if(pl->async_base == DEV_PTR_NULL)
+    {
+        checkm8_debug_indent("\tasync payload is not set up correctly!\n");
+        return CHECKM8_FAIL_NOINST;
+    }
+
+    args[0] = ADDR_TASK_RUN;
+    args[1] = pl->async_base;
+
+    resp = dev_exec(dev, 0, 2, args);
+    retval = resp->ret;
+    free_dev_cmd_resp(resp);
+
+    return retval;
+}
+
+int kill_payload_async(struct pwned_device *dev, PAYLOAD_T p, DEV_PTR_T buf_addr)
+{
+    checkm8_debug_indent("kill_payload_async(dev = %p, p = %i, buf_addr = %llx)\n", dev, p, buf_addr);
+    struct payload *pl;
+    struct dev_cmd_resp *resp;
+    unsigned long long args[2];
+
+    if((pl = dev_retrieve_payload(dev, p)) == NULL)
+    {
+        checkm8_debug_indent("\tpayload is not installed\n");
+        return CHECKM8_FAIL_NOINST;
+    }
+
+    if(pl->async_base == DEV_PTR_NULL)
+    {
+        checkm8_debug_indent("\tasync payload is not set up correctly\n");
+        return CHECKM8_FAIL_NOINST;
+    }
+
+    args[0] = ADDR_TASK_FREE;
+    args[1] = pl->async_base;
+
+    resp = dev_exec(dev, 0, 2, args);
+    pl->async_base = DEV_PTR_NULL;
+
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        checkm8_debug_indent("\tfailed to kill payload\n");
+        free_dev_cmd_resp(resp);
+        return CHECKM8_FAIL_XFER;
+    }
+
+    free_dev_cmd_resp(resp);
+    if(IS_CHECKM8_FAIL(free_address(dev, SRAM, buf_addr)))
+    {
+        checkm8_debug_indent("\tfailed to free shared buffer\n");
+        return CHECKM8_FAIL_XFER;
+    }
+
+    return CHECKM8_SUCCESS;
+}
+
+DEV_PTR_T install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len)
+{
+    checkm8_debug_indent("install_data(dev = %p, loc = %i, data = %p, len = %i)\n", dev, loc, data, len);
+    struct dev_cmd_resp *resp;
+    DEV_PTR_T addr = get_address(dev, loc, len);
+
+    if(addr == -1)
+    {
+        checkm8_debug_indent("\tfailed to get an address\n");
+        return DEV_PTR_NULL;
+    }
+
+    checkm8_debug_indent("\twriting data to address %X\n", addr);
+    resp = dev_write_memory(dev, addr, data, len);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        checkm8_debug_indent("\tfailed to write data\n");
+        return -1;
+    }
+
+    free_dev_cmd_resp(resp);
+    return addr;
+}
+
+int uninstall_data(struct pwned_device *dev, DEV_PTR_T addr)
+{
+    checkm8_debug_indent("uninstall_data(dev = %p, addr = %X)\n", dev, addr);
+    return free_address(dev, SRAM, addr);
 }
 
 struct dev_cmd_resp *read_gadget(struct pwned_device *dev, DEV_PTR_T addr, int len)
