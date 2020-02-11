@@ -43,11 +43,6 @@ struct payload *get_payload(PAYLOAD_T p)
             len = PAYLOAD_AES_SW_SZ;
             break;
 
-        case PAYLOAD_BOOTSTRAP:
-            pl = payload_bootstrap;
-            len = PAYLOAD_BOOTSTRAP_SZ;
-            break;
-
         case PAYLOAD_EXIT_USB_TASK:
             pl = payload_exit_usb_task;
             len = PAYLOAD_EXIT_USB_TASK_SZ;
@@ -151,13 +146,15 @@ int *dev_unlink_payload(struct pwned_device *dev, struct payload *pl)
 {
     if(dev->installed == pl)
     {
-        dev->installed = NULL;
+        dev->installed = pl->next;
         return CHECKM8_SUCCESS;
     }
     else
     {
         pl->prev->next = pl->next;
-        pl->next->prev = pl->prev;
+        if(pl->next != NULL)
+            pl->next->prev = pl->prev;
+
         return CHECKM8_SUCCESS;
     }
 }
@@ -222,6 +219,12 @@ int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
     return CHECKM8_SUCCESS;
 }
 
+unsigned long long get_payload_address(struct pwned_device *dev, PAYLOAD_T p)
+{
+    return dev_retrieve_payload(dev, p)->install_base;
+}
+
+
 unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len)
 {
     checkm8_debug_indent("install_data(dev = %p, loc = %i, data = %p, len = %i)\n", dev, loc, data, len);
@@ -265,7 +268,7 @@ int uninstall_data(struct pwned_device *dev, unsigned long long addr)
 
 struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...)
 {
-    checkm8_debug_indent("execute_payload(dev = %p, p = %i, nargs = %i, ...)\n", dev, p, nargs);
+    checkm8_debug_indent("execute_payload(dev = %p, p = %i, response_len = %i, nargs = %i, ...)\n", dev, p, response_len, nargs);
     int i;
     struct dev_cmd_resp *resp;
     struct payload *pl;

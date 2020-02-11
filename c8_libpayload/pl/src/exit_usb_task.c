@@ -43,14 +43,14 @@ void fix_heap()
 }
 
 TEXT_SECTION
-void _start()
+void _start(unsigned long long ptr_self)
 {
     unsigned int *completion = (unsigned int *) 0x180088ac8;
     unsigned char *dfu_done = (unsigned char *) 0x180088ac0;
 
     unsigned long long *dfu_event = (unsigned long long *) 0x180088af0;
     BOOTROM_FUNC event_signal = ((BOOTROM_FUNC) 0x10000aee8);
-    BOOTROM_FUNC enter_critical_section = ((BOOTROM_FUNC) 0x10000a4b8);
+    BOOTROM_FUNC free = ((BOOTROM_FUNC) 0x10000f1b0);
 
     fix_heap();
 
@@ -58,5 +58,5 @@ void _start()
     *dfu_done = 1;
 
     event_signal(dfu_event);
-    // enter_critical_section();
+    free(ptr_self);
 }

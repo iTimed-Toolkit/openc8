@@ -8,7 +8,6 @@ typedef enum
     PAYLOAD_AES,
     PAYLOAD_AES_BUSY,
     PAYLOAD_AES_SW,
-    PAYLOAD_BOOTSTRAP,
     PAYLOAD_EXIT_USB_TASK,
     PAYLOAD_FLOPPYSLEEP,
     PAYLOAD_SYNC,
@@ -25,6 +24,7 @@ typedef enum
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc);
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p);
 struct dev_cmd_resp *execute_payload(struct pwned_device *dev, PAYLOAD_T p, int response_len, int nargs, ...);
+unsigned long long get_payload_address(struct pwned_device *dev, PAYLOAD_T p);
 
 unsigned long long install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len);
 int uninstall_data(struct pwned_device *dev, unsigned long long ptr);

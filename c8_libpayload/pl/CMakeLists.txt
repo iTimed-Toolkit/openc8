@@ -1,5 +1,6 @@
 project(checkm8_libpayload_sources C ASM)
 include_directories(include)
+include_directories(include/openssl)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")

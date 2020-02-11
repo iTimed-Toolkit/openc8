@@ -29,22 +29,19 @@ unsigned long long _start(float *init_a)
     unsigned long long timer_deadline_enter = 0x10000b874;
     unsigned long long halt = 0x1000004fc;
 
-    while(1)
+    __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (start));
+    fs_load(init_a, 1);
+    for(i = 0; i < 8; i++) fs_routine();
+    __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (end));
+
+    if(2 * end - start - 64 > 0)
     {
-        __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (start));
-        fs_load(init_a, 1);
-        for(i = 0; i < 8; i++) fs_routine();
-        __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (end));
-
-        if(2 * end - start - 64 > 0)
-        {
-            ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
-            ((BOOTROM_FUNC) halt)();
-        }
-
-        __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (report));
-        j++;
+        ((BOOTROM_FUNC) timer_deadline_enter)(2 * end - start - 64, ((BOOTROM_FUNC) 0x10000b924));
+        ((BOOTROM_FUNC) halt)();
     }
+
+    __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (report));
+    j++;
 
     return end - start;
 }
