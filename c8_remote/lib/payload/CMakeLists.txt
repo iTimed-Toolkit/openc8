@@ -18,8 +18,6 @@ endif()
 set(CMAKE_C_FLAGS "-nostdlib -O -Wl,--gc-sections")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-add_library(bootrom_dev bootrom_dev.c)
-
 foreach(NAME ${PL_NAMES})
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.S)
         add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c
@@ -32,7 +30,7 @@ foreach(NAME ${PL_NAMES})
     add_custom_command(TARGET       payload_${NAME} POST_BUILD
                         BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin
                         COMMAND     ${CMAKE_OBJCOPY}
-                        ARGS        -O binary -j .text -j .payload_text -j .bootrom_lib.*
+                        ARGS        -O binary -j .text -j .payload_text
                                     ${CMAKE_CURRENT_BINARY_DIR}/payload_${NAME}
                                     ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin)
 endforeach(NAME)

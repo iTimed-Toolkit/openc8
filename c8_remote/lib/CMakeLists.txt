@@ -5,7 +5,8 @@ set(PL_NAMES
         aes_sw
         exit_usb_task
         floppysleep
-        sync)
+        sync
+        )
 
 foreach(NAME ${PL_NAMES})
     list(APPEND PL_TARGETS      "payload_${NAME}")
@@ -34,5 +35,5 @@ add_dependencies(payload payload_sources)
 add_custom_command(TARGET       payload POST_BUILD
                     BYPRODUCTS  ${CMAKE_SOURCE_DIR}/c8_remote/include/libpayload.h
                     COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/headerize.py
-                                        ${CMAKE_CURRENT_BINARY_DIR}/lib
+                                        ${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles
                                         ${CMAKE_SOURCE_DIR}/c8_remote/include)
