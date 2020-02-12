@@ -141,17 +141,11 @@ void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char 
 }
 
 PAYLOAD_SECTION
-uint64_t entry_sync(uint64_t *args)
+uint64_t entry_sync(unsigned char *msg, unsigned int msg_len, unsigned char key[16],
+                    unsigned char sbox[16][16], unsigned char rc_lookup[11],
+                    unsigned char mul2[256], unsigned char mul3[256])
 {
     unsigned long long start = 0, end = 0;
-
-    unsigned char *msg = (unsigned char *) args[0];
-    unsigned int msg_len = (unsigned int) args[1];
-    unsigned char *key = (unsigned char *) args[2];
-    unsigned char *sbox = (unsigned char *) args[3];
-    unsigned char *rc_lookup = (unsigned char *) args[4];
-    unsigned char *mul2 = (unsigned char *) args[5];
-    unsigned char *mul3 = (unsigned char *) args[6];
 
     __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
     aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
@@ -167,7 +161,7 @@ uint64_t entry_sync(uint64_t *args)
 }
 
 PAYLOAD_SECTION
-uint64_t entry_async(uint64_t *base)
+void entry_async(uint64_t *base)
 {
     unsigned long long start = 0, end = 0;
 

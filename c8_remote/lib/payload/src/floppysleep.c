@@ -39,13 +39,13 @@ uint64_t floppysleep_iteration(float *init)
 }
 
 PAYLOAD_SECTION
-uint64_t entry_sync(uint64_t *args)
+uint64_t entry_sync(float *init_ptr)
 {
-    return floppysleep_iteration((float *) args[0]);
+    return floppysleep_iteration(init_ptr);
 }
 
 PAYLOAD_SECTION
-uint64_t entry_async(uint64_t *args)
+void entry_async(uint64_t *args)
 {
     float *init_ptr = (float *) args[0];
     args[0] = 0;
@@ -54,7 +54,7 @@ uint64_t entry_async(uint64_t *args)
     {
         floppysleep_iteration(init_ptr);
 
+        if(args[0] % 1000000 == 0) task_resched();
         args[0]++;
-        if(args[0] % 100000 == 0) task_resched();
     }
 }
