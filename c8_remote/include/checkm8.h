@@ -48,6 +48,7 @@ struct pwned_device
 
 struct pwned_device *exploit_device();
 int demote_device(struct pwned_device *dev);
+int fix_heap(struct pwned_device *dev);
 void free_device(struct pwned_device *dev);
 
 #endif //CHECKM8_TOOL_CHECKM8_H
