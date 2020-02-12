@@ -399,12 +399,12 @@ unsigned long long setup_payload_async(struct pwned_device *dev, PAYLOAD_T p, in
     }
 
     task_args[0] = ADDR_TASK_NEW;
-    task_args[1] = 0; // todo: name pointer
+    task_args[1] = 0x10001943b; // todo: name pointer
     task_args[2] = pl->install_base;
     task_args[3] = buf_addr;
     task_args[4] = 0x4000;
 
-    resp = dev_exec(dev, 0, 4, task_args);
+    resp = dev_exec(dev, 0, 5, task_args);
     if(IS_CHECKM8_FAIL(resp->ret))
     {
         checkm8_debug_indent("\tfailed to create a new task\n");
