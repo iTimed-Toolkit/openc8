@@ -1,8 +1,6 @@
-project(checkm8_libpayload_sources C ASM)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
-
-
 set(CMAKE_SYSTEM_PROCESSOR arm)
+
 if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     # regular desktop
     set(CMAKE_C_COMPILER    /usr/bin/aarch64-linux-gnu-gcc)

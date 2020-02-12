@@ -1,5 +1,3 @@
-project(checkm8_libpayload)
-
 set(PL_NAMES
         aes_busy
         aes_sw
