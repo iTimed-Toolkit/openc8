@@ -36,7 +36,8 @@ struct pwned_device
     unsigned int idVendor;
     unsigned int idProduct;
 
-    struct payload *installed;
+    struct payload *inst_pl;
+    struct data *inst_data;
 
 #ifdef WITH_ARDUINO
     int ard_fd;
@@ -47,6 +48,7 @@ struct pwned_device
 
 struct pwned_device *exploit_device();
 int demote_device(struct pwned_device *dev);
+int fix_heap(struct pwned_device *dev);
 void free_device(struct pwned_device *dev);
 
 #endif //CHECKM8_TOOL_CHECKM8_H

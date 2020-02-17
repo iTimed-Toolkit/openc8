@@ -517,6 +517,12 @@ int ctrl_transfer(struct pwned_device *dev,
                 // get the size of this chunk
                 size = 0;
                 ard_read(dev, (unsigned char *) &size, 2);
+                if(size > ARD_BUF_SIZE)
+                {
+                    checkm8_debug_indent("\treceived bad chunk size %i\n", size);
+                    return CHECKM8_FAIL_XFER;
+                }
+
                 checkm8_debug_indent("\treceiving data chunk of size %i\n", size);
 
                 ard_read(dev, (unsigned char *) &data[amount], size);
