@@ -39,7 +39,7 @@ void fix_heap()
     check_all_chksums();
 }
 
-void entry_sync()
+void entry_sync(unsigned long long *self)
 {
     fix_heap();
 
@@ -47,6 +47,7 @@ void entry_sync()
     *(ADDR_DFU_STATUS) = 1;
 
     event_notify(ADDR_DFU_EVENT);
+    dev_free(self);
 }
 
 void entry_async(uint64_t *base){}
