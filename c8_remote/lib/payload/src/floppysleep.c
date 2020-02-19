@@ -25,7 +25,7 @@ uint64_t floppysleep_iteration(float *init)
 
     __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (start));
     fs_load(init, 1);
-    for(i = 0; i < 8; i++) fs_routine();
+    for(i = 0; i < 128; i++) fs_routine();
     __asm__ volatile ("isb\n\rmrs %0, cntpct_el0" : "=r" (end));
 
     if(2 * end - start - 64 > 0)
