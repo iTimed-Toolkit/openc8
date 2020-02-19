@@ -62,7 +62,7 @@ class Profile(gdb.Command):
                 arg1 = instr_spl[2].strip(',')
 
             if len(instr_spl) > 3:
-                arg2 = instr_spl[3]
+                arg2 = instr_spl[3].strip(',')
 
             if mnem == 'bl' or mnem == 'blr':
                 outfile.write('\tentering %s\n' % dest)
