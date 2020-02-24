@@ -11,6 +11,7 @@
 /* Timing */
 #define ADDR_CLOCK_GATE                     0x100009d4c
 #define ADDR_GET_TIME                       0x10000b0e0
+#define ADDR_GET_TICKS                      0x10000041c
 #define ADDR_TIMER_REGISTER_INT             0x10000b874
 #define ADDR_WFI                            0x1000004fc
 

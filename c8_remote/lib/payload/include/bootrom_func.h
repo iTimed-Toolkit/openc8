@@ -24,6 +24,11 @@ static inline unsigned long long get_time()
     return ((BOOTROM_FUNC_ULL) ADDR_GET_TIME)();
 }
 
+static inline unsigned long long get_ticks()
+{
+    return ((BOOTROM_FUNC_ULL) ADDR_GET_TICKS)();
+}
+
 static inline void timer_register_int(unsigned long long dl)
 {
     ((BOOTROM_FUNC_V) ADDR_TIMER_REGISTER_INT)(dl, ADDR_RANDOM_RET);
