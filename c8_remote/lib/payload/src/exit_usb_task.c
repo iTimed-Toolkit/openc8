@@ -46,7 +46,7 @@ void entry_sync(unsigned long long *self)
     *(ADDR_DFU_RETVAL) = -1;
     *(ADDR_DFU_STATUS) = 1;
 
-    event_notify(ADDR_DFU_EVENT);
+    event_notify((struct event *) ADDR_DFU_EVENT);
     dev_free(self);
 }
 
