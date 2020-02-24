@@ -50,6 +50,11 @@ struct payload *get_payload(PAYLOAD_T p)
             len = PAYLOAD_AES_SW_SZ;
             break;
 
+        case PAYLOAD_CACHELIB:
+            pl = payload_cachelib;
+            len = PAYLOAD_CACHELIB_SZ;
+            break;
+
         case PAYLOAD_EXIT_USB_TASK:
             pl = payload_exit_usb_task;
             len = PAYLOAD_EXIT_USB_TASK_SZ;

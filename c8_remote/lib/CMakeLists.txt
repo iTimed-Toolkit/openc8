@@ -1,6 +1,7 @@
 set(PL_NAMES
         aes_busy
         aes_sw
+        cachelib
         exit_usb_task
         floppysleep
         sync
