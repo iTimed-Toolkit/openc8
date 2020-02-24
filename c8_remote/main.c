@@ -2,8 +2,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
-#include <float.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include "command.h"
 #include "payload.h"
@@ -13,6 +13,8 @@
 
 #include <stdarg.h>
 #include <execinfo.h>
+#include <stdlib.h>
+#include <time.h>
 
 #endif
 
@@ -148,16 +150,17 @@ void floppysleep_async(struct pwned_device *dev)
 //    close_device_session(dev);
 }
 
-void aes_sw(struct pwned_device *dev)
+struct aes_pointers
 {
-    int i = 0;
-    struct dev_cmd_resp *resp;
-    unsigned long long addr_sbox, addr_rc, addr_mul2, addr_mul3, addr_key, addr_data;
+    DEV_PTR_T addr_sbox;
+    DEV_PTR_T addr_rc;
+    DEV_PTR_T addr_mul2;
+    DEV_PTR_T addr_mul3;
+};
 
-    unsigned char key[16] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
-                             0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
-    unsigned char data[16] = {0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef,
-                              0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef};
+struct aes_pointers *install_aes_data(struct pwned_device *dev)
+{
+    struct aes_pointers *res = malloc(sizeof(struct aes_pointers));
 
     unsigned char sbox[256] =
             {
@@ -224,36 +227,61 @@ void aes_sw(struct pwned_device *dev)
     if(IS_CHECKM8_FAIL(open_device_session(dev)))
     {
         printf("failed to open device session\n");
-        return;
+        free(res);
+        return NULL;
     }
 
-    addr_sbox = install_data(dev, SRAM, sbox, 256);
-    if(addr_sbox == DEV_PTR_NULL)
+    res->addr_sbox = install_data(dev, SRAM, sbox, 256);
+    if(res->addr_sbox == DEV_PTR_NULL)
     {
         printf("failed to write sbox\n");
-        return;
+        free(res);
+        return NULL;
     }
 
-    addr_rc = install_data(dev, SRAM, rc_lookup, 11);
-    if(addr_rc == DEV_PTR_NULL)
+    res->addr_rc = install_data(dev, SRAM, rc_lookup, 11);
+    if(res->addr_rc == DEV_PTR_NULL)
     {
         printf("failed to write rc lookup\n");
-        return;
+        free(res);
+        return NULL;
     }
 
-    addr_mul2 = install_data(dev, SRAM, mul2_lookup, 256);
-    if(addr_mul2 == DEV_PTR_NULL)
+    res->addr_mul2 = install_data(dev, SRAM, mul2_lookup, 256);
+    if(res->addr_mul2 == DEV_PTR_NULL)
     {
         printf("failed to write mul2 lookup\n");
-        return;
+        free(res);
+        return NULL;
     }
 
-    addr_mul3 = install_data(dev, SRAM, mul3_lookup, 256);
-    if(addr_mul3 == DEV_PTR_NULL)
+    res->addr_mul3 = install_data(dev, SRAM, mul3_lookup, 256);
+    if(res->addr_mul3 == DEV_PTR_NULL)
     {
         printf("failed to write mul3 lookup\n");
-        return;
+        free(res);
+        return NULL;
     }
+
+    if(IS_CHECKM8_FAIL(close_device_session(dev)))
+    {
+        printf("failed to close device session\n");
+        free(res);
+        return NULL;
+    }
+
+    return res;
+}
+
+void aes_sw(struct pwned_device *dev)
+{
+    int i = 0;
+    struct dev_cmd_resp *resp;
+    struct aes_pointers *ptrs = install_aes_data(dev);
+    DEV_PTR_T addr_key, addr_data;
+
+    unsigned char key[16] = {};
+    unsigned char data[16] = {};
 
     addr_key = install_data(dev, SRAM, key, 16);
     if(addr_key == DEV_PTR_NULL)
@@ -292,44 +320,169 @@ void aes_sw(struct pwned_device *dev)
     {
         resp = execute_payload(dev, PAYLOAD_AES_SW, 0, 7,
                                addr_data, 16, addr_key,
-                               addr_sbox, addr_rc, addr_mul2, addr_mul3);
+                               ptrs->addr_sbox, ptrs->addr_rc, ptrs->addr_mul2, ptrs->addr_mul3);
         if(IS_CHECKM8_FAIL(resp->ret))
         {
             printf("failed to execute sw AES payload\n");
             return;
         }
-
         printf("%i) op took %llu\n", i, resp->retval);
 
         free_dev_cmd_resp(resp);
-        resp = read_gadget(dev, addr_data, 16);
-        if(IS_CHECKM8_FAIL(resp->ret))
-        {
-            printf("failed to read encrypted data from memory\n");
-        }
-
-        printf(" -> ");
-        for(int j = 0; j < 16; j++)
-        {
-            printf("%02x", resp->data[j]);
-        }
-        printf("\n");
-
-        free_dev_cmd_resp(resp);
-        usleep(1000000);
+//        resp = read_gadget(dev, addr_data, 16);
+//        if(IS_CHECKM8_FAIL(resp->ret))
+//        {
+//            printf("failed to read encrypted data from memory\n");
+//        }
+//
+//        printf(" -> ");
+//        for(int j = 0; j < 16; j++)
+//        {
+//            printf("%02x", resp->data[j]);
+//        }
+//        printf("\n");
+//
+//        free_dev_cmd_resp(resp);
+        //usleep(1000000);
     }
 
-    uninstall_payload(dev, PAYLOAD_AES_SW);
-    uninstall_payload(dev, PAYLOAD_SYNC);
-
-    uninstall_data(dev, addr_data);
-    uninstall_data(dev, addr_key);
-    uninstall_data(dev, addr_mul3);
-    uninstall_data(dev, addr_mul2);
-    uninstall_data(dev, addr_rc);
-    uninstall_data(dev, addr_sbox);
-
+    uninstall_all_payloads(dev);
+    uninstall_all_data(dev);
     close_device_session(dev);
+}
+
+void aes_sw_bernstein(struct pwned_device *dev)
+{
+    int i, j;
+    double timing;
+
+    double packets = 0;
+    double ttotal = 0;
+    double t[16][256] = {0};
+    double tsq[16][256] = {0};
+    long long tnum[16][256] = {0};
+    double u[16][256] = {0};
+    double udev[16][256] = {0};
+
+    DEV_PTR_T addr_data, addr_key, addr_async_buf;
+    unsigned char data[16];
+    unsigned char key[16];
+
+    for(j = 0; j < 16; j++)
+        key[j] = random();
+
+    struct dev_cmd_resp *resp;
+    struct aes_pointers *ptrs = install_aes_data(dev);
+    if(ptrs == NULL)
+    {
+        printf("failed to install aes constants\n");
+        return;
+    }
+
+    addr_data = install_data(dev, SRAM, data, 16);
+    if(addr_data == DEV_PTR_NULL)
+    {
+        printf("failed to install aes data\n");
+        return;
+    }
+
+    addr_key = install_data(dev, SRAM, key, 16);
+    if(addr_key == DEV_PTR_NULL)
+    {
+        printf("failed to install aes key\n");
+        return;
+    }
+
+    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_SYNC, SRAM)))
+    {
+        printf("failed to install sync payload\n");
+        return;
+    }
+
+    if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_AES_SW, SRAM)))
+    {
+        printf("failed to install aes payload\n");
+        return;
+    }
+
+    resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("failed to execute sync payload\n");
+        free_dev_cmd_resp(resp);
+        return;
+    }
+    free_dev_cmd_resp(resp);
+
+    addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW, 32,
+            7, addr_data, 16, addr_key,
+            ptrs->addr_sbox, ptrs->addr_rc, ptrs->addr_mul2, ptrs->addr_mul3);
+    run_payload_async(dev, PAYLOAD_AES_SW);
+    close_device_session(dev);
+
+
+    for(i = 0; i < 1000000; i++)
+    {
+        for(j = 0; j < 16; j++)
+            data[j] = random();
+
+        resp = write_gadget(dev, addr_data, data, 16);
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed to update data\n");
+            return;
+        }
+        free_dev_cmd_resp(resp);
+
+        resp = execute_payload(dev, PAYLOAD_AES_SW, 0, 7,
+                               addr_data, 16, addr_key,
+                               ptrs->addr_sbox, ptrs->addr_rc, ptrs->addr_mul2, ptrs->addr_mul3);
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed to execute sw AES payload\n");
+            free_dev_cmd_resp(resp);
+            return;
+        }
+
+        timing = (double) resp->retval;
+        printf("%i) -> got timing %f\n", i, timing);
+        free_dev_cmd_resp(resp);
+
+        for(j = 0; j < 16; j++)
+        {
+            ++packets;
+            ttotal += timing;
+            t[j][data[j]] += timing;
+            tsq[j][data[j]] += timing * timing;
+            tnum[j][data[j]] += 1;
+        }
+    }
+
+    for(i = 0; i < 16; i++)
+    {
+        for(j = 0; j < 256; j++)
+        {
+            u[i][j] = t[i][j] / tnum[i][j];
+            udev[i][j] = tsq[i][j] / tnum[i][j];
+            udev[i][j] -= u[i][j] * u[i][j];
+            udev[i][j] = sqrt(udev[i][j]);
+        }
+    }
+
+    for(i = 0; i < 16; i++)
+    {
+        for(j = 0; j < 256; j++)
+        {
+            printf("%2d %4d %3d %lld %.3f %.3f %.3f %.3f\n",
+                    i, 16, j, tnum[i][j], u[i][j], udev[i][j],
+                   u[i][j] - (ttotal / packets), udev[i][j] / sqrt(tnum[i][j])
+            );
+        }
+    }
+
+    uninstall_all_payloads(dev);
+    uninstall_all_data(dev);
+    free(ptrs);
 }
 
 void usb_task_exit(struct pwned_device *dev)
@@ -385,6 +538,7 @@ void usb_task_exit(struct pwned_device *dev)
 
 int main()
 {
+    struct dev_cmd_resp *resp;
     struct pwned_device *dev = exploit_device();
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
@@ -394,12 +548,10 @@ int main()
 
     fix_heap(dev);
     demote_device(dev);
-    floppysleep_async(dev);
 
-//    open_device_session(dev);
-//    uninstall_all_payloads(dev);
-//    uninstall_all_data(dev);
-//    free_device(dev);
+    aes_sw_bernstein(dev);
+
+    free_device(dev);
 }
 
 

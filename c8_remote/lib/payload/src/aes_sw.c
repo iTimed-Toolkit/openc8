@@ -1,4 +1,5 @@
 #include "bootrom_func.h"
+#include "cacheutil.h"
 
 PAYLOAD_SECTION
 void sub_bytes(unsigned char block[16], unsigned char sbox[16][16])
@@ -145,19 +146,19 @@ uint64_t entry_sync(unsigned char *msg, unsigned int msg_len, unsigned char key[
                     unsigned char sbox[16][16], unsigned char rc_lookup[11],
                     unsigned char mul2[256], unsigned char mul3[256])
 {
-    unsigned long long start = 0, end = 0;
+    unsigned long long start = 0;
+//    int i, j;
+//    for(i = 0; i < 256; i++)
+//    {
+//        for(j = 0; j < 4; j++)
+//        {
+//            clean_inv_l1_setway(i, j);
+//        }
+//    }
 
-    __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
+    start = get_ticks();
     aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
-    __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
-
-    if(2 * end - start - 64 > 0)
-    {
-        timer_register_int(2 * end - start - 64);
-        wfi();
-    }
-
-    return end - start;
+    return get_ticks() - start;
 }
 
 PAYLOAD_SECTION
