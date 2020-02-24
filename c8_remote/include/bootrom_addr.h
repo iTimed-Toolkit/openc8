@@ -25,6 +25,7 @@
 #define ADDR_EVENT_NEW                      0x10000aed4
 #define ADDR_EVENT_NOTIFY                   0x10000aee8
 #define ADDR_EVENT_WAIT                     0x10000af3c
+#define ADDR_EVENT_TRY                      0x10000af7c
 
 /* Heap */
 #define ADDR_CALC_CHKSUM                    0x10000ee20

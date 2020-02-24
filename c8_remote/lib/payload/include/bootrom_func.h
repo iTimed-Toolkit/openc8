@@ -2,6 +2,7 @@
 #define CHECKM8_TOOL_BOOTROM_FUNC_H
 
 #include "bootrom_addr.h"
+#include "bootrom_type.h"
 #include "dev_util.h"
 
 /* Crypto */
@@ -65,19 +66,24 @@ static inline void task_free(void *task)
     ((BOOTROM_FUNC_V) ADDR_TASK_FREE)(task);
 }
 
-static inline void event_new(void *dst, int flags, int state)
+static inline void event_new(struct event *dst, int flags, int state)
 {
     ((BOOTROM_FUNC_V) ADDR_EVENT_NEW)(dst, flags, state);
 }
 
-static inline void event_notify(void *ev)
+static inline void event_notify(struct event *ev)
 {
     ((BOOTROM_FUNC_V) ADDR_EVENT_NOTIFY)(ev);
 }
 
-static inline void event_wait(void *ev)
+static inline void event_wait(struct event *ev)
 {
     ((BOOTROM_FUNC_V) ADDR_EVENT_WAIT)(ev);
+}
+
+static inline int event_try(struct event *ev, int timeout)
+{
+    return ((BOOTROM_FUNC_I) ADDR_EVENT_TRY)(ev, timeout);
 }
 
 /* Heap */

@@ -48,13 +48,13 @@ static inline void clean_inv_l1_setway(unsigned int set, unsigned int way)
 }
 
 PAYLOAD_SECTION
-static inline void inv_l1_va(unsigned long long *addr)
+static inline void inv_va(void *addr)
 {
     __asm__ volatile ("dc ivac, %0"::"r" (addr));
 }
 
 PAYLOAD_SECTION
-static inline void clean_inv_l1_va(unsigned long long *addr)
+static inline void clean_inv_va(void *addr)
 {
     __asm__ volatile ("dc ivac, %0"::"r" (addr));
 }
