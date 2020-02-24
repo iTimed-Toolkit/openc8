@@ -490,7 +490,7 @@ void usb_task_exit(struct pwned_device *dev)
 int main()
 {
     struct dev_cmd_resp *resp;
-    struct aes_sw_bernstein_data *data;
+    struct aes_sw_bernstein_data data;
     struct pwned_device *dev = exploit_device();
     DEV_PTR_T addr_async_buf;
 
@@ -498,6 +498,9 @@ int main()
     double u[16][256];
     double udev[16][256];
     double taverage;
+
+    FILE *outfile;
+    char linebuf[256];
 
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
@@ -517,7 +520,7 @@ int main()
 
     while(1)
     {
-        sleep(15);
+        sleep(60);
         if(IS_CHECKM8_FAIL(open_device_session(dev)))
         {
             printf("failed to open device session");
@@ -542,34 +545,9 @@ int main()
             return -1;
         }
 
-        data = (struct aes_sw_bernstein_data *) resp->data;
-        printf("have count %lli\n", data->count);
-
-        taverage = data->ttotal / (double) data->count;
-        for(j = 0; j < 16; j++)
-        {
-            for(b = 0; b < 256; b++)
-            {
-                u[j][b] = data->t[j][b] / data->tnum[j][b];
-                udev[j][b] = data->tsq[j][b] / data->tnum[j][b];
-                udev[j][b] -= u[j][b] * u[j][b];
-                udev[j][b] = sqrt(udev[j][b]);
-            }
-        }
-
-        for(j = 0; j < 16; j++)
-        {
-            for(b = 0; b < 256; b++)
-            {
-                printf("%2d %3d %lli %.3f %.3f %.3f %.3f\n",
-                       j, b, (long long) data->tnum[j][b],
-                       u[j][b], udev[j][b],
-                       u[j][b] - taverage, udev[j][b] / sqrt(data->tnum[j][b])
-                );
-            }
-        }
-
+        memcpy(&data, resp->data, sizeof(struct aes_sw_bernstein_data));
         free_dev_cmd_resp(resp);
+
         resp = execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1,
                               addr_async_buf + offsetof(struct aes_sw_bernstein_data, ev_done));
         if(IS_CHECKM8_FAIL(resp->ret))
@@ -585,6 +563,43 @@ int main()
             printf("failed to close device session\n");
             return -1;
         }
+
+        printf("have count %lli\n", data.count);
+        taverage = data.ttotal / (double) data.count;
+
+        for(j = 0; j < 16; j++)
+        {
+            for(b = 0; b < 256; b++)
+            {
+                u[j][b] = data.t[j][b] / data.tnum[j][b];
+                udev[j][b] = data.tsq[j][b] / data.tnum[j][b];
+                udev[j][b] -= u[j][b] * u[j][b];
+                udev[j][b] = sqrt(udev[j][b]);
+            }
+        }
+
+        sprintf(linebuf, "dat_%lli.dat", data.count);
+        outfile = fopen(linebuf, "w+");
+        if(outfile == NULL)
+        {
+            printf("failed to open data file\n");
+            return -1;
+        }
+
+        for(j = 0; j < 16; j++)
+        {
+            for(b = 0; b < 256; b++)
+            {
+                sprintf(linebuf,
+                        "%2d %3d %lli %f %f %f %f\n",
+                        j, b, (long long) data.tnum[j][b],
+                        u[j][b], udev[j][b],
+                        u[j][b] - taverage, udev[j][b] / sqrt(data.tnum[j][b]));
+                fputs(linebuf, outfile);
+            }
+        }
+
+        fclose(outfile);
     }
 
     free_device(dev);

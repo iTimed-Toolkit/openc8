@@ -173,6 +173,7 @@ void entry_async(uint64_t *base)
 
     expand_key(key, key_sched, 11, sbox, rc_lookup);
 
+    // initialize events and buffers
     struct aes_sw_bernstein_data *data = (struct aes_sw_bernstein_data *) base;
     event_new(&data->ev_data, 1, 0);
     event_new(&data->ev_done, 1, 0);
@@ -180,7 +181,7 @@ void entry_async(uint64_t *base)
     data->count = 0;
     for(i = 0; i < 16; i++)
     {
-        for(j = 0; j < 16; j++)
+        for(j = 0; j < 256; j++)
         {
             data->t[i][j] = 0;
             data->tsq[i][j] = 0;
@@ -190,17 +191,16 @@ void entry_async(uint64_t *base)
 
     while(1)
     {
+        // randomly generate a new msg based on the old one
         for(i = 0; i < 16; i++)
             msg_old[i] = msg[i];
 
-        for(addr = sbox; addr < sbox + 256; addr += 64)
-            inv_va(addr);
-
-
+        // encrypt it and measure time
         start = get_ticks();
         aes128_encrypt_ecb(msg, msg_len, key, sbox, key_sched, mul2, mul3);
         timing = (double) (get_ticks() - start);
 
+        // update counters
         for(i = 0; i < 16; i++)
         {
             data->t[i][msg_old[i]] += timing;
@@ -211,6 +211,7 @@ void entry_async(uint64_t *base)
             data->ttotal += timing;
         }
 
+        // check if host has requested data
         iter_count++;
         if(iter_count % 100000 == 0)
         {
