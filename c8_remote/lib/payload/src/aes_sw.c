@@ -1,4 +1,5 @@
 #include "bootrom_func.h"
+#include "bootrom_type.h"
 #include "cacheutil.h"
 
 PAYLOAD_SECTION
@@ -112,12 +113,9 @@ void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
 
 PAYLOAD_SECTION
 void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char key[16],
-                        unsigned char sbox[16][16], unsigned char rc_lookup[11],
+                        unsigned char sbox[16][16], unsigned char key_sched[176],
                         unsigned char mul2[256], unsigned char mul3[256])
 {
-    unsigned char key_sched[176];
-    expand_key(key, key_sched, 11, sbox, rc_lookup);
-
     unsigned int num_blocks = msg_len / 16;
     unsigned char *block;
 
@@ -147,14 +145,6 @@ uint64_t entry_sync(unsigned char *msg, unsigned int msg_len, unsigned char key[
                     unsigned char mul2[256], unsigned char mul3[256])
 {
     unsigned long long start = 0;
-//    int i, j;
-//    for(i = 0; i < 256; i++)
-//    {
-//        for(j = 0; j < 4; j++)
-//        {
-//            clean_inv_l1_setway(i, j);
-//        }
-//    }
 
     start = get_ticks();
     aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
@@ -164,8 +154,15 @@ uint64_t entry_sync(unsigned char *msg, unsigned int msg_len, unsigned char key[
 PAYLOAD_SECTION
 void entry_async(uint64_t *base)
 {
-    unsigned long long start = 0, end = 0;
+    int i, j, iter_count = 0;
+    unsigned long long start = 0;
+    unsigned char *addr;
 
+    unsigned char msg_old[16];
+    unsigned char key_sched[176];
+    double timing;
+
+    // get initial params
     unsigned char *msg = (unsigned char *) base[0];
     unsigned int msg_len = (unsigned int) base[1];
     unsigned char *key = (unsigned char *) base[2];
@@ -174,20 +171,51 @@ void entry_async(uint64_t *base)
     unsigned char *mul2 = (unsigned char *) base[5];
     unsigned char *mul3 = (unsigned char *) base[6];
 
-    base[0] = 0;
+    expand_key(key, key_sched, 11, sbox, rc_lookup);
+
+    struct aes_sw_bernstein_data *data = (struct aes_sw_bernstein_data *) base;
+    event_new(&data->ev_data, 1, 0);
+    event_new(&data->ev_done, 1, 0);
+
+    data->count = 0;
+    for(i = 0; i < 16; i++)
+    {
+        for(j = 0; j < 16; j++)
+        {
+            data->t[i][j] = 0;
+            data->tsq[i][j] = 0;
+            data->tnum[i][j] = 0;
+        }
+    }
+
     while(1)
     {
-        __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (start));
-        aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
-        __asm__ volatile ("mrs %0, cntpct_el0" : "=r" (end));
+        for(i = 0; i < 16; i++)
+            msg_old[i] = msg[i];
 
-        if(2 * end - start - 64 > 0)
+        for(addr = sbox; addr < sbox + 256; addr += 64)
+            inv_va(addr);
+
+
+        start = get_ticks();
+        aes128_encrypt_ecb(msg, msg_len, key, sbox, key_sched, mul2, mul3);
+        timing = (double) (get_ticks() - start);
+
+        for(i = 0; i < 16; i++)
         {
-            timer_register_int(2 * end - start - 64);
-            wfi();
+            data->t[i][msg_old[i]] += timing;
+            data->tsq[i][msg_old[i]] += (timing * timing);
+            data->tnum[i][msg_old[i]] += 1;
+
+            data->count++;
+            data->ttotal += timing;
         }
 
-        base[0]++;
-        if(base[0] % 100000 == 0) task_resched();
+        iter_count++;
+        if(iter_count % 100000 == 0)
+        {
+            if(event_try(&data->ev_data, 1))
+                event_wait(&data->ev_done);
+        }
     }
 }

