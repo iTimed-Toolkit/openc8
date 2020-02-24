@@ -564,7 +564,7 @@ int main()
             return -1;
         }
 
-        printf("have count %lli\n", data.count);
+        printf("have count %lli\n", data.count / 16);
         taverage = data.ttotal / (double) data.count;
 
         for(j = 0; j < 16; j++)
@@ -578,7 +578,7 @@ int main()
             }
         }
 
-        sprintf(linebuf, "dat_%lli.dat", data.count);
+        sprintf(linebuf, "dat_%lli.dat", data.count / 16);
         outfile = fopen(linebuf, "w+");
         if(outfile == NULL)
         {
