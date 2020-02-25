@@ -520,11 +520,11 @@ int main()
 
     while(1)
     {
-	for(j = 0; j < 30; j++)
-	{
-	    printf("waiting for minute %i out of 30\n", j);
-	    sleep(60);
-	}
+        for(j = 0; j < 30; j++)
+        {
+            printf("waiting for minute %i out of 30\n", j);
+            sleep(60);
+        }
 
         if(IS_CHECKM8_FAIL(open_device_session(dev)))
         {
