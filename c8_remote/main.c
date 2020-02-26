@@ -369,7 +369,7 @@ DEV_PTR_T aes_sw_bernstein(struct pwned_device *dev)
 
     unsigned char data[16];
     unsigned char key[16];
-    memset(key, 0, 16);
+    memset(key, 0x1, 16);
 
     if(IS_CHECKM8_FAIL(open_device_session(dev)))
     {

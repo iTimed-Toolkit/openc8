@@ -14,6 +14,21 @@ static inline int hardware_aes(unsigned long long cmd,
     return ((BOOTROM_FUNC_I) ADDR_HARDWARE_AES)(cmd, src, dst, len, opts, key, iv);
 }
 
+static inline int get_random(void *buf, int len)
+{
+    return ((BOOTROM_FUNC_I) ADDR_GET_RANDOM)(buf, len);
+}
+
+static inline unsigned int get_entropy()
+{
+    return ((BOOTROM_FUNC_I) ADDR_GET_ENTROPY)();
+}
+
+static inline void sha1(void *src, int len, void *dst)
+{
+    return ((BOOTROM_FUNC_V) ADDR_SHA1)(src, len, dst);
+}
+
 /* Timing */
 static inline int clock_gate(int device, int power)
 {

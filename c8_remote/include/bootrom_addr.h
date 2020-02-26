@@ -7,6 +7,9 @@
 
 /* Crypto */
 #define ADDR_HARDWARE_AES                   0x100000f0c
+#define ADDR_GET_RANDOM                     0x1000113e0
+#define ADDR_GET_ENTROPY                    0x1000013d4
+#define ADDR_SHA1                           0x10000cc90
 
 /* Timing */
 #define ADDR_CLOCK_GATE                     0x100009d4c
