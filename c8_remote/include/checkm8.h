@@ -46,9 +46,25 @@ struct pwned_device
 #endif
 };
 
+struct dev_cmd_resp
+{
+    int ret;
+    unsigned long long magic;
+    unsigned long long retval;
+    unsigned char *data;
+    int len;
+};
+
 struct pwned_device *exploit_device();
+void free_device(struct pwned_device *dev);
+
 int demote_device(struct pwned_device *dev);
 int fix_heap(struct pwned_device *dev);
-void free_device(struct pwned_device *dev);
+
+int open_device_session(struct pwned_device *dev);
+int close_device_session(struct pwned_device *dev);
+int is_device_session_open(struct pwned_device *dev);
+
+void free_dev_cmd_resp(struct dev_cmd_resp *resp);
 
 #endif //CHECKM8_TOOL_CHECKM8_H

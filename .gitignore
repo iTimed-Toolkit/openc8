@@ -6,4 +6,4 @@ cmake-build-debug/
 /c8_arduino/cmake-build-debug/
 
 # generated files
-/c8_remote/include/libpayload.h
+/c8_remote/include/tool/libpayload.h

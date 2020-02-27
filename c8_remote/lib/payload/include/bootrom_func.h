@@ -1,8 +1,8 @@
 #ifndef CHECKM8_TOOL_BOOTROM_FUNC_H
 #define CHECKM8_TOOL_BOOTROM_FUNC_H
 
-#include "bootrom_addr.h"
-#include "bootrom_type.h"
+#include "dev/addr.h"
+#include "dev/types.h"
 #include "dev_util.h"
 
 /* Crypto */

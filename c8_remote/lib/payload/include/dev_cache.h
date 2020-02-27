@@ -1,5 +1,5 @@
-#ifndef CHECKM8_TOOL_CACHEUTIL_H
-#define CHECKM8_TOOL_CACHEUTIL_H
+#ifndef CHECKM8_TOOL_DEV_CACHE_H
+#define CHECKM8_TOOL_DEV_CACHE_H
 
 #include "dev_util.h"
 
@@ -59,4 +59,4 @@ static inline void clean_inv_va(void *addr)
     __asm__ volatile ("dc ivac, %0"::"r" (addr));
 }
 
-#endif //CHECKM8_TOOL_CACHEUTIL_H
+#endif //CHECKM8_TOOL_DEV_CACHE_H

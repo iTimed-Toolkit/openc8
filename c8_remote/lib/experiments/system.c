@@ -1,9 +1,7 @@
-#include "experiments.h"
+#include "util/experiments.h"
 
 #include <stdio.h>
-
-#include "usb_helpers.h"
-#include "command.h"
+#include "tool/command.h"
 
 void usb_task_exit(struct pwned_device *dev)
 {

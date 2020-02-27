@@ -1,8 +1,8 @@
 #ifndef CHECKM8_TOOL_EXPERIMENTS_H
 #define CHECKM8_TOOL_EXPERIMENTS_H
 
-#include "payload.h"
-#include "bootrom_type.h"
+#include "tool/payload.h"
+#include "dev/types.h"
 
 /* AES Software */
 DEV_PTR_T setup_bern_exp(struct pwned_device *dev);

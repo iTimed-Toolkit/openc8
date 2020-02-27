@@ -1,6 +1,6 @@
 #include "bootrom_func.h"
-#include "bootrom_type.h"
-#include "cacheutil.h"
+#include "dev/types.h"
+#include "dev_cache.h"
 #include "dev_crypto.h"
 
 PAYLOAD_SECTION

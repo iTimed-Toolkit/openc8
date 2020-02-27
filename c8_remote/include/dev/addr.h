@@ -1,8 +1,8 @@
-#ifndef CHECKM8_TOOL_BOOTROM_ADDR_H
-#define CHECKM8_TOOL_BOOTROM_ADDR_H
+#ifndef CHECKM8_TOOL_ADDR_H
+#define CHECKM8_TOOL_ADDR_H
 
 #include "checkm8_config.h"
-#include "bootrom_type.h"
+#include "types.h"
 
 #if CHECKM8_PLATFORM == 8010
 
@@ -53,4 +53,4 @@
 #error "Unsupported checkm8 platform"
 #endif
 
-#endif //CHECKM8_TOOL_BOOTROM_ADDR_H
+#endif //CHECKM8_TOOL_ADDR_H

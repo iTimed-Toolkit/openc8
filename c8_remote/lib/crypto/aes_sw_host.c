@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "bootrom_type.h"
+#include "dev/types.h"
 
 static const unsigned char sbox[256] =
         {

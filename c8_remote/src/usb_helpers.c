@@ -1,4 +1,4 @@
-#include "usb_helpers.h"
+#include "tool/usb_helpers.h"
 
 #ifdef WITH_ARDUINO
 

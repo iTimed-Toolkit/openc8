@@ -1,8 +1,7 @@
-#include "experiments.h"
+#include "util/experiments.h"
 
 #include <stdio.h>
-#include "usb_helpers.h"
-#include "command.h"
+#include "tool/payload.h"
 
 void floppysleep(struct pwned_device *dev)
 {

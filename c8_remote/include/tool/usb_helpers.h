@@ -15,10 +15,6 @@ struct libusb_device_bundle
 };
 #endif
 
-int open_device_session(struct pwned_device *dev);
-int close_device_session(struct pwned_device *dev);
-int is_device_session_open(struct pwned_device *dev);
-
 int partial_ctrl_transfer(struct pwned_device *dev,
                           unsigned char bmRequestType, unsigned char bRequest,
                           unsigned short wValue, unsigned short wIndex,

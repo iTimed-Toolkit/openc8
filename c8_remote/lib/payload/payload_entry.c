@@ -1,5 +1,5 @@
 #include "dev_util.h"
-#include "bootrom_addr.h"
+#include "dev/addr.h"
 
 PAYLOAD_SECTION
 void load_sync_entry()

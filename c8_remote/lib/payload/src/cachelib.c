@@ -1,5 +1,5 @@
 #include "bootrom_func.h"
-#include "cacheutil.h"
+#include "dev_cache.h"
 
 
 PAYLOAD_SECTION

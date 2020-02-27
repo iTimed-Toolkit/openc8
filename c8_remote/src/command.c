@@ -1,7 +1,7 @@
-#include "command.h"
+#include "tool/command.h"
 
 #include "checkm8.h"
-#include "usb_helpers.h"
+#include "tool/usb_helpers.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -4,19 +4,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <unistd.h>
 
-#include "payload.h"
-#include "usb_helpers.h"
-#include "bootrom_type.h"
-#include "experiments.h"
-#include "host_crypto.h"
+#include "dev/types.h"
+#include "util/experiments.h"
+#include "util/host_crypto.h"
 
 #ifdef CHECKM8_LOGGING
-
 #include <stdarg.h>
 #include <execinfo.h>
-
 #endif
 
 void checkm8_debug_indent(const char *format, ...)

@@ -1,4 +1,4 @@
-#include "bootrom_type.h"
+#include "dev/types.h"
 
 #ifdef DEV_CRYPTO
 #include "dev_util.h"

@@ -1,4 +1,4 @@
-#include "bootrom_addr.h"
+#include "dev/addr.h"
 #include "bootrom_func.h"
 
 PAYLOAD_SECTION

@@ -1,5 +1,5 @@
-#ifndef CHECKM8_TOOL_BOOTROM_TYPE_H
-#define CHECKM8_TOOL_BOOTROM_TYPE_H
+#ifndef CHECKM8_TOOL_TYPES_H
+#define CHECKM8_TOOL_TYPES_H
 
 struct event
 {
@@ -41,4 +41,4 @@ struct corr_data
     unsigned char data[N_CORR_ENTRIES];
 };
 
-#endif //CHECKM8_TOOL_BOOTROM_TYPE_H
+#endif //CHECKM8_TOOL_TYPES_H

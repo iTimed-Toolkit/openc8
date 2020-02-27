@@ -37,7 +37,7 @@ add_custom_command(TARGET       payload POST_BUILD
                     BYPRODUCTS  ${CMAKE_SOURCE_DIR}/c8_remote/include/libpayload.h
                     COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/headerize.py
                                         ${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles
-                                        ${CMAKE_SOURCE_DIR}/c8_remote/include)
+                                        ${CMAKE_SOURCE_DIR}/c8_remote/include/tool)
 
 add_library(experiments experiments/aes_sw.c
                         experiments/system.c

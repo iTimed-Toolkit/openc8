@@ -1,14 +1,13 @@
-#include "experiments.h"
+#include "util/experiments.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
 
-#include "bootrom_addr.h"
-#include "usb_helpers.h"
-#include "command.h"
-#include "host_crypto.h"
+#include "dev/addr.h"
+#include "tool/command.h"
+#include "util/host_crypto.h"
 
 DEV_PTR_T install_aes_data(struct pwned_device *dev)
 {

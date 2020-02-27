@@ -1,14 +1,13 @@
-#include "payload.h"
+#include "tool/payload.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "command.h"
-#include "usb_helpers.h"
+#include "tool/command.h"
+#include "tool/libpayload.h"
 
-#include "bootrom_addr.h"
-#include "libpayload.h"
+#include "dev/addr.h"
 
 struct payload
 {

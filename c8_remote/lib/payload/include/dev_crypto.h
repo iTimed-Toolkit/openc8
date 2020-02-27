@@ -1,7 +1,7 @@
 #ifndef CHECKM8_TOOL_CRYPTO_H
 #define CHECKM8_TOOL_CRYPTO_H
 
-#include "bootrom_type.h"
+#include "dev/types.h"
 
 void expand_key(unsigned char key[16], unsigned char key_sched[176],
                 int n, struct aes_constants *c);
