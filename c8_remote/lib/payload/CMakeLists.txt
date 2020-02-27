@@ -39,6 +39,7 @@ foreach(NAME ${PL_NAMES})
 endforeach(NAME)
 
 add_library(crypto_dev ../crypto/aes_sw_impl.c)
+target_compile_definitions(crypto_dev PRIVATE CRYPTO_DEV)
 
 target_link_libraries(payload_aes_sw_bern crypto_dev)
 target_link_libraries(payload_aes_sw_corr crypto_dev)

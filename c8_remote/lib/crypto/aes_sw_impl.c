@@ -1,5 +1,10 @@
 #include "bootrom_type.h"
 
+#ifdef CRYPTO_DEV
+#include "dev_util.h"
+
+PAYLOAD_SECTION
+#endif
 void sub_bytes(unsigned char block[16], struct aes_constants *c)
 {
     int i;
@@ -12,6 +17,9 @@ void sub_bytes(unsigned char block[16], struct aes_constants *c)
     }
 }
 
+#ifdef CRYPTO_DEV
+PAYLOAD_SECTION
+#endif
 void shift_rows(unsigned char block[16])
 {
     unsigned char temp1, temp2;
@@ -36,6 +44,9 @@ void shift_rows(unsigned char block[16])
     block[0x7] = temp1;
 }
 
+#ifdef CRYPTO_DEV
+PAYLOAD_SECTION
+#endif
 void mix_cols(unsigned char block[16], struct aes_constants *c)
 {
     unsigned char r0, r1, r2, r3;
@@ -56,6 +67,9 @@ void mix_cols(unsigned char block[16], struct aes_constants *c)
     }
 }
 
+#ifdef CRYPTO_DEV
+PAYLOAD_SECTION
+#endif
 void add_key(unsigned char block[16], unsigned char key[16])
 {
     int i;
@@ -65,6 +79,9 @@ void add_key(unsigned char block[16], unsigned char key[16])
     }
 }
 
+#ifdef CRYPTO_DEV
+PAYLOAD_SECTION
+#endif
 void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
                 struct aes_constants *c)
 {
@@ -103,6 +120,9 @@ void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
     }
 }
 
+#ifdef CRYPTO_DEV
+PAYLOAD_SECTION
+#endif
 void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len,
                         unsigned char key_sched[176], struct aes_constants *c)
 {
