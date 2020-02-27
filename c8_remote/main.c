@@ -109,16 +109,14 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     for(i = 0; i < 16; i++)
     {
         msg[i] = 0;
-        key[i] = 0x1;
+        key[i] = 0x0;
     }
 
     expand_key(key, key_sched, 11, c);
 
-
-
     addr_async_buf = setup_corr_exp(dev, key);
     printf("got async buf ptr %llx\n", addr_async_buf);
-    if(addr_async_buf == DEV_PTR_NULL)return;
+    if(addr_async_buf == DEV_PTR_NULL) return;
 
     while(1)
     {
