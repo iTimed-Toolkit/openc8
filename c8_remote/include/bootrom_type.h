@@ -30,4 +30,15 @@ struct bern_data
     struct event ev_done;
 } __attribute__ ((packed));
 
+#define N_CORR_ENTRIES 1024*256
+
+struct corr_data
+{
+    struct event ev_cont;
+
+    int num_cutoff;
+    unsigned char msg[16];
+    unsigned char data[N_CORR_ENTRIES];
+};
+
 #endif //CHECKM8_TOOL_BOOTROM_TYPE_H

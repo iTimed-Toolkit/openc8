@@ -1,6 +1,7 @@
 set(PL_NAMES
         aes_busy
-        aes_sw
+        aes_sw_bern
+        aes_sw_corr
         cachelib
         exit_usb_task
         floppysleep
@@ -17,6 +18,7 @@ foreach(TARGET ${PL_TARGETS})
     list(APPEND PL_BIN          "${CMAKE_CURRENT_BINARY_DIR}/payload/bin/${TARGET}.bin")
 endforeach(TARGET)
 
+set(CMAKE_C_FLAGS "-g -Wall")
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/payload)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles)
@@ -37,4 +39,7 @@ add_custom_command(TARGET       payload POST_BUILD
                                         ${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles
                                         ${CMAKE_SOURCE_DIR}/c8_remote/include)
 
-add_library(experiments experiments/aes_sw.c experiments/system.c experiments/power.c)
+add_library(experiments experiments/aes_sw.c
+                        experiments/system.c
+                        experiments/power.c)
+add_library(crypto_host crypto/aes_sw_impl.c crypto/aes_sw_host.c)

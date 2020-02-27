@@ -6,14 +6,16 @@ if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     set(CMAKE_C_COMPILER    /usr/bin/aarch64-linux-gnu-gcc)
     set(CMAKE_ASM_COMPILER  /usr/bin/aarch64-linux-gnu-as)
     set(CMAKE_OBJCOPY       /usr/bin/aarch64-linux-gnu-objcopy)
+    set(CMAKE_RANLIB        /usr/bin/aarch64-linux-gnu-ranlib)
 elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "armv7l")
     # raspberry pi
     set(CMAKE_C_COMPILER    /opt/cross/bin/aarch64-linux-gcc)
     set(CMAKE_ASM_COMPILER  /opt/cross/bin/aarch64-linux-as)
     set(CMAKE_OBJCOPY       /opt/cross/bin/aarch64-linux-objcopy)
+    set(CMAKE_RANLIB        /opt/cross/bin/aarch64-linux-ranlib)
 endif()
 
-set(CMAKE_C_FLAGS "-nostdlib -O -Wl,--gc-sections")
+set(CMAKE_C_FLAGS "-nostdlib -O")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 foreach(NAME ${PL_NAMES})
@@ -35,3 +37,8 @@ foreach(NAME ${PL_NAMES})
                                     ${CMAKE_CURRENT_BINARY_DIR}/payload_${NAME}
                                     ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin)
 endforeach(NAME)
+
+add_library(crypto_dev ../crypto/aes_sw_impl.c)
+
+target_link_libraries(payload_aes_sw_bern crypto_dev)
+target_link_libraries(payload_aes_sw_corr crypto_dev)

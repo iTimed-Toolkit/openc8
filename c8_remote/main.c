@@ -6,11 +6,11 @@
 #include <math.h>
 #include <unistd.h>
 
-#include "command.h"
 #include "payload.h"
 #include "usb_helpers.h"
 #include "bootrom_type.h"
 #include "experiments.h"
+#include "crypto_host.h"
 
 #ifdef CHECKM8_LOGGING
 
@@ -95,10 +95,69 @@ void record_bern_data(struct bern_data *data)
     fclose(outfile);
 }
 
+void run_corr_exp(struct pwned_device *dev, char *fname)
+{
+    int i;
+    FILE *outfile;
+    DEV_PTR_T addr_async_buf;
+
+    struct aes_constants *c = get_constants();
+    struct corr_data *data;
+
+    unsigned char msg[16];
+    unsigned char key[16];
+    unsigned char key_sched[176];
+
+    for(i = 0; i < 16; i++)
+    {
+        msg[i] = 0;
+        key[i] = 0x1;
+    }
+
+    expand_key(key, key_sched, 11, c);
+
+    outfile = fopen(fname, "wb");
+    if(outfile == NULL)
+    {
+        printf("failed to open outfile\n");
+        return;
+    }
+
+    addr_async_buf = setup_corr_exp(dev, key);
+    printf("got async buf ptr %llx\n", addr_async_buf);
+    if(addr_async_buf == DEV_PTR_NULL)return;
+
+    while(1)
+    {
+        data = get_corr_exp_data(dev, addr_async_buf);
+
+        for(i = 0; i < N_CORR_ENTRIES; i++)
+        {
+            fwrite(msg, 1, sizeof(msg), outfile);
+            fwrite("\x00", 1, 1, outfile);
+            fwrite(&data->data[i], 1, 1, outfile);
+            fwrite("\x00", 1, 1, outfile);
+
+            aes128_encrypt_ecb(msg, 16, key_sched, c);
+        }
+
+        fflush(outfile);
+        for(i = 0; i < 16; i++)
+        {
+            if(msg[i] != data->msg[i])
+            {
+                printf("aes error! message mismatch\n");
+                free(data);
+                return;
+            }
+        }
+
+        free(data);
+    }
+}
+
 int main()
 {
-    DEV_PTR_T addr_async_buf;
-    struct bern_data *data;
     struct pwned_device *dev = exploit_device();
 
     if(dev == NULL || dev->status == DEV_NORMAL)
@@ -110,22 +169,7 @@ int main()
     fix_heap(dev);
     demote_device(dev);
 
-    addr_async_buf = setup_bern_exp(dev);
-    printf("got async buf ptr %llx\n", addr_async_buf);
-    if(addr_async_buf == DEV_PTR_NULL)
-    {
-        return -1;
-    }
-
-    while(1)
-    {
-        sleep(60);
-
-        data = get_bern_exp_data(dev, addr_async_buf);
-        record_bern_data(data);
-        free(data);
-    }
-
+    run_corr_exp(dev, "test.out");
     free_device(dev);
 }
 
