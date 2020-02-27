@@ -8,7 +8,7 @@
 #include "bootrom_addr.h"
 #include "usb_helpers.h"
 #include "command.h"
-#include "crypto_host.h"
+#include "host_crypto.h"
 
 DEV_PTR_T install_aes_data(struct pwned_device *dev)
 {

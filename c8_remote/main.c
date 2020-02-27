@@ -10,7 +10,7 @@
 #include "usb_helpers.h"
 #include "bootrom_type.h"
 #include "experiments.h"
-#include "crypto_host.h"
+#include "host_crypto.h"
 
 #ifdef CHECKM8_LOGGING
 

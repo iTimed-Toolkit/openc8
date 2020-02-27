@@ -8,4 +8,4 @@ include_directories(include)
 
 add_executable(checkm8_remote main.c src/usb_helpers.c src/exploit.c src/payload.c src/command.c)
 target_link_libraries(checkm8_remote usb-1.0 pthread udev m)
-target_link_libraries(checkm8_remote payload experiments crypto_host)
+target_link_libraries(checkm8_remote payload experiments host_crypto)

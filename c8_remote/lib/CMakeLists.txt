@@ -42,4 +42,4 @@ add_custom_command(TARGET       payload POST_BUILD
 add_library(experiments experiments/aes_sw.c
                         experiments/system.c
                         experiments/power.c)
-add_library(crypto_host crypto/aes_sw_impl.c crypto/aes_sw_host.c)
+add_library(host_crypto crypto/aes_sw_impl.c crypto/aes_sw_host.c)

@@ -1,6 +1,6 @@
 #include "bootrom_func.h"
 #include "dev_util.h"
-#include "crypto_dev.h"
+#include "dev_crypto.h"
 
 PAYLOAD_SECTION
 void entry_sync()

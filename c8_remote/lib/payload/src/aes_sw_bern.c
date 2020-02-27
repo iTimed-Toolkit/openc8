@@ -1,7 +1,7 @@
 #include "bootrom_func.h"
 #include "bootrom_type.h"
 #include "cacheutil.h"
-#include "crypto_dev.h"
+#include "dev_crypto.h"
 
 PAYLOAD_SECTION
 uint64_t entry_sync(unsigned char *msg, unsigned int msg_len, unsigned char key[16],
