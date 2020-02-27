@@ -10,8 +10,10 @@
 #include "util/host_crypto.h"
 
 #ifdef CHECKM8_LOGGING
+
 #include <stdarg.h>
 #include <execinfo.h>
+
 #endif
 
 void checkm8_debug_indent(const char *format, ...)
@@ -92,7 +94,8 @@ void record_bern_data(struct bern_data *data)
 
 void run_corr_exp(struct pwned_device *dev, char *fname)
 {
-    int i;
+    int i, j, iter = 0;
+    char dat_fname[32];
     FILE *outfile;
     DEV_PTR_T addr_async_buf;
 
@@ -111,12 +114,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
 
     expand_key(key, key_sched, 11, c);
 
-    outfile = fopen(fname, "wb");
-    if(outfile == NULL)
-    {
-        printf("failed to open outfile\n");
-        return;
-    }
+
 
     addr_async_buf = setup_corr_exp(dev, key);
     printf("got async buf ptr %llx\n", addr_async_buf);
@@ -124,30 +122,46 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
 
     while(1)
     {
-        data = get_corr_exp_data(dev, addr_async_buf);
-
-        for(i = 0; i < N_CORR_ENTRIES; i++)
+        sprintf(dat_fname, "%s_%i.bin", fname, iter);
+        outfile = fopen(dat_fname, "wb");
+        if(outfile == NULL)
         {
-            fwrite(msg, 1, sizeof(msg), outfile);
-            fwrite("\x00", 1, 1, outfile);
-            fwrite(&data->data[i], 1, 1, outfile);
-            fwrite("\x00", 1, 1, outfile);
-
-            aes128_encrypt_ecb(msg, 16, key_sched, c);
+            printf("failed to open outfile\n");
+            return;
         }
 
-        fflush(outfile);
-        for(i = 0; i < 16; i++)
+        for(j = 0; j < 375; j++)
         {
-            if(msg[i] != data->msg[i])
+            data = get_corr_exp_data(dev, addr_async_buf);
+            if(data->num_cutoff != 0)
+                printf("more than 0 entries were cutoff\n");
+
+            for(i = 0; i < N_CORR_ENTRIES; i++)
             {
-                printf("aes error! message mismatch\n");
-                free(data);
-                return;
+                fwrite(msg, 1, sizeof(msg), outfile);
+                fwrite("\x00", 1, 1, outfile);
+                fwrite(&data->data[i], 1, 1, outfile);
+                fwrite("\x00\x00", 1, 2, outfile);
+
+                aes128_encrypt_ecb(msg, 16, key_sched, c);
             }
+
+            fflush(outfile);
+            for(i = 0; i < 16; i++)
+            {
+                if(msg[i] != data->msg[i])
+                {
+                    printf("aes error! message mismatch\n");
+                    free(data);
+                    return;
+                }
+            }
+
+            free(data);
         }
 
-        free(data);
+        fclose(outfile);
+        iter++;
     }
 }
 
@@ -164,7 +178,7 @@ int main()
     fix_heap(dev);
     demote_device(dev);
 
-    run_corr_exp(dev, "test.out");
+    run_corr_exp(dev, "key00");
     free_device(dev);
 }
 
