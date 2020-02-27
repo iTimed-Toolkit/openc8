@@ -2,6 +2,7 @@
 #define CHECKM8_TOOL_BOOTROM_ADDR_H
 
 #include "checkm8_config.h"
+#include "bootrom_type.h"
 
 #if CHECKM8_PLATFORM == 8010
 
@@ -45,7 +46,8 @@
 
 #define ADDR_DFU_RETVAL                     (int *)                 0x180088ac8
 #define ADDR_DFU_STATUS                     (unsigned char *)       0x180088ac0
-#define ADDR_DFU_EVENT                      (unsigned long long *)  0x180088af0
+#define ADDR_DFU_EVENT                      (struct event *)        0x180088af0
+#define ADDR_USB_EVENT                      (struct event *)        0x1800838c8
 
 #else
 #error "Unsupported checkm8 platform"

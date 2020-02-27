@@ -505,7 +505,7 @@ DEV_PTR_T install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *
     struct dev_cmd_resp *resp;
     DEV_PTR_T addr = get_address(dev, loc, len);
 
-    if(addr == -1)
+    if(addr == DEV_PTR_NULL)
     {
         checkm8_debug_indent("\tfailed to get an address\n");
         return DEV_PTR_NULL;

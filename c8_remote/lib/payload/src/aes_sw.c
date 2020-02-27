@@ -3,7 +3,7 @@
 #include "cacheutil.h"
 
 PAYLOAD_SECTION
-void sub_bytes(unsigned char block[16], unsigned char sbox[16][16])
+void sub_bytes(unsigned char block[16], struct aes_constants *c)
 {
     int i;
     unsigned char val;
@@ -11,7 +11,7 @@ void sub_bytes(unsigned char block[16], unsigned char sbox[16][16])
     for(i = 0; i < 16; i++)
     {
         val = block[i];
-        block[i] = sbox[val >> 4u][val & 0xfu];
+        block[i] = c->sbox[val >> 4u][val & 0xfu];
     }
 }
 
@@ -41,8 +41,7 @@ void shift_rows(unsigned char block[16])
 }
 
 PAYLOAD_SECTION
-void mix_cols(unsigned char block[16],
-              unsigned char mul2_lookup[256], unsigned char mul3_lookup[256])
+void mix_cols(unsigned char block[16], struct aes_constants *c)
 {
     unsigned char r0, r1, r2, r3;
     int i;
@@ -55,10 +54,10 @@ void mix_cols(unsigned char block[16],
         r3 = block[4 * i + 3];
 
         // no reason for the "+ 0" here but it makes the code look more lined up :)
-        block[4 * i + 0] = mul2_lookup[r0] ^ mul3_lookup[r1] ^ r2 ^ r3;
-        block[4 * i + 1] = r0 ^ mul2_lookup[r1] ^ mul3_lookup[r2] ^ r3;
-        block[4 * i + 2] = r0 ^ r1 ^ mul2_lookup[r2] ^ mul3_lookup[r3];
-        block[4 * i + 3] = mul3_lookup[r0] ^ r1 ^ r2 ^ mul2_lookup[r3];
+        block[4 * i + 0] = c->mul2[r0] ^ c->mul3[r1] ^ r2 ^ r3;
+        block[4 * i + 1] = r0 ^ c->mul2[r1] ^ c->mul3[r2] ^ r3;
+        block[4 * i + 2] = r0 ^ r1 ^ c->mul2[r2] ^ c->mul3[r3];
+        block[4 * i + 3] = c->mul3[r0] ^ r1 ^ r2 ^ c->mul2[r3];
     }
 }
 
@@ -74,7 +73,7 @@ void add_key(unsigned char block[16], unsigned char key[16])
 
 PAYLOAD_SECTION
 void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
-                unsigned char sbox[16][16], unsigned char rc_lookup[11])
+                struct aes_constants *c)
 {
     int i, j, prev_key_base, key_base = 0;
     unsigned char val;
@@ -91,13 +90,13 @@ void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
         for(j = 0; j < 3; j++)
         {
             val = key_sched[prev_key_base + 13 + j];
-            key_sched[key_base + j] = sbox[val >> 4u][val & 0xfu];
+            key_sched[key_base + j] = c->sbox[val >> 4u][val & 0xfu];
         }
 
         val = key_sched[prev_key_base + 12];
-        key_sched[key_base + 3] = sbox[val >> 4u][val & 0xfu];
+        key_sched[key_base + 3] = c->sbox[val >> 4u][val & 0xfu];
 
-        key_sched[key_base] ^= rc_lookup[i - 1];
+        key_sched[key_base] ^= c->rc_lookup[i - 1];
 
         for(j = 0; j < 4; j++)
         {
@@ -112,9 +111,8 @@ void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
 }
 
 PAYLOAD_SECTION
-void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char key[16],
-                        unsigned char sbox[16][16], unsigned char key_sched[176],
-                        unsigned char mul2[256], unsigned char mul3[256])
+void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len,
+                        unsigned char key_sched[176], struct aes_constants *c)
 {
     unsigned int num_blocks = msg_len / 16;
     unsigned char *block;
@@ -127,13 +125,13 @@ void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char 
 
         for(j = 0; j < 9; j++)
         {
-            sub_bytes(block, sbox);
+            sub_bytes(block, c);
             shift_rows(block);
-            mix_cols(block, mul2, mul3);
+            mix_cols(block, c);
             add_key(block, &key_sched[16 * (j + 1)]);
         }
 
-        sub_bytes(block, sbox);
+        sub_bytes(block, c);
         shift_rows(block);
         add_key(block, &key_sched[16 * (j + 1)]);
     }
@@ -141,13 +139,14 @@ void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len, unsigned char 
 
 PAYLOAD_SECTION
 uint64_t entry_sync(unsigned char *msg, unsigned int msg_len, unsigned char key[16],
-                    unsigned char sbox[16][16], unsigned char rc_lookup[11],
-                    unsigned char mul2[256], unsigned char mul3[256])
+                    struct aes_constants *c)
 {
     unsigned long long start = 0;
+    unsigned char key_sched[176];
+    expand_key(key, key_sched, 11, c);
 
     start = get_ticks();
-    aes128_encrypt_ecb(msg, msg_len, key, sbox, rc_lookup, mul2, mul3);
+    aes128_encrypt_ecb(msg, msg_len, key, c);
     return get_ticks() - start;
 }
 
@@ -156,7 +155,7 @@ void entry_async(uint64_t *base)
 {
     int i, j, iter_count = 0;
     unsigned long long start = 0;
-    unsigned char *addr;
+    struct event *usb_event = ADDR_USB_EVENT;
 
     unsigned char msg_old[16];
     unsigned char key_sched[176];
@@ -166,15 +165,12 @@ void entry_async(uint64_t *base)
     unsigned char *msg = (unsigned char *) base[0];
     unsigned int msg_len = (unsigned int) base[1];
     unsigned char *key = (unsigned char *) base[2];
-    unsigned char *sbox = (unsigned char *) base[3];
-    unsigned char *rc_lookup = (unsigned char *) base[4];
-    unsigned char *mul2 = (unsigned char *) base[5];
-    unsigned char *mul3 = (unsigned char *) base[6];
+    struct aes_constants *c = (struct aes_constants *) base[3];
 
-    expand_key(key, key_sched, 11, sbox, rc_lookup);
+    expand_key(key, key_sched, 11, c);
 
     // initialize events and buffers
-    struct aes_sw_bernstein_data *data = (struct aes_sw_bernstein_data *) base;
+    struct bern_data *data = (struct bern_data *) base;
     event_new(&data->ev_data, 1, 0);
     event_new(&data->ev_done, 1, 0);
 
@@ -197,7 +193,7 @@ void entry_async(uint64_t *base)
 
         // encrypt it and measure time
         start = get_ticks();
-        aes128_encrypt_ecb(msg, msg_len, key, sbox, key_sched, mul2, mul3);
+        aes128_encrypt_ecb(msg, msg_len, key_sched, c);
         timing = (double) (get_ticks() - start);
 
         // update counters
