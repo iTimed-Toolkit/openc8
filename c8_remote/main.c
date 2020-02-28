@@ -108,7 +108,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     unsigned char key_sched[176];
 
     sprintf(fname, "KEY");
-    outfile = fopen(fname, "w");
+    outfile = fopen(fname, "w+");
     if(outfile == NULL)
     {
         printf("failed to open key file\n");
@@ -136,7 +136,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     while(1)
     {
         sprintf(dat_fname, "%s_%i.bin", fname, iter);
-        outfile = fopen(dat_fname, "wb");
+        outfile = fopen(dat_fname, "wb+");
         if(outfile == NULL)
         {
             printf("failed to open outfile\n");
@@ -200,6 +200,7 @@ int main()
     // crash!
     execute_gadget(dev, 0, 0, 0);
     free_device(dev);
+    return 0;
 }
 
 
