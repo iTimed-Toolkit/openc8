@@ -175,6 +175,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
 
         fclose(outfile);
         iter++;
+        if(iter == 46) break;
     }
 }
 
@@ -192,6 +193,12 @@ int main()
     demote_device(dev);
 
     run_corr_exp(dev, "key00");
+
+    uninstall_all_data(dev);
+    uninstall_all_payloads(dev);
+
+    // crash!
+    execute_gadget(dev, 0, 0, 0);
     free_device(dev);
 }
 
