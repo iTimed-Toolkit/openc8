@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #include "dev/types.h"
 #include "util/experiments.h"
@@ -106,11 +107,25 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     unsigned char key[16];
     unsigned char key_sched[176];
 
+    sprintf(fname, "KEY");
+    outfile = fopen(fname, "w");
+    if(outfile == NULL)
+    {
+        printf("failed to open key file\n");
+        return;
+    }
+
+    srand(time(NULL));
     for(i = 0; i < 16; i++)
     {
         msg[i] = 0;
-        key[i] = 0x0;
+        key[i] = random();
+        fprintf(outfile, "%02x", key[i]);
     }
+
+    fprintf(outfile, "\n");
+    fflush(outfile);
+    fclose(outfile);
 
     expand_key(key, key_sched, 11, c);
 
