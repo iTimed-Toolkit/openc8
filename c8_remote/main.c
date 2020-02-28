@@ -107,8 +107,8 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     unsigned char key[16];
     unsigned char key_sched[176];
 
-    sprintf(fname, "KEY");
-    outfile = fopen(fname, "w+");
+    sprintf(dat_fname, "KEY");
+    outfile = fopen(dat_fname, "w+");
     if(outfile == NULL)
     {
         printf("failed to open key file\n");
