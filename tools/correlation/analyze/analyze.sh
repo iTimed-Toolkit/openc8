@@ -25,6 +25,5 @@ done
 
 rm $NODEFILE
 
-prun # todo: whatever the name is
-
-#todo: delete tmp files
+prun ./analyze /tmp/ghaas
+rm -r /tmp/ghaas
