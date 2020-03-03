@@ -8,4 +8,4 @@ include_directories(include)
 add_subdirectory(c8_remote)
 
 # targets for external tools
-add_executable(tool_corr_strip  tools/correlation/strip/main.c)
+add_subdirectory(tools)
