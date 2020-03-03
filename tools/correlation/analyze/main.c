@@ -13,10 +13,15 @@
 #define FILE_PER_NODE   (N_FILES / N_NODES)
 #define MSG_SEPARATE    1024 * 256
 
+#define ANALYZE_DEBUG   1
+
 int read_data(unsigned char *dst, char *fname, unsigned int offset, unsigned int num)
 {
     unsigned long ret;
     FILE *datafile = fopen(fname, "rb");
+
+    if(ANALYZE_DEBUG)
+        printf("read_data(dst = %p, fname = %s, offset = %i, num = %i)\n", dst, fname, offset, num);
 
     if(datafile == NULL)
     {
@@ -120,7 +125,7 @@ struct summary_stats *calculate_stats(unsigned char *data,
 
 int main(int argc, char *argv[])
 {
-    int i, j, res;
+    int i, j;
     unsigned int i_byte, i_input, i_key, i_key_split;
     unsigned int trace_per_file = 0, msg_per_file = 0, num_traces = 0;
     int rank, nodes;
@@ -148,12 +153,18 @@ int main(int argc, char *argv[])
      * First, read in the data from each file
      */
 
+    if(ANALYZE_DEBUG)
+        printf("initializing MPI\n");
+
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nodes);
 
-    sprintf(timing_name, "%s/timing_dat00_%i.dat", argv[1], rank);
-    sprintf(msg_name, "%s/msg_dat00_%i.dat", argv[1], rank);
+    if(ANALYZE_DEBUG)
+        printf("getting initial sizes\n");
+
+    sprintf(timing_name, "%s/timing_key00_%i.bin", argv[1], rank);
+    sprintf(msg_name, "%s/msg_key00_%i.bin", argv[1], rank);
 
     if(stat(timing_name, &timing_finfo) != 0)
     {
@@ -171,10 +182,9 @@ int main(int argc, char *argv[])
     msg_per_file = msg_finfo.st_size / 16;
     num_traces = trace_per_file * FILE_PER_NODE;
 
-    // allocate memory (big!)
-    model = malloc(64 * num_traces);
-    msg = malloc(16 * num_traces);
-    timings = malloc(num_traces);
+    if(ANALYZE_DEBUG)
+        printf("%i traces per file, %i msgs per file, %i total traces\n",
+               trace_per_file, msg_per_file, num_traces);
 
     sprintf(timing_name, "%s/KEY", argv[1]);
     keyfile = fopen(timing_name, "r");
@@ -193,13 +203,24 @@ int main(int argc, char *argv[])
 
     fclose(keyfile);
 
+    if(ANALYZE_DEBUG)
+        printf("allocating memory\n");
+
+    // allocate memory (big!)
+    model = malloc(64 * num_traces);
+    msg = malloc(16 * num_traces);
+    timings = malloc(num_traces);
+
     c = get_constants();
     expand_key(key, key_sched, 11, c);
 
+    if(ANALYZE_DEBUG)
+        printf("beginning data read stage\n");
+
     for(i = 0; i < FILE_PER_NODE; i++)
     {
-        sprintf(timing_name, "%s/timing_dat00_%i.dat", argv[1], rank * FILE_PER_NODE + i);
-        sprintf(msg_name, "%s/msg_dat00_%i.dat", argv[1], rank * FILE_PER_NODE + i);
+        sprintf(timing_name, "%s/timing_key00_%i.bin", argv[1], rank * FILE_PER_NODE + i);
+        sprintf(msg_name, "%s/msg_key00_%i.bin", argv[1], rank * FILE_PER_NODE + i);
 
         read_data(timings, timing_name, trace_per_file * (i % FILE_PER_NODE), trace_per_file);
         read_data(msg, msg_name, msg_per_file * (i % FILE_PER_NODE), msg_per_file);
@@ -209,13 +230,13 @@ int main(int argc, char *argv[])
      * Then expand the messages so that we can create power models
      */
 
-    res = 0;
+    if(ANALYZE_DEBUG)
+        printf("beginning data expand stage\n");
 
 #pragma omp parallel for num_threads(32) default(none)  \
             firstprivate(key_sched, msg_per_file)       \
             private(msg_new, j)                         \
-            shared(msg, c)                              \
-            reduction(max:res)
+            shared(msg, c)
     for(i = 0; i < FILE_PER_NODE * msg_per_file; i++)
     {
         memcpy(&msg[i * MSG_SEPARATE], &msg[i], 16);
@@ -232,16 +253,9 @@ int main(int argc, char *argv[])
         {
             if(msg_new[j] != msg[(i + 1) * MSG_SEPARATE - 16 + j])
             {
-                res = 1;
                 break;
             }
         }
-    }
-
-    if(res)
-    {
-        printf("aes expansion failed for some thread\n");
-        return -1;
     }
 
     /*
