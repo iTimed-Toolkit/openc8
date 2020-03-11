@@ -12,9 +12,9 @@ struct event
 struct aes_constants
 {
     unsigned char sbox[16][16];
-    unsigned char rc_lookup[11];
     unsigned char mul2[256];
     unsigned char mul3[256];
+    unsigned char rc_lookup[11];
 } __attribute__ ((packed));
 
 struct bern_data
