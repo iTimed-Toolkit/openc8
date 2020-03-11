@@ -14,6 +14,7 @@
 
 #include <stdarg.h>
 #include <execinfo.h>
+#include <dev/addr.h>
 
 #endif
 
@@ -182,23 +183,28 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
 int main()
 {
     struct pwned_device *dev = exploit_device();
-
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
         printf("Failed to exploit device\n");
         return -1;
     }
 
-    fix_heap(dev);
+    open_device_session(dev);
+
     demote_device(dev);
+    fix_heap(dev);
+    usb_task_exit(dev);
 
-    run_corr_exp(dev, "key00");
+    close_device_session(dev);
 
-    uninstall_all_data(dev);
-    uninstall_all_payloads(dev);
 
-    // crash!
-    execute_gadget(dev, 0, 0, 0);
+//    run_corr_exp(dev, "key00");
+//
+//    uninstall_all_data(dev);
+//    uninstall_all_payloads(dev);
+//
+//    // crash!
+//    execute_gadget(dev, 0, 0, 0);
     free_device(dev);
     return 0;
 }

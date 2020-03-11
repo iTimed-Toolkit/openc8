@@ -40,6 +40,10 @@
 #define ADDR_DEV_MEMALIGN                   0x10000f380
 #define ADDR_DEV_FREE                       0x10000f1b0
 
+#define ADDR_HEAP_COOKIE                    0x180080640
+#define ADDR_HEAP_BASE                      0x1801b4000
+#define ADDR_HEAP_END                       0x1801fffc0
+
 /* Misc */
 #define ADDR_RANDOM_RET                     0x10000b924
 #define ADDR_SYNC_ENTRY                     0x1800afc84

@@ -17,6 +17,21 @@ struct aes_constants
     unsigned char rc_lookup[11];
 } __attribute__ ((packed));
 
+struct heap_header
+{
+    unsigned long long chksum;
+    unsigned long long pad[3];
+
+    unsigned long long curr_size;
+    unsigned long long curr_free : 1;
+
+    unsigned long long prev_free : 1;
+    unsigned long long prev_size : (sizeof(unsigned long long) * 8 - 2);
+
+    unsigned long long pad_start;
+    unsigned long long pad_end;
+} header;
+
 struct bern_data
 {
     double t[16][256];
