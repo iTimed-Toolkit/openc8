@@ -30,7 +30,7 @@ struct heap_header
 
     unsigned long long pad_start;
     unsigned long long pad_end;
-} header;
+} __attribute__ ((packed));
 
 struct bern_data
 {
