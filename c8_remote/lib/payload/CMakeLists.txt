@@ -19,23 +19,24 @@ set(CMAKE_C_FLAGS "-nostdlib -O")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 foreach(NAME ${PL_NAMES})
-    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.S)
-        add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/payload_entry.S
-                                        ${CMAKE_CURRENT_LIST_DIR}/payload_entry.c
-                                        ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c
-                                        ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.S)
-    else()
-        add_executable(payload_${NAME} ${CMAKE_CURRENT_LIST_DIR}/payload_entry.S
-                                        ${CMAKE_CURRENT_LIST_DIR}/payload_entry.c
-                                        ${CMAKE_CURRENT_LIST_DIR}/src/${NAME}.c)
+    string(REPLACE ":" "/" SRC_PATH ${NAME})
+    string(REGEX REPLACE "^[^:]*\\:(.*)$" "\\1" NAME_ONLY ${NAME})
+
+    set(SRC_NAME ${NAME}_SRCS)
+    set(${SRC_NAME} src/payload_entry.S src/payload_entry.c src/${SRC_PATH}.c)
+
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${SRC_PATH}.S)
+        list(APPEND ${SRC_NAME} src/${SRC_PATH}.S)
     endif()
 
-    add_custom_command(TARGET       payload_${NAME} POST_BUILD
-                        BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin
+    add_executable(payload_${NAME_ONLY} ${${SRC_NAME}})
+    message(adding payload_${NAME_ONLY})
+    add_custom_command(TARGET       payload_${NAME_ONLY} POST_BUILD
+                        BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin
                         COMMAND     ${CMAKE_OBJCOPY}
-                        ARGS        -O binary -j .text -j .payload_text
-                                    ${CMAKE_CURRENT_BINARY_DIR}/payload_${NAME}
-                                    ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME}.bin)
+                        ARGS        -O binary -j .text -j .payload_text -j .payload_data
+                                    ${CMAKE_CURRENT_BINARY_DIR}/payload_${NAME_ONLY}
+                                    ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin)
 endforeach(NAME)
 
 add_library(dev_crypto ../crypto/aes_sw_impl.c)

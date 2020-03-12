@@ -17,6 +17,6 @@ typedef unsigned int        uint32_t;
 typedef unsigned long long  uint64_t;
 
 #define PAYLOAD_SECTION __attribute__ ((section (".payload_text")))
-#define TEXT_SECTION    __attribute__ ((section (".text")))
+#define PAYLOAD_DATA    __attribute__ ((section (".payload_data")))
 
 #endif //CHECKM8_TOOL_DEV_UTIL_H

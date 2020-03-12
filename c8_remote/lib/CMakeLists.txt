@@ -1,17 +1,22 @@
 set(PL_NAMES
-        aes_busy
-        aes_sw_bern
-        aes_sw_corr
-        cachelib
-        exit_usb_task
-        floppysleep
-        sync
+        crypto:aes_busy
+        crypto:aes_sw_bern
+        crypto:aes_sw_corr
+
+        system:cachelib
+        system:exit_usb_task
+        system:init_sys
+        system:sync
+
+        power:floppysleep
         )
 
 foreach(NAME ${PL_NAMES})
-    list(APPEND PL_TARGETS      "payload_${NAME}")
-    list(APPEND PL_SRC_BIN      "${CMAKE_CURRENT_LIST_DIR}/payload/src/${NAME}.c")
+    string(REGEX REPLACE "^[^:]*\\:(.*)$" "\\1" NAME_ONLY ${NAME})
+    list(APPEND PL_TARGETS      "payload_${NAME_ONLY}")
 endforeach(NAME)
+
+message("${PL_TARGETS}")
 
 foreach(TARGET ${PL_TARGETS})
     list(APPEND PL_SRC_LIB      "${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles/${TARGET}.c")
@@ -39,7 +44,7 @@ add_custom_command(TARGET       payload POST_BUILD
                                         ${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles
                                         ${CMAKE_SOURCE_DIR}/c8_remote/include/tool)
 
-add_library(experiments experiments/aes_sw.c
+add_library(experiments experiments/crypto.c
                         experiments/system.c
                         experiments/power.c)
 add_library(host_crypto crypto/aes_sw_impl.c crypto/aes_sw_host.c)

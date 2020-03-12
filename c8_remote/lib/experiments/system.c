@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include "tool/command.h"
+#include "dev/addr.h"
 
 void usb_task_exit(struct pwned_device *dev)
 {
@@ -38,8 +39,7 @@ void usb_task_exit(struct pwned_device *dev)
         return;
     }
 
-    resp = execute_payload(dev, PAYLOAD_EXIT_USB_TASK, 0,
-                           1, get_payload_address(dev, PAYLOAD_EXIT_USB_TASK));
+    resp = execute_payload(dev, PAYLOAD_EXIT_USB_TASK, 0, 0);
     if(IS_CHECKM8_FAIL(resp->ret))
     {
         printf("failed to exit usb task\n");
