@@ -31,6 +31,8 @@
 #define ADDR_EVENT_WAIT                     0x10000af3c
 #define ADDR_EVENT_TRY                      0x10000af7c
 
+#define ADDR_BOOTSTRAP_TASK                 0x180080200
+
 /* Heap */
 #define ADDR_CALC_CHKSUM                    0x10000ee20
 #define ADDR_CHECK_BLOCK_CKSUM              0x10000f138
@@ -47,6 +49,7 @@
 /* Misc */
 #define ADDR_RANDOM_RET                     0x10000b924
 #define ADDR_SYNC_ENTRY                     0x1800afc84
+#define ADDR_GETDFU_EXIT                    0x1000006c8
 
 #define ADDR_DFU_RETVAL                     (int *)                 0x180088ac8
 #define ADDR_DFU_STATUS                     (unsigned char *)       0x180088ac0

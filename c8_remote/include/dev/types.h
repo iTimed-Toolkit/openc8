@@ -56,4 +56,7 @@ struct corr_data
     unsigned char data[N_CORR_ENTRIES];
 };
 
+#define DEV_PTR_NULL       -1ull
+typedef unsigned long long DEV_PTR_T;
+
 #endif //CHECKM8_TOOL_TYPES_H

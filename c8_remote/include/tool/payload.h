@@ -2,6 +2,7 @@
 #define CHECKM8_TOOL_PAYLOAD_H
 
 #include "checkm8.h"
+#include "dev/types.h"
 
 typedef enum
 {
@@ -20,8 +21,6 @@ typedef enum
     DRAM
 } LOCATION_T;
 
-#define DEV_PTR_NULL       -1ull
-typedef unsigned long long DEV_PTR_T;
 
 int install_payload(struct pwned_device *dev, PAYLOAD_T p, LOCATION_T loc);
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p);
