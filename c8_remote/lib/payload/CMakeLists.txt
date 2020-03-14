@@ -23,14 +23,17 @@ foreach(NAME ${PL_NAMES})
     string(REGEX REPLACE "^[^:]*\\:(.*)$" "\\1" NAME_ONLY ${NAME})
 
     set(SRC_NAME ${NAME}_SRCS)
-    set(${SRC_NAME} src/payload_entry.S src/payload_entry.c src/${SRC_PATH}.c)
+    set(${SRC_NAME} src/payload_entry.S src/payload_entry.c)
+
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${SRC_PATH}.c)
+        list(APPEND ${SRC_NAME} src/${SRC_PATH}.c)
+    endif()
 
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${SRC_PATH}.S)
         list(APPEND ${SRC_NAME} src/${SRC_PATH}.S)
     endif()
 
     add_executable(payload_${NAME_ONLY} ${${SRC_NAME}})
-    message(adding payload_${NAME_ONLY})
     add_custom_command(TARGET       payload_${NAME_ONLY} POST_BUILD
                         BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin
                         COMMAND     ${CMAKE_OBJCOPY}

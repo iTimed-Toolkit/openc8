@@ -9,5 +9,4 @@ void load_sync_entry()
     __asm__ volatile("movk x9, %0, LSL #16" :: "i" ((addr & 0xFFFF0000u) >> 16u));
     __asm__ volatile("movk x9, %0, LSL #32" :: "i" ((addr & 0xFFFF00000000u) >> 32u));
     __asm__ volatile("movk x9, %0, LSL #48" :: "i" ((addr & 0xFFFF000000000000u) >> 48u));
-
 }

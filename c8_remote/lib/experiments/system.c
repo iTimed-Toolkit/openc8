@@ -21,23 +21,17 @@ void usb_task_exit(struct pwned_device *dev)
 
     if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_EXIT_USB_TASK, SRAM)))
     {
-        printf("failed to install sync payload\n");
+        printf("failed to install dfu exit payload\n");
         return;
     }
 
     resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
     if(IS_CHECKM8_FAIL(resp->ret))
     {
-        printf("failed to execute bootstrap\n");
+        printf("failed to execute sync\n");
         return;
     }
     free_dev_cmd_resp(resp);
-
-    if(IS_CHECKM8_FAIL(uninstall_payload(dev, PAYLOAD_SYNC)))
-    {
-        printf("failed to uninstall sync payload\n");
-        return;
-    }
 
     resp = execute_payload(dev, PAYLOAD_EXIT_USB_TASK, 0, 0);
     if(IS_CHECKM8_FAIL(resp->ret))

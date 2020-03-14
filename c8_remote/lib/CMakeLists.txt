@@ -5,7 +5,6 @@ set(PL_NAMES
 
         system:cachelib
         system:exit_usb_task
-        system:init_sys
         system:sync
 
         power:floppysleep
@@ -15,8 +14,6 @@ foreach(NAME ${PL_NAMES})
     string(REGEX REPLACE "^[^:]*\\:(.*)$" "\\1" NAME_ONLY ${NAME})
     list(APPEND PL_TARGETS      "payload_${NAME_ONLY}")
 endforeach(NAME)
-
-message("${PL_TARGETS}")
 
 foreach(TARGET ${PL_TARGETS})
     list(APPEND PL_SRC_LIB      "${CMAKE_CURRENT_BINARY_DIR}/lib_cfiles/${TARGET}.c")

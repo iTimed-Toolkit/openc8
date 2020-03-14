@@ -7,9 +7,9 @@
 
 /* Crypto */
 static inline int hardware_aes(unsigned long long cmd,
-                        unsigned char *src, unsigned char *dst,
-                        int len, unsigned long long opts,
-                        unsigned char *key, unsigned char *iv)
+                               unsigned char *src, unsigned char *dst,
+                               int len, unsigned long long opts,
+                               unsigned char *key, unsigned char *iv)
 {
     return ((BOOTROM_FUNC_I) ADDR_HARDWARE_AES)(cmd, src, dst, len, opts, key, iv);
 }
@@ -102,8 +102,7 @@ static inline int event_try(struct event *ev, int timeout)
 }
 
 /* Heap */
-static inline void calc_chksum(unsigned long long *dst, unsigned long long *src,
-                        int len, unsigned long long *cookie)
+static inline void calc_chksum(void *dst, void *src, int len, void *cookie)
 {
     ((BOOTROM_FUNC_V) ADDR_CALC_CHKSUM)(dst, src, len, cookie);
 }

@@ -46,14 +46,18 @@
 #define ADDR_HEAP_BASE                      0x1801b4000
 #define ADDR_HEAP_END                       0x1801fffc0
 
-/* Misc */
-#define ADDR_RANDOM_RET                     0x10000b924
-#define ADDR_SYNC_ENTRY                     0x1800afc84
+/* Boot */
 #define ADDR_GETDFU_EXIT                    0x1000006c8
+#define ADDR_GETBOOT_ENTRY                  0x100000658
+#define ADDR_EN_BOOT_INTF                   0x100008088
 
 #define ADDR_DFU_RETVAL                     (int *)                 0x180088ac8
 #define ADDR_DFU_STATUS                     (unsigned char *)       0x180088ac0
 #define ADDR_DFU_EVENT                      (struct event *)        0x180088af0
+
+/* Misc */
+#define ADDR_RANDOM_RET                     0x10000b924
+#define ADDR_SYNC_ENTRY                     0x1800afc84
 #define ADDR_USB_EVENT                      (struct event *)        0x1800838c8
 
 #else

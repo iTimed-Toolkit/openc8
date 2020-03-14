@@ -192,7 +192,6 @@ int main()
     open_device_session(dev);
 
     demote_device(dev);
-    fix_heap(dev);
     usb_task_exit(dev);
 
     close_device_session(dev);
