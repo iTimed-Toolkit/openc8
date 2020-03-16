@@ -51,6 +51,10 @@
 #define ADDR_GETBOOT_ENTRY                  0x100000658
 #define ADDR_EN_BOOT_INTF                   0x100008088
 
+#define ADDR_TRAMPOLINE                     0x1800ac000
+#define LEN_TRAMPOLINE                      0x240
+#define TRAMPOLINE_SIZE                     0x4000
+
 #define ADDR_DFU_RETVAL                     (int *)                 0x180088ac8
 #define ADDR_DFU_STATUS                     (unsigned char *)       0x180088ac0
 #define ADDR_DFU_EVENT                      (struct event *)        0x180088af0

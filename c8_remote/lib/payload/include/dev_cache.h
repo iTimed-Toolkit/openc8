@@ -56,7 +56,7 @@ static inline void inv_va(void *addr)
 PAYLOAD_SECTION
 static inline void clean_inv_va(void *addr)
 {
-    __asm__ volatile ("dc ivac, %0"::"r" (addr));
+    __asm__ volatile ("dc civac, %0"::"r" (addr));
 }
 
 #endif //CHECKM8_TOOL_DEV_CACHE_H

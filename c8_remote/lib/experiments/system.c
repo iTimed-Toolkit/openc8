@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include "tool/command.h"
-#include "dev/addr.h"
 
 void usb_task_exit(struct pwned_device *dev)
 {
