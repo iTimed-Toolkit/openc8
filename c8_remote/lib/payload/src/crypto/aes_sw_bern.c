@@ -17,6 +17,25 @@ uint64_t entry_sync(unsigned char *msg, unsigned int msg_len, unsigned char key[
 }
 
 PAYLOAD_SECTION
+void reset_data(struct bern_data *data)
+{
+    int i, j;
+
+    data->count = 0;
+    data->ttotal = 0;
+
+    for(i = 0; i < 16; i++)
+    {
+        for(j = 0; j < 256; j++)
+        {
+            data->t[i][j] = 0;
+            data->tsq[i][j] = 0;
+            data->tnum[i][j] = 0;
+        }
+    }
+}
+
+PAYLOAD_SECTION
 void entry_async(uint64_t *base)
 {
     int i, j, iter_count = 0;
@@ -39,16 +58,7 @@ void entry_async(uint64_t *base)
     event_new(&data->ev_data, 1, 0);
     event_new(&data->ev_done, 1, 0);
 
-    data->count = 0;
-    for(i = 0; i < 16; i++)
-    {
-        for(j = 0; j < 256; j++)
-        {
-            data->t[i][j] = 0;
-            data->tsq[i][j] = 0;
-            data->tnum[i][j] = 0;
-        }
-    }
+    reset_data(data);
 
     while(1)
     {
@@ -77,7 +87,11 @@ void entry_async(uint64_t *base)
         if(iter_count % 100000 == 0)
         {
             if(event_try(&data->ev_data, 1))
+            {
                 event_wait(&data->ev_done);
+                reset_data(data);
+                iter_count = 0;
+            }
         }
     }
 }

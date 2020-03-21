@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <zconf.h>
 
 #include "dev/types.h"
+#include <dev/addr.h>
 #include "util/experiments.h"
 #include "util/host_crypto.h"
 
@@ -14,7 +16,7 @@
 
 #include <stdarg.h>
 #include <execinfo.h>
-#include <dev/addr.h>
+
 
 #endif
 
@@ -46,31 +48,13 @@ void checkm8_debug_block(const char *format, ...)
 #endif
 }
 
-void record_bern_data(struct bern_data *data)
+void record_bern_data(struct bern_data *data, int index)
 {
     int j, b;
-    double u[16][256];
-    double udev[16][256];
-    double taverage;
-
     FILE *outfile;
     char linebuf[256];
 
-    printf("have count %lli k\n", data->count / 16 / 100000);
-    taverage = data->ttotal / (double) data->count;
-
-    for(j = 0; j < 16; j++)
-    {
-        for(b = 0; b < 256; b++)
-        {
-            u[j][b] = data->t[j][b] / data->tnum[j][b];
-            udev[j][b] = data->tsq[j][b] / data->tnum[j][b];
-            udev[j][b] -= u[j][b] * u[j][b];
-            udev[j][b] = sqrt(udev[j][b]);
-        }
-    }
-
-    sprintf(linebuf, "dat_%lli.dat", data->count / 16 / 100000);
+    sprintf(linebuf, "%i.dat", index);
     outfile = fopen(linebuf, "w+");
     if(outfile == NULL)
     {
@@ -78,15 +62,16 @@ void record_bern_data(struct bern_data *data)
         return;
     }
 
+    sprintf(linebuf, "%lli %f\n\n", data->count, data->ttotal);
+    fputs(linebuf, outfile);
+
     for(j = 0; j < 16; j++)
     {
         for(b = 0; b < 256; b++)
         {
             sprintf(linebuf,
-                    "%2d %3d %lli %f %f %f %f\n",
-                    j, b, (long long) data->tnum[j][b],
-                    u[j][b], udev[j][b],
-                    u[j][b] - taverage, udev[j][b] / sqrt(data->tnum[j][b]));
+                    "%2d %3d %lli %f %f\n",
+                    j, b, (long long) data->tnum[j][b], data->t[j][b], data->tsq[j][b]);
             fputs(linebuf, outfile);
         }
     }
@@ -182,6 +167,10 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
 
 int main()
 {
+    int i, count = 0;
+    DEV_PTR_T async_buf;
+
+    struct bern_data *data;
     struct pwned_device *dev = exploit_device();
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
@@ -189,21 +178,35 @@ int main()
         return -1;
     }
 
-    open_device_session(dev);
+    fix_heap(dev);
 
-    demote_device(dev);
-    usb_task_exit(dev);
+    async_buf = setup_bern_exp(dev);
+    if(async_buf == DEV_PTR_NULL)
+    {
+        printf("failed to setup bernstein experiment\n");
+        return -1;
+    }
 
-    close_device_session(dev);
+    while(1)
+    {
+        for(i = 0; i < 30; i++)
+        {
+            printf("sleeping %i / 30\n", i);
+            sleep(60);
+        }
 
+        data = get_bern_exp_data(dev, async_buf);
+        if(data == NULL)
+        {
+            printf("failed to get bernstein data\n");
+            return -1;
+        }
 
-//    run_corr_exp(dev, "key00");
-//
-//    uninstall_all_data(dev);
-//    uninstall_all_payloads(dev);
-//
-//    // crash!
-//    execute_gadget(dev, 0, 0, 0);
+        record_bern_data(data, count);
+        free(data);
+        count++;
+    }
+
     free_device(dev);
     return 0;
 }

@@ -26,8 +26,8 @@ class Profile(gdb.Command):
 
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
-        if len(argv) != 1:
-            raise gdb.GdbError("Usage: profile [fname]")
+        if len(argv) != 2:
+            raise gdb.GdbError("Usage: profile [fname] [end_addr]")
 
         arch = gdb.selected_frame().architecture()
         instr_type = gdb.lookup_type("unsigned int").pointer()
@@ -36,6 +36,7 @@ class Profile(gdb.Command):
         stack = []
 
         outfile = open(argv[0], "a+")
+        end_addr = int(argv[1], 16)
 
         while True:
             if next_dest is not None:
@@ -43,6 +44,10 @@ class Profile(gdb.Command):
                 next_dest = None
 
             addr = gdb.selected_frame().read_register("pc")
+            if int(str(addr), 16) == end_addr:
+                print 'goodbye!'
+                break
+
             instr = arch.disassemble(int(str(addr), 16))[0]['asm']
             if instr == '.inst\t0x00000000 ; undefined':
                 break

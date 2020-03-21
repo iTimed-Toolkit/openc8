@@ -85,25 +85,29 @@ void fix_heap()
 PAYLOAD_SECTION
 void trampoline_function()
 {
-    int8_t *base = (int8_t *) 0x18010a36f;
+    int8_t *string = (int8_t *) 0x18010a36f;
+    uint32_t *patch = (uint32_t *) 0x1800b2f40;
+
     uint64_t addr, arg;
 
     __asm__ volatile ("str x0, %0" : "=m" (addr));
     __asm__ volatile ("str x1, %0" : "=m" (arg));
 
-    base[9] = ' ';
-    base[10] = 'H';
-    base[11] = 'E';
-    base[12] = 'L';
-    base[13] = 'L';
-    base[14] = 'O';
-    base[15] = ' ';
-    base[16] = 'W';
-    base[17] = 'O';
-    base[18] = 'R';
-    base[19] = 'L';
-    base[20] = 'D';
-    base[21] = ' ';
+    string[9] = ' ';
+    string[10] = 'H';
+    string[11] = 'E';
+    string[12] = 'L';
+    string[13] = 'L';
+    string[14] = 'O';
+    string[15] = ' ';
+    string[16] = 'W';
+    string[17] = 'O';
+    string[18] = 'R';
+    string[19] = 'L';
+    string[20] = 'D';
+    string[21] = ' ';
+
+//    *patch = 0x52801408;    // mov	w8, #0xa0
 
     __asm__ volatile ("ldr x0, %0"::"m" (addr));
     __asm__ volatile ("ldr x1, %0"::"m" (arg));
