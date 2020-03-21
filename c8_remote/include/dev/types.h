@@ -34,12 +34,12 @@ struct heap_header
 
 struct bern_data
 {
-    double t[16][256];
-    double tsq[16][256];
-    double tnum[16][256];
+    unsigned long long t[16][256];
+    unsigned long long tsq[16][256];
+    unsigned long long tnum[16][256];
 
     unsigned long long count;
-    double ttotal;
+    unsigned long long ttotal;
 
     struct event ev_data;
     struct event ev_done;

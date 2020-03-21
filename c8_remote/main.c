@@ -62,7 +62,7 @@ void record_bern_data(struct bern_data *data, int index)
         return;
     }
 
-    sprintf(linebuf, "%lli %f\n\n", data->count, data->ttotal);
+    sprintf(linebuf, "%lli %lli\n\n", data->count, data->ttotal);
     fputs(linebuf, outfile);
 
     for(j = 0; j < 16; j++)
@@ -70,7 +70,7 @@ void record_bern_data(struct bern_data *data, int index)
         for(b = 0; b < 256; b++)
         {
             sprintf(linebuf,
-                    "%2d %3d %lli %f %f\n",
+                    "%2d %3d %lli %lli %lli\n",
                     j, b, (long long) data->tnum[j][b], data->t[j][b], data->tsq[j][b]);
             fputs(linebuf, outfile);
         }

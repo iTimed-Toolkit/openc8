@@ -43,7 +43,7 @@ void entry_async(uint64_t *base)
 
     unsigned char msg_old[16];
     unsigned char key_sched[176];
-    double timing;
+    unsigned long long timing;
 
     // get initial params
     unsigned char *msg = (unsigned char *) base[0];
@@ -69,7 +69,7 @@ void entry_async(uint64_t *base)
         // encrypt it and measure time
         start = get_ticks();
         aes128_encrypt_ecb(msg, msg_len, key_sched, c);
-        timing = (double) (get_ticks() - start);
+        timing = get_ticks() - start;
 
         // update counters
         for(i = 0; i < 16; i++)
