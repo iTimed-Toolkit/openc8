@@ -53,10 +53,17 @@ DEV_PTR_T setup_bern_exp(struct pwned_device *dev)
 {
     DEV_PTR_T addr_data, addr_key, addr_async_buf, addr_constants;
     struct dev_cmd_resp *resp;
+    FILE *keyfile;
 
     unsigned char data[16];
     unsigned char key[16];
-    memset(key, 0x1, 16);
+    for(int i = 0; i < 16; i++)
+        key[i] = random();
+
+    keyfile = fopen("KEY", "w+");
+    for(int i = 0; i < 16; i++)
+        fprintf(keyfile, "%02X", key[i]);
+    fclose(keyfile);
 
     if(IS_CHECKM8_FAIL(open_device_session(dev)))
     {

@@ -165,7 +165,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     }
 }
 
-int main()
+int main_bernstein()
 {
     int i, count = 0;
     DEV_PTR_T async_buf;
@@ -209,6 +209,23 @@ int main()
 
     free_device(dev);
     return 0;
+}
+
+int main()
+{
+    return main_bernstein();
+//    struct pwned_device *dev = exploit_device();
+//    if(dev == NULL || dev->status == DEV_NORMAL)
+//    {
+//        printf("Failed to exploit device\n");
+//        return -1;
+//    }
+//
+//    demote_device(dev);
+//    usb_task_exit(dev);
+//
+//    free_device(dev);
+//    return 0;
 }
 
 
