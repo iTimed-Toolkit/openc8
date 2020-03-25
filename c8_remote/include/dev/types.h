@@ -1,6 +1,8 @@
 #ifndef CHECKM8_TOOL_TYPES_H
 #define CHECKM8_TOOL_TYPES_H
 
+#include "experiment_config.h"
+
 struct event
 {
     unsigned int dat0;
@@ -41,8 +43,10 @@ struct bern_data
     unsigned long long count;
     unsigned long long ttotal;
 
+#ifdef BERNSTEIN_WITH_USB
     struct event ev_data;
     struct event ev_done;
+#endif
 } __attribute__ ((packed));
 
 #define N_CORR_ENTRIES 1024*256

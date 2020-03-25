@@ -55,11 +55,15 @@ void entry_async(uint64_t *base)
 
     // initialize events and buffers
     struct bern_data *data = (struct bern_data *) base;
+#ifdef BERNSTEIN_WITH_USB
     event_new(&data->ev_data, 1, 0);
     event_new(&data->ev_done, 1, 0);
+#else
+    // initial hook
+    __asm__ volatile ("b 0");
+#endif
 
     reset_data(data);
-
     while(1)
     {
         // randomly generate a new msg based on the old one
@@ -84,6 +88,8 @@ void entry_async(uint64_t *base)
 
         // check if host has requested data
         iter_count++;
+
+#ifdef BERNSTEIN_WITH_USB
         if(iter_count % 100000 == 0)
         {
             if(event_try(&data->ev_data, 1))
@@ -93,5 +99,11 @@ void entry_async(uint64_t *base)
                 iter_count = 0;
             }
         }
+#else
+        if(iter_count % 100000000 == 0)
+        {
+            __asm__ volatile ("b 0");
+        }
+#endif
     }
 }

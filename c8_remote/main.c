@@ -167,10 +167,8 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
 
 int main_bernstein()
 {
-    int i, count = 0;
     DEV_PTR_T async_buf;
 
-    struct bern_data *data;
     struct pwned_device *dev = exploit_device();
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
@@ -178,6 +176,7 @@ int main_bernstein()
         return -1;
     }
 
+    demote_device(dev);
     fix_heap(dev);
 
     async_buf = setup_bern_exp(dev);
@@ -186,6 +185,12 @@ int main_bernstein()
         printf("failed to setup bernstein experiment\n");
         return -1;
     }
+
+    printf("got async buf 0x%llX size 0x%lx\n", async_buf, sizeof(struct bern_data));
+
+#ifdef BERNSTEIN_WITH_USB
+    int i, count = 0;
+    struct bern_data *data;
 
     while(1)
     {
@@ -206,6 +211,7 @@ int main_bernstein()
         free(data);
         count++;
     }
+#endif
 
     free_device(dev);
     return 0;

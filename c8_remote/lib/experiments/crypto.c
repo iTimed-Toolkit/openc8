@@ -127,6 +127,7 @@ DEV_PTR_T setup_bern_exp(struct pwned_device *dev)
     return addr_async_buf;
 }
 
+#ifdef BERNSTEIN_WITH_USB
 struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_buf)
 {
     struct dev_cmd_resp *resp;
@@ -179,6 +180,7 @@ struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_bu
 
     return res;
 }
+#endif
 
 DEV_PTR_T setup_corr_exp(struct pwned_device *dev, unsigned char *init_key)
 {
