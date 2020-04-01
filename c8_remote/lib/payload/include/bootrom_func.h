@@ -81,6 +81,11 @@ static inline void task_free(void *task)
     ((BOOTROM_FUNC_V) ADDR_TASK_FREE)(task);
 }
 
+static inline void task_exit(int ret)
+{
+    ((BOOTROM_FUNC_V) ADDR_TASK_EXIT)(ret);
+}
+
 static inline void event_new(struct event *dst, int flags, int state)
 {
     ((BOOTROM_FUNC_V) ADDR_EVENT_NEW)(dst, flags, state);

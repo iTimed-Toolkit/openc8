@@ -49,16 +49,13 @@ DEV_PTR_T install_aes_data(struct pwned_device *dev)
     return res;
 }
 
-DEV_PTR_T setup_bern_exp(struct pwned_device *dev)
+DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsigned int num_iter)
 {
     DEV_PTR_T addr_data, addr_key, addr_async_buf, addr_constants;
     struct dev_cmd_resp *resp;
     FILE *keyfile;
 
-    unsigned char data[16];
-    unsigned char key[16];
-    for(int i = 0; i < 16; i++)
-        key[i] = random();
+    unsigned char data[16] = {0};
 
     keyfile = fopen("KEY", "w+");
     for(int i = 0; i < 16; i++)
@@ -113,9 +110,15 @@ DEV_PTR_T setup_bern_exp(struct pwned_device *dev)
     }
     free_dev_cmd_resp(resp);
 
+#ifdef BERNSTEIN_CONTINUOUS
     addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW_BERN,
                                          sizeof(struct bern_data),
                                          4, addr_data, 16, addr_key, addr_constants);
+#else
+    addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW_BERN,
+                                         sizeof(struct bern_data),
+                                         5, addr_data, 16, addr_key, addr_constants, num_iter);
+#endif
     run_payload_async(dev, PAYLOAD_AES_SW_BERN);
 
     if(IS_CHECKM8_FAIL(close_device_session(dev)))
@@ -139,6 +142,7 @@ struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_bu
         return NULL;
     }
 
+#ifdef BERNSTEIN_CONTINUOUS
     resp = execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1,
                           async_buf + offsetof(struct bern_data, ev_data));
     if(IS_CHECKM8_FAIL(resp->ret))
@@ -149,6 +153,7 @@ struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_bu
     }
 
     free_dev_cmd_resp(resp);
+#endif
     resp = read_gadget(dev, async_buf, sizeof(struct bern_data));
     if(IS_CHECKM8_FAIL(resp->ret))
     {
@@ -160,6 +165,7 @@ struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_bu
     res = (struct bern_data *) resp->data;
     free(resp);
 
+#ifdef BERNSTEIN_CONTINUOUS
     resp = execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1,
                           async_buf + offsetof(struct bern_data, ev_done));
     if(IS_CHECKM8_FAIL(resp->ret))
@@ -171,6 +177,8 @@ struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_bu
     }
 
     free_dev_cmd_resp(resp);
+#endif
+
     if(IS_CHECKM8_FAIL(close_device_session(dev)))
     {
         printf("failed to close device session\n");

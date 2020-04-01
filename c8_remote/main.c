@@ -165,9 +165,11 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     }
 }
 
-int main_bernstein()
+int main_bernstein(unsigned int num_iter)
 {
     DEV_PTR_T async_buf;
+    unsigned char key[16];
+    memset(key, 0, 16);
 
     struct pwned_device *dev = exploit_device();
     if(dev == NULL || dev->status == DEV_NORMAL)
@@ -179,7 +181,12 @@ int main_bernstein()
     demote_device(dev);
     fix_heap(dev);
 
-    async_buf = setup_bern_exp(dev);
+#ifdef BERNSTEIN_WITH_USB
+    struct bern_data *data;
+    int i, count = 0;
+
+#ifdef BERNSTEIN_CONTINUOUS
+    async_buf = setup_bern_exp(dev, key, 0);
     if(async_buf == DEV_PTR_NULL)
     {
         printf("failed to setup bernstein experiment\n");
@@ -187,10 +194,6 @@ int main_bernstein()
     }
 
     printf("got async buf 0x%llX size 0x%lx\n", async_buf, sizeof(struct bern_data));
-
-#ifdef BERNSTEIN_WITH_USB
-    int i, count = 0;
-    struct bern_data *data;
 
     while(1)
     {
@@ -211,7 +214,44 @@ int main_bernstein()
         free(data);
         count++;
     }
-#endif
+#else
+    unsigned char key_values[6] = {0x00, 0x00, 0x80, 0x80, 0xFF, 0xFF};
+    for(i = 0; i < 6; i++)
+    {
+        key[0] = key_values[i];
+
+        async_buf = setup_bern_exp(dev, key, num_iter);
+        if(async_buf == DEV_PTR_NULL)
+        {
+            printf("failed to set up bern experiment\n");
+            return -1;
+        }
+
+        data = get_bern_exp_data(dev, async_buf); // will hang until complete - 1.5 hours
+        if(data == NULL)
+        {
+            printf("failed to set up bern experiment\n");
+            return -1;
+        }
+
+        record_bern_data(data, count++);
+        free(data);
+
+        if(IS_CHECKM8_FAIL(uninstall_all_payloads(dev)))
+        {
+            printf("failed to uninstall all payloads\n");
+            return -1;
+        }
+
+        if(IS_CHECKM8_FAIL(uninstall_all_data(dev)))
+        {
+            printf("failed to uninstall all data\n");
+            return -1;
+        }
+    }
+
+#endif // BERNSTEIN_CONTINUOUS
+#endif // BERNSTEIN_WITH_USB
 
     free_device(dev);
     return 0;
@@ -219,7 +259,7 @@ int main_bernstein()
 
 int main()
 {
-    return main_bernstein();
+    main_bernstein(620000000);
 //    struct pwned_device *dev = exploit_device();
 //    if(dev == NULL || dev->status == DEV_NORMAL)
 //    {
@@ -228,7 +268,7 @@ int main()
 //    }
 //
 //    demote_device(dev);
-//    usb_task_exit(dev);
+////    usb_task_exit(dev);
 //
 //    free_device(dev);
 //    return 0;

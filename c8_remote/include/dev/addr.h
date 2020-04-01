@@ -25,6 +25,7 @@
 #define ADDR_TASK_PAUSE                     0x10000adf0
 #define ADDR_TASK_RESCHED                   0x10000aaa8
 #define ADDR_TASK_FREE                      0x10000aa20
+#define ADDR_TASK_EXIT                      0x10000ac5c
 
 #define ADDR_EVENT_NEW                      0x10000aed4
 #define ADDR_EVENT_NOTIFY                   0x10000aee8

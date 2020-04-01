@@ -51,6 +51,10 @@ void entry_async(uint64_t *base)
     unsigned char *key = (unsigned char *) base[2];
     struct aes_constants *c = (struct aes_constants *) base[3];
 
+#ifndef BERNSTEIN_CONTINUOUS
+    unsigned int num_iter = (unsigned int) base[4];
+#endif
+
     expand_key(key, key_sched, 11, c);
 
     // initialize events and buffers
@@ -58,13 +62,17 @@ void entry_async(uint64_t *base)
 #ifdef BERNSTEIN_WITH_USB
     event_new(&data->ev_data, 1, 0);
     event_new(&data->ev_done, 1, 0);
-#else
+#elif defined(BERNSTEIN_CONTINUOUS)
     // initial hook
     __asm__ volatile ("b 0");
 #endif
 
     reset_data(data);
+#ifdef BERNSTEIN_CONTINUOUS
     while(1)
+#else
+    for(iter_count = 0; iter_count < num_iter; iter_count++)
+#endif
     {
         // randomly generate a new msg based on the old one
         for(i = 0; i < 16; i++)
@@ -87,9 +95,10 @@ void entry_async(uint64_t *base)
         }
 
         // check if host has requested data
+#ifdef BERNSTEIN_CONTINUOUS
         iter_count++;
 
-#ifdef BERNSTEIN_WITH_USB
+#if defined(BERNSTEIN_WITH_USB)
         if(iter_count % 100000 == 0)
         {
             if(event_try(&data->ev_data, 1))
@@ -105,5 +114,10 @@ void entry_async(uint64_t *base)
             __asm__ volatile ("b 0");
         }
 #endif
+#endif
     }
+
+#ifndef BERNSTEIN_CONTINUOUS
+    task_exit(0);
+#endif
 }
