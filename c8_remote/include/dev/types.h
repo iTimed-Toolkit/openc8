@@ -11,13 +11,24 @@ struct event
     unsigned long long dat3;
 } __attribute__ ((packed));
 
-struct aes_constants
+struct aes_sbox_constants
 {
-    unsigned char sbox[16][16];
+    unsigned char sbox[256];
     unsigned char mul2[256];
     unsigned char mul3[256];
     unsigned char rc_lookup[11];
+
 } __attribute__ ((packed));
+
+struct aes_ttable_constants
+{
+    unsigned int t0[256];
+    unsigned int t1[256];
+    unsigned int t2[256];
+    unsigned int t3[256];
+    unsigned char sbox[256];
+    unsigned char rc_lookup[11];
+};
 
 struct heap_header
 {

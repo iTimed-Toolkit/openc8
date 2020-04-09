@@ -4,15 +4,15 @@
 #include "dev_crypto.h"
 
 PAYLOAD_SECTION
-uint64_t entry_sync(unsigned char *msg, unsigned int msg_len, unsigned char key[16],
-                    struct aes_constants *c)
+uint64_t entry_sync(unsigned char *msg, unsigned char key[16],
+                    struct aes_sbox_constants *c)
 {
     unsigned long long start = 0;
     unsigned char key_sched[176];
-    expand_key(key, key_sched, 11, c);
+    expand_key_sbox(key, key_sched, 11, c);
 
     start = get_ticks();
-    aes128_encrypt_ecb(msg, msg_len, key, c);
+    aes128_sbox_encrypt_ecb(msg, key, c);
     return get_ticks() - start;
 }
 
@@ -47,18 +47,17 @@ void entry_async(uint64_t *base)
 
     // get initial params
     unsigned char *msg = (unsigned char *) base[0];
-    unsigned int msg_len = (unsigned int) base[1];
-    unsigned char *key = (unsigned char *) base[2];
-    struct aes_constants *c = (struct aes_constants *) base[3];
-
+    unsigned char *key = (unsigned char *) base[1];
+    struct aes_ttable_constants *c = (struct aes_ttable_constants *) base[2];
 #ifndef BERNSTEIN_CONTINUOUS
-    unsigned int num_iter = (unsigned int) base[4];
+    unsigned int num_iter = (unsigned int) base[3];
 #endif
 
-    expand_key(key, key_sched, 11, c);
+    expand_key_ttable(key, key_sched, 11, c);
 
     // initialize events and buffers
     struct bern_data *data = (struct bern_data *) base;
+
 #ifdef BERNSTEIN_WITH_USB
     event_new(&data->ev_data, 1, 0);
     event_new(&data->ev_done, 1, 0);
@@ -80,7 +79,7 @@ void entry_async(uint64_t *base)
 
         // encrypt it and measure time
         start = get_ticks();
-        aes128_encrypt_ecb(msg, msg_len, key_sched, c);
+        aes128_ttable_encrypt_ecb(msg, key_sched, c);
         timing = get_ticks() - start;
 
         // update counters

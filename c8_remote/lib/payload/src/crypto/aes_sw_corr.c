@@ -16,12 +16,12 @@ void entry_async(uint64_t *base)
     unsigned long long start, timing;
 
     unsigned char *key = (unsigned char *) base[0];
-    struct aes_constants *c = (struct aes_constants *) base[1];
+    struct aes_sbox_constants *c = (struct aes_sbox_constants *) base[1];
 
     struct corr_data *data = (struct corr_data *) base;
     event_new(&data->ev_cont, 1, 0);
 
-    expand_key(key, key_sched, 11, c);
+    expand_key_sbox(key, key_sched, 11, c);
     for(i = 0; i < 16; i++)
         data->msg[i] = 0;
 
@@ -39,7 +39,7 @@ void entry_async(uint64_t *base)
         while(i < N_CORR_ENTRIES)
         {
             start = get_ticks();
-            aes128_encrypt_ecb(data->msg, 16, key_sched, c);
+            aes128_sbox_encrypt_ecb(data->msg, key_sched, c);
             timing = get_ticks() - start;
 
             if(timing < 256)

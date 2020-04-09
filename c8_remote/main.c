@@ -86,7 +86,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     FILE *outfile;
     DEV_PTR_T addr_async_buf;
 
-    struct aes_constants *c = get_constants();
+    struct aes_sbox_constants *c = get_sbox_constants();
     struct corr_data *data;
 
     unsigned char msg[16];
@@ -113,7 +113,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     fflush(outfile);
     fclose(outfile);
 
-    expand_key(key, key_sched, 11, c);
+    expand_key_sbox(key, key_sched, 11, c);
 
     addr_async_buf = setup_corr_exp(dev, key);
     printf("got async buf ptr %llx\n", addr_async_buf);
@@ -142,7 +142,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
                 fwrite(&data->data[i], 1, 1, outfile);
                 fwrite("\x00\x00", 1, 2, outfile);
 
-                aes128_encrypt_ecb(msg, 16, key_sched, c);
+                aes128_sbox_encrypt_ecb(msg, key_sched, c);
             }
 
             fflush(outfile);
@@ -268,7 +268,7 @@ int main()
 //    }
 //
 //    demote_device(dev);
-////    usb_task_exit(dev);
+//    usb_task_exit(dev);
 //
 //    free_device(dev);
 //    return 0;

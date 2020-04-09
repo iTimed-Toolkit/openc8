@@ -3,12 +3,19 @@
 
 #include "dev/types.h"
 
-void expand_key(unsigned char key[16], unsigned char key_sched[176],
-                int n, struct aes_constants *c);
+void expand_key_sbox(unsigned char key[16], unsigned char key_sched[176],
+                int n, struct aes_sbox_constants *c);
 
-void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len,
-                        unsigned char key_sched[176], struct aes_constants *c);
+void expand_key_ttable(unsigned char key[16], unsigned char key_sched[176],
+                     int n, struct aes_ttable_constants *c);
 
-struct aes_constants *get_constants();
+void aes128_sbox_encrypt_ecb(unsigned char *msg, 
+                        unsigned char key_sched[176], struct aes_sbox_constants *c);
+
+void aes128_ttable_encrypt_ecb(unsigned char *msg,
+                               unsigned char key_sched[176], struct aes_ttable_constants *c);
+
+struct aes_sbox_constants *get_sbox_constants();
+struct aes_ttable_constants *get_ttable_constants();
 
 #endif //CHECKM8_TOOL_HOST_CRYPTO_H

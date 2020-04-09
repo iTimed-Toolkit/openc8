@@ -5,7 +5,8 @@
 
 PAYLOAD_SECTION
 #endif
-void sub_bytes(unsigned char block[16], struct aes_constants *c)
+
+void sub_bytes(unsigned char block[16], struct aes_sbox_constants *c)
 {
     int i;
     unsigned char val;
@@ -13,13 +14,14 @@ void sub_bytes(unsigned char block[16], struct aes_constants *c)
     for(i = 0; i < 16; i++)
     {
         val = block[i];
-        block[i] = c->sbox[val >> 4u][val & 0xfu];
+        block[i] = c->sbox[val];
     }
 }
 
 #ifdef DEV_CRYPTO
 PAYLOAD_SECTION
 #endif
+
 void shift_rows(unsigned char block[16])
 {
     unsigned char temp1, temp2;
@@ -47,7 +49,8 @@ void shift_rows(unsigned char block[16])
 #ifdef DEV_CRYPTO
 PAYLOAD_SECTION
 #endif
-void mix_cols(unsigned char block[16], struct aes_constants *c)
+
+void mix_cols(unsigned char block[16], struct aes_sbox_constants *c)
 {
     unsigned char r0, r1, r2, r3;
     int i;
@@ -70,6 +73,7 @@ void mix_cols(unsigned char block[16], struct aes_constants *c)
 #ifdef DEV_CRYPTO
 PAYLOAD_SECTION
 #endif
+
 void add_key(unsigned char block[16], unsigned char key[16])
 {
     int i;
@@ -79,11 +83,8 @@ void add_key(unsigned char block[16], unsigned char key[16])
     }
 }
 
-#ifdef DEV_CRYPTO
-PAYLOAD_SECTION
-#endif
-void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
-                struct aes_constants *c)
+static inline void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
+                              unsigned char *sbox, unsigned char *rc_lookup)
 {
     int i, j, prev_key_base, key_base = 0;
     unsigned char val;
@@ -100,13 +101,13 @@ void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
         for(j = 0; j < 3; j++)
         {
             val = key_sched[prev_key_base + 13 + j];
-            key_sched[key_base + j] = c->sbox[val >> 4u][val & 0xfu];
+            key_sched[key_base + j] = sbox[val];
         }
 
         val = key_sched[prev_key_base + 12];
-        key_sched[key_base + 3] = c->sbox[val >> 4u][val & 0xfu];
+        key_sched[key_base + 3] = sbox[val];
 
-        key_sched[key_base] ^= c->rc_lookup[i - 1];
+        key_sched[key_base] ^= rc_lookup[i - 1];
 
         for(j = 0; j < 4; j++)
         {
@@ -123,28 +124,109 @@ void expand_key(unsigned char key[16], unsigned char key_sched[176], int n,
 #ifdef DEV_CRYPTO
 PAYLOAD_SECTION
 #endif
-void aes128_encrypt_ecb(unsigned char *msg, unsigned int msg_len,
-                        unsigned char key_sched[176], struct aes_constants *c)
+
+void expand_key_sbox(unsigned char key[16], unsigned char key_sched[176], int n, struct aes_sbox_constants *c)
 {
-    unsigned int num_blocks = msg_len / 16;
-    unsigned char *block;
+    expand_key(key, key_sched, n, c->sbox, c->rc_lookup);
+}
 
-    unsigned int i, j;
-    for(i = 0; i < num_blocks; i++)
+#ifdef DEV_CRYPTO
+PAYLOAD_SECTION
+#endif
+
+void expand_key_ttable(unsigned char key[16], unsigned char key_sched[176], int n, struct aes_ttable_constants *c)
+{
+    expand_key(key, key_sched, n, c->sbox, c->rc_lookup);
+}
+
+#ifdef DEV_CRYPTO
+PAYLOAD_SECTION
+#endif
+
+void aes128_ttable_encrypt_ecb(unsigned char *msg,
+                               unsigned char key_sched[176], struct aes_ttable_constants *c)
+{
+    int i;
+
+    unsigned int *key_sched_int = (unsigned int *) key_sched;
+    unsigned int *msg_int = (unsigned int *) msg;
+    unsigned int t0, t1, t2, t3, u0, u1, u2, u3;
+
+    t0 = msg_int[0] ^ key_sched_int[0];
+    t1 = msg_int[1] ^ key_sched_int[1];
+    t2 = msg_int[2] ^ key_sched_int[2];
+    t3 = msg_int[3] ^ key_sched_int[3];
+
+    // 9 rounds
+    for(i = 1; i < 10; ++i)
     {
-        block = &msg[16 * i];
-        add_key(block, key_sched);
+        u0 = c->t0[(unsigned char) t0] ^
+             c->t1[(unsigned char) (t1 >> 8u)] ^
+             c->t2[(unsigned char) (t2 >> 16u)] ^
+             c->t3[t3 >> 24u];
 
-        for(j = 0; j < 9; j++)
-        {
-            sub_bytes(block, c);
-            shift_rows(block);
-            mix_cols(block, c);
-            add_key(block, &key_sched[16 * (j + 1)]);
-        }
+        u1 = c->t0[(unsigned char) t1] ^
+             c->t1[(unsigned char) (t2 >> 8u)] ^
+             c->t2[(unsigned char) (t3 >> 16u)] ^
+             c->t3[t0 >> 24u];
 
-        sub_bytes(block, c);
-        shift_rows(block);
-        add_key(block, &key_sched[16 * (j + 1)]);
+        u2 = c->t0[(unsigned char) t2] ^
+             c->t1[(unsigned char) (t3 >> 8u)] ^
+             c->t2[(unsigned char) (t0 >> 16u)] ^
+             c->t3[t1 >> 24u];
+
+        u3 = c->t0[(unsigned char) t3] ^
+             c->t1[(unsigned char) (t0 >> 8u)] ^
+             c->t2[(unsigned char) (t1 >> 16u)] ^
+             c->t3[t2 >> 24u];
+
+        t0 = u0 ^ key_sched_int[4 * i];
+        t1 = u1 ^ key_sched_int[4 * i + 1];
+        t2 = u2 ^ key_sched_int[4 * i + 2];
+        t3 = u3 ^ key_sched_int[4 * i + 3];
     }
+
+    msg_int[0] = ((unsigned int) c->sbox[(unsigned char) (t0 >> 0u)] << 0u |
+                  (unsigned int) c->sbox[(unsigned char) (t1 >> 8u)] << 8u |
+                  (unsigned int) c->sbox[(unsigned char) (t2 >> 16u)] << 16u |
+                  (unsigned int) c->sbox[(unsigned char) (t3 >> 24u)] << 24u) ^ key_sched_int[4 * i];
+
+    msg_int[1] = ((unsigned int) c->sbox[(unsigned char) (t1 >> 0u)] << 0u |
+                  (unsigned int) c->sbox[(unsigned char) (t2 >> 8u)] << 8u |
+                  (unsigned int) c->sbox[(unsigned char) (t3 >> 16u)] << 16u |
+                  (unsigned int) c->sbox[(unsigned char) (t0 >> 24u)] << 24u) ^ key_sched_int[4 * i + 1];
+
+    msg_int[2] = ((unsigned int) c->sbox[(unsigned char) (t2 >> 0u)] << 0u |
+                  (unsigned int) c->sbox[(unsigned char) (t3 >> 8u)] << 8u |
+                  (unsigned int) c->sbox[(unsigned char) (t0 >> 16u)] << 16u |
+                  (unsigned int) c->sbox[(unsigned char) (t1 >> 24u)] << 24u) ^ key_sched_int[4 * i + 2];
+
+    msg_int[3] = ((unsigned int) c->sbox[(unsigned char) (t3 >> 0u)] << 0u |
+                  (unsigned int) c->sbox[(unsigned char) (t0 >> 8u)] << 8u |
+                  (unsigned int) c->sbox[(unsigned char) (t1 >> 16u)] << 16u |
+                  (unsigned int) c->sbox[(unsigned char) (t2 >> 24u)] << 24u) ^ key_sched_int[4 * i + 3];
+}
+
+#ifdef DEV_CRYPTO
+PAYLOAD_SECTION
+#endif
+
+void aes128_sbox_encrypt_ecb(unsigned char *msg,
+                             unsigned char key_sched[176], struct aes_sbox_constants *c)
+{
+    unsigned int j;
+
+    add_key(msg, key_sched);
+
+    for(j = 0; j < 9; j++)
+    {
+        sub_bytes(msg, c);
+        shift_rows(msg);
+        mix_cols(msg, c);
+        add_key(msg, &key_sched[16 * (j + 1)]);
+    }
+
+    sub_bytes(msg, c);
+    shift_rows(msg);
+    add_key(msg, &key_sched[16 * (j + 1)]);
 }
