@@ -28,7 +28,7 @@ struct aes_ttable_constants
     unsigned int t3[256];
     unsigned char sbox[256];
     unsigned char rc_lookup[11];
-};
+} __attribute__ ((packed));
 
 struct heap_header
 {

@@ -259,7 +259,7 @@ int main_bernstein(unsigned int num_iter)
 
 int main()
 {
-    main_bernstein(620000000);
+    main_bernstein(0);
 //    struct pwned_device *dev = exploit_device();
 //    if(dev == NULL || dev->status == DEV_NORMAL)
 //    {

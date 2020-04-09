@@ -27,7 +27,7 @@ DEV_PTR_T install_aes_data(struct pwned_device *dev)
         }
     }
 
-    res = install_data(dev, SRAM, (unsigned char *) constants, sizeof(struct aes_sbox_constants));
+    res = install_data(dev, SRAM, (unsigned char *) constants, sizeof(struct aes_ttable_constants));
     if(res == DEV_PTR_NULL)
     {
         printf("failed to write AES constants\n");
@@ -113,7 +113,7 @@ DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsign
 #ifdef BERNSTEIN_CONTINUOUS
     addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW_BERN,
                                          sizeof(struct bern_data),
-                                         4, addr_data, 16, addr_key, addr_constants);
+                                         3, addr_data, addr_key, addr_constants);
 #else
     addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW_BERN,
                                          sizeof(struct bern_data),
