@@ -33,6 +33,8 @@ int run_payload_async(struct pwned_device *dev, PAYLOAD_T p);
 int kill_payload_async(struct pwned_device *dev, PAYLOAD_T p, DEV_PTR_T buf_addr);
 
 DEV_PTR_T install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len);
+DEV_PTR_T install_data_offset(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len, unsigned int offset);
+
 int uninstall_data(struct pwned_device *dev, DEV_PTR_T ptr);
 int uninstall_all_data(struct pwned_device *dev);
 

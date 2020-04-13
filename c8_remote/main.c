@@ -165,7 +165,7 @@ void run_corr_exp(struct pwned_device *dev, char *fname)
     }
 }
 
-int main_bernstein(unsigned int num_iter)
+int main_bernstein(unsigned int num_iter, unsigned int offset)
 {
     DEV_PTR_T async_buf;
     unsigned char key[16];
@@ -186,7 +186,7 @@ int main_bernstein(unsigned int num_iter)
     int i, count = 0;
 
 #ifdef BERNSTEIN_CONTINUOUS
-    async_buf = setup_bern_exp(dev, key, 0);
+    async_buf = setup_bern_exp(dev, key, 0, offset);
     if(async_buf == DEV_PTR_NULL)
     {
         printf("failed to setup bernstein experiment\n");
@@ -197,9 +197,9 @@ int main_bernstein(unsigned int num_iter)
 
     while(1)
     {
-        for(i = 0; i < 30; i++)
+        for(i = 0; i < 3; i++)
         {
-            printf("sleeping %i / 30\n", i);
+            printf("sleeping %i / 3\n", i);
             sleep(60);
         }
 
@@ -220,7 +220,7 @@ int main_bernstein(unsigned int num_iter)
     {
         key[0] = key_values[i];
 
-        async_buf = setup_bern_exp(dev, key, num_iter);
+        async_buf = setup_bern_exp(dev, key, num_iter, offset);
         if(async_buf == DEV_PTR_NULL)
         {
             printf("failed to set up bern experiment\n");
@@ -259,7 +259,7 @@ int main_bernstein(unsigned int num_iter)
 
 int main()
 {
-    main_bernstein(0);
+    main_bernstein(0, 4);
 //    struct pwned_device *dev = exploit_device();
 //    if(dev == NULL || dev->status == DEV_NORMAL)
 //    {

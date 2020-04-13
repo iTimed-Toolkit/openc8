@@ -527,6 +527,31 @@ DEV_PTR_T install_data(struct pwned_device *dev, LOCATION_T loc, unsigned char *
     return addr;
 }
 
+DEV_PTR_T
+install_data_offset(struct pwned_device *dev, LOCATION_T loc, unsigned char *data, int len, unsigned int offset)
+{
+    checkm8_debug_indent("install_data_offset(dev = %p, loc = %i, data = %p, len = %i)\n", dev, loc, data, len);
+    struct dev_cmd_resp *resp;
+    DEV_PTR_T addr = get_address(dev, loc, len + offset);
+
+    if(addr == DEV_PTR_NULL)
+    {
+        checkm8_debug_indent("\tfailed to get an address\n");
+        return DEV_PTR_NULL;
+    }
+
+    checkm8_debug_indent("\twriting data to address %X offset %i\n", addr, offset);
+    resp = dev_write_memory(dev, addr + offset, data, len);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        checkm8_debug_indent("\tfailed to write data\n");
+        return -1;
+    }
+
+    free_dev_cmd_resp(resp);
+    return addr;
+}
+
 int uninstall_data(struct pwned_device *dev, DEV_PTR_T addr)
 {
     checkm8_debug_indent("uninstall_data(dev = %p, addr = %X)\n", dev, addr);

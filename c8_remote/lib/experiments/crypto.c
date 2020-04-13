@@ -9,7 +9,7 @@
 #include "tool/command.h"
 #include "util/host_crypto.h"
 
-DEV_PTR_T install_aes_data(struct pwned_device *dev)
+DEV_PTR_T install_aes_data(struct pwned_device *dev, unsigned int offset)
 {
     int close;
     DEV_PTR_T res;
@@ -27,7 +27,11 @@ DEV_PTR_T install_aes_data(struct pwned_device *dev)
         }
     }
 
-    res = install_data(dev, SRAM, (unsigned char *) constants, sizeof(struct aes_ttable_constants));
+    res = install_data_offset(dev,
+                              SRAM,
+                              (unsigned char *) constants,
+                              sizeof(struct aes_ttable_constants),
+                              offset);
     if(res == DEV_PTR_NULL)
     {
         printf("failed to write AES constants\n");
@@ -49,7 +53,7 @@ DEV_PTR_T install_aes_data(struct pwned_device *dev)
     return res;
 }
 
-DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsigned int num_iter)
+DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsigned int num_iter, unsigned int offset)
 {
     DEV_PTR_T addr_data, addr_key, addr_async_buf, addr_constants;
     struct dev_cmd_resp *resp;
@@ -68,7 +72,7 @@ DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsign
         return DEV_PTR_NULL;
     }
 
-    addr_constants = install_aes_data(dev);
+    addr_constants = install_aes_data(dev, offset);
     if(addr_constants == DEV_PTR_NULL)
     {
         printf("failed to install aes constants\n");
@@ -113,11 +117,11 @@ DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsign
 #ifdef BERNSTEIN_CONTINUOUS
     addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW_BERN,
                                          sizeof(struct bern_data),
-                                         3, addr_data, addr_key, addr_constants);
+                                         3, addr_data, addr_key, addr_constants + offset);
 #else
     addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW_BERN,
                                          sizeof(struct bern_data),
-                                         4, addr_data, addr_key, addr_constants, num_iter);
+                                         4, addr_data, addr_key, addr_constants + offset, num_iter);
 #endif
     run_payload_async(dev, PAYLOAD_AES_SW_BERN);
 
@@ -201,7 +205,7 @@ DEV_PTR_T setup_corr_exp(struct pwned_device *dev, unsigned char *init_key)
         return DEV_PTR_NULL;
     }
 
-    addr_constants = install_aes_data(dev);
+    addr_constants = install_aes_data(dev, 0);
     if(addr_constants == DEV_PTR_NULL)
     {
         printf("failed to install aes constants\n");
