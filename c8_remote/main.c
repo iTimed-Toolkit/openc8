@@ -171,6 +171,10 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
     unsigned char key[16];
     memset(key, 0, 16);
 
+//    srand(time(NULL));
+//    for(int i = 0; i < 16; i++)
+//        key[i] = random();
+
     struct pwned_device *dev = exploit_device();
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
@@ -199,7 +203,7 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
     {
         for(i = 0; i < 30; i++)
         {
-            printf("sleeping %i / 3\n", i);
+            printf("sleeping %i / 30\n", i);
             sleep(60);
         }
 
@@ -259,7 +263,7 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
 
 int main()
 {
-    main_bernstein(0, 4);
+    main_bernstein(0, 8);
 //    struct pwned_device *dev = exploit_device();
 //    if(dev == NULL || dev->status == DEV_NORMAL)
 //    {
