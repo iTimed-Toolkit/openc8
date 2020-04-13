@@ -197,7 +197,7 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
 
     while(1)
     {
-        for(i = 0; i < 3; i++)
+        for(i = 0; i < 30; i++)
         {
             printf("sleeping %i / 3\n", i);
             sleep(60);

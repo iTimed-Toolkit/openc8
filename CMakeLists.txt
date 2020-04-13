@@ -6,6 +6,3 @@ include_directories(include)
 
 # set up checkm8_remote
 add_subdirectory(c8_remote)
-
-# targets for external tools
-add_subdirectory(tools)
