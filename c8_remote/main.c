@@ -54,7 +54,8 @@ void record_bern_data(struct bern_data *data, int index)
     FILE *outfile;
     char linebuf[256];
 
-    sprintf(linebuf, "%i.dat", index);
+#ifdef BERNSTEIN_COLLECT1
+    sprintf(linebuf, "%i-1.dat", index);
     outfile = fopen(linebuf, "w+");
     if(outfile == NULL)
     {
@@ -62,7 +63,85 @@ void record_bern_data(struct bern_data *data, int index)
         return;
     }
 
-    sprintf(linebuf, "%lli %lli\n\n", data->count, data->ttotal);
+    sprintf(linebuf, "%lli %lli\n\n", data->count1, data->ttotal1);
+    fputs(linebuf, outfile);
+
+    for(j = 0; j < 128; j++)
+    {
+        for(b = 0; b < 2; b++)
+        {
+            sprintf(linebuf,
+                    "%2d %3d %lli %lli %lli\n",
+                    j, b, (long long) data->tnum1[j][b], data->t1[j][b], data->tsq1[j][b]);
+            fputs(linebuf, outfile);
+        }
+    }
+
+    fclose(outfile);
+#endif
+
+#ifdef BERNSTEIN_COLLECT2
+    sprintf(linebuf, "%i-2.dat", index);
+    outfile = fopen(linebuf, "w+");
+    if(outfile == NULL)
+    {
+        printf("failed to open data file\n");
+        return;
+    }
+
+    sprintf(linebuf, "%lli %lli\n\n", data->count2, data->ttotal2);
+    fputs(linebuf, outfile);
+
+    for(j = 0; j < 64; j++)
+    {
+        for(b = 0; b < 4; b++)
+        {
+            sprintf(linebuf,
+                    "%2d %3d %lli %lli %lli\n",
+                    j, b, (long long) data->tnum2[j][b], data->t2[j][b], data->tsq2[j][b]);
+            fputs(linebuf, outfile);
+        }
+    }
+
+    fclose(outfile);
+#endif
+
+#ifdef BERNSTEIN_COLLECT4
+    sprintf(linebuf, "%i-4.dat", index);
+    outfile = fopen(linebuf, "w+");
+    if(outfile == NULL)
+    {
+        printf("failed to open data file\n");
+        return;
+    }
+
+    sprintf(linebuf, "%lli %lli\n\n", data->count4, data->ttotal4);
+    fputs(linebuf, outfile);
+
+    for(j = 0; j < 32; j++)
+    {
+        for(b = 0; b < 16; b++)
+        {
+            sprintf(linebuf,
+                    "%2d %3d %lli %lli %lli\n",
+                    j, b, (long long) data->tnum4[j][b], data->t4[j][b], data->tsq4[j][b]);
+            fputs(linebuf, outfile);
+        }
+    }
+
+    fclose(outfile);
+#endif
+
+#ifdef BERNSTEIN_COLLECT8
+    sprintf(linebuf, "%i-8.dat", index);
+    outfile = fopen(linebuf, "w+");
+    if(outfile == NULL)
+    {
+        printf("failed to open data file\n");
+        return;
+    }
+
+    sprintf(linebuf, "%lli %lli\n\n", data->count8, data->ttotal8);
     fputs(linebuf, outfile);
 
     for(j = 0; j < 16; j++)
@@ -71,12 +150,13 @@ void record_bern_data(struct bern_data *data, int index)
         {
             sprintf(linebuf,
                     "%2d %3d %lli %lli %lli\n",
-                    j, b, (long long) data->tnum[j][b], data->t[j][b], data->tsq[j][b]);
+                    j, b, (long long) data->tnum8[j][b], data->t8[j][b], data->tsq8[j][b]);
             fputs(linebuf, outfile);
         }
     }
 
     fclose(outfile);
+#endif
 }
 
 void run_corr_exp(struct pwned_device *dev, char *fname)
