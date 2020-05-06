@@ -46,4 +46,3 @@ add_library(dev_crypto ../crypto/aes_sw_impl.c)
 target_compile_definitions(dev_crypto PRIVATE DEV_CRYPTO)
 
 target_link_libraries(payload_aes_sw_bern dev_crypto)
-target_link_libraries(payload_aes_sw_corr dev_crypto)

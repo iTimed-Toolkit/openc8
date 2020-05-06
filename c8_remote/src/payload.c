@@ -49,11 +49,6 @@ struct payload *get_payload(PAYLOAD_T p)
             len = PAYLOAD_AES_SW_BERN_SZ;
             break;
 
-        case PAYLOAD_AES_SW_CORR:
-            pl = payload_aes_sw_corr;
-            len = PAYLOAD_AES_SW_CORR_SZ;
-            break;
-
         case PAYLOAD_CACHELIB:
             pl = payload_cachelib;
             len = PAYLOAD_CACHELIB_SZ;

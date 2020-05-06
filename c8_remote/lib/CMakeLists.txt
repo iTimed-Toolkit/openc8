@@ -1,7 +1,6 @@
 set(PL_NAMES
         crypto:aes_busy
         crypto:aes_sw_bern
-        crypto:aes_sw_corr
 
         system:cachelib
         system:exit_usb_task

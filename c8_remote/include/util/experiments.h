@@ -8,9 +8,6 @@
 DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsigned int num_iter, unsigned int offset);
 struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_buf);
 
-DEV_PTR_T setup_corr_exp(struct pwned_device *dev, unsigned char *init_key);
-struct corr_data *get_corr_exp_data(struct pwned_device *dev, DEV_PTR_T async_buf);
-
 /* System */
 void usb_task_exit(struct pwned_device *dev);
 
