@@ -189,22 +189,26 @@ void aes128_ttable_encrypt_ecb(unsigned char *msg,
     msg_int[0] = ((unsigned int) c->sbox[(unsigned char) (t0 >> 0u)] << 0u |
                   (unsigned int) c->sbox[(unsigned char) (t1 >> 8u)] << 8u |
                   (unsigned int) c->sbox[(unsigned char) (t2 >> 16u)] << 16u |
-                  (unsigned int) c->sbox[(unsigned char) (t3 >> 24u)] << 24u) ^ key_sched_int[4 * i];
+                  (unsigned int) c->sbox[(unsigned char) (t3 >> 24u)] << 24u) ^
+                          key_sched_int[4 * i];
 
     msg_int[1] = ((unsigned int) c->sbox[(unsigned char) (t1 >> 0u)] << 0u |
                   (unsigned int) c->sbox[(unsigned char) (t2 >> 8u)] << 8u |
                   (unsigned int) c->sbox[(unsigned char) (t3 >> 16u)] << 16u |
-                  (unsigned int) c->sbox[(unsigned char) (t0 >> 24u)] << 24u) ^ key_sched_int[4 * i + 1];
+                  (unsigned int) c->sbox[(unsigned char) (t0 >> 24u)] << 24u) ^
+                          key_sched_int[4 * i + 1];
 
     msg_int[2] = ((unsigned int) c->sbox[(unsigned char) (t2 >> 0u)] << 0u |
                   (unsigned int) c->sbox[(unsigned char) (t3 >> 8u)] << 8u |
                   (unsigned int) c->sbox[(unsigned char) (t0 >> 16u)] << 16u |
-                  (unsigned int) c->sbox[(unsigned char) (t1 >> 24u)] << 24u) ^ key_sched_int[4 * i + 2];
+                  (unsigned int) c->sbox[(unsigned char) (t1 >> 24u)] << 24u) ^
+                          key_sched_int[4 * i + 2];
 
     msg_int[3] = ((unsigned int) c->sbox[(unsigned char) (t3 >> 0u)] << 0u |
                   (unsigned int) c->sbox[(unsigned char) (t0 >> 8u)] << 8u |
                   (unsigned int) c->sbox[(unsigned char) (t1 >> 16u)] << 16u |
-                  (unsigned int) c->sbox[(unsigned char) (t2 >> 24u)] << 24u) ^ key_sched_int[4 * i + 3];
+                  (unsigned int) c->sbox[(unsigned char) (t2 >> 24u)] << 24u) ^
+                          key_sched_int[4 * i + 3];
 }
 
 #ifdef DEV_CRYPTO
