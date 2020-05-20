@@ -3,10 +3,10 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 
 if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     # regular desktop
-    set(CMAKE_C_COMPILER    /usr/bin/aarch64-linux-gnu-gcc)
-    set(CMAKE_ASM_COMPILER  /usr/bin/aarch64-linux-gnu-as)
-    set(CMAKE_OBJCOPY       /usr/bin/aarch64-linux-gnu-objcopy)
-    set(CMAKE_RANLIB        /usr/bin/aarch64-linux-gnu-ranlib)
+    set(CMAKE_C_COMPILER    /opt/aarch64-none-elf/bin/aarch64-none-elf-gcc)
+    set(CMAKE_ASM_COMPILER  /opt/aarch64-none-elf/bin/aarch64-none-elf-as)
+    set(CMAKE_OBJCOPY       /opt/aarch64-none-elf/bin/aarch64-none-elf-objcopy)
+    set(CMAKE_RANLIB        /opt/aarch64-none-elf/bin/aarch64-none-elf-ranlib)
 elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "armv7l")
     # raspberry pi
     set(CMAKE_C_COMPILER    /opt/cross/bin/aarch64-linux-gcc)
