@@ -172,7 +172,6 @@ int open_device_session(struct pwned_device *dev)
         else
         {
             checkm8_debug_indent("\tfailed to open device\n");
-            libusb_exit(dev->bundle->ctx);
             free(dev->bundle->descriptor);
         }
 
@@ -181,10 +180,8 @@ int open_device_session(struct pwned_device *dev)
     else
     {
         checkm8_debug_indent("\tcould not find a matching device\n");
-        libusb_exit(dev->bundle->ctx);
         free(dev->bundle->descriptor);
 
-        dev->bundle->ctx = NULL;
         dev->bundle->device = NULL;
         dev->bundle->handle = NULL;
         dev->bundle->descriptor = NULL;
@@ -217,14 +214,6 @@ int close_device_session(struct pwned_device *dev)
     }
 
     dev->bundle->device = NULL;
-
-    if(dev->bundle->ctx != NULL)
-    {
-        checkm8_debug_indent("\texiting context\n");;
-        libusb_exit(dev->bundle->ctx);
-        dev->bundle->ctx = NULL;
-    }
-
     if(dev->bundle->descriptor != NULL)
     {
         checkm8_debug_indent("\tfreeing device descriptor\n");
@@ -260,7 +249,6 @@ void ard_read(struct pwned_device *dev, unsigned char *target, int nbytes)
 }
 
 #endif
-
 
 int partial_ctrl_transfer(struct pwned_device *dev,
                           unsigned char bmRequestType, unsigned char bRequest,

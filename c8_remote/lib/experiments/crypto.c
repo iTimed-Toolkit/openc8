@@ -53,56 +53,79 @@ DEV_PTR_T install_aes_data(struct pwned_device *dev, unsigned int offset)
     return res;
 }
 
-DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsigned int num_iter, unsigned int offset)
+struct bern_exp_ptrs *
+setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsigned int num_iter, unsigned int offset)
 {
-    DEV_PTR_T addr_data, addr_key, addr_async_buf, addr_constants;
     struct dev_cmd_resp *resp;
-    FILE *keyfile;
+    struct bern_exp_ptrs *res = malloc(sizeof(struct bern_exp_ptrs));
 
     unsigned char data[16] = {0};
-
-    keyfile = fopen("KEY", "w+");
-    for(int i = 0; i < 16; i++)
-        fprintf(keyfile, "%02X", key[i]);
-    fclose(keyfile);
 
     if(IS_CHECKM8_FAIL(open_device_session(dev)))
     {
         printf("failed to open device session\n");
-        return DEV_PTR_NULL;
+        goto fail;
     }
 
-    addr_constants = install_aes_data(dev, offset);
-    if(addr_constants == DEV_PTR_NULL)
+    res->addr_constants = install_aes_data(dev, offset);
+    if(res->addr_constants == DEV_PTR_NULL)
     {
         printf("failed to install aes constants\n");
-        return DEV_PTR_NULL;
+        goto fail;
     }
 
-    addr_data = install_data(dev, SRAM, data, 16);
-    if(addr_data == DEV_PTR_NULL)
+    res->addr_data = install_data(dev, SRAM, data, 16);
+    if(res->addr_data == DEV_PTR_NULL)
     {
         printf("failed to install aes data\n");
-        return DEV_PTR_NULL;
+        goto fail;
     }
 
-    addr_key = install_data(dev, SRAM, key, 16);
-    if(addr_key == DEV_PTR_NULL)
+    res->addr_key = install_data(dev, SRAM, key, 16);
+    if(res->addr_key == DEV_PTR_NULL)
     {
         printf("failed to install aes key\n");
-        return DEV_PTR_NULL;
+        goto fail;
     }
+
+    res->addr_results = get_address(dev, SRAM, sizeof(struct bern_data));
+    if(res->addr_results == DEV_PTR_NULL)
+    {
+        printf("failed to create result array");
+        goto fail;
+    }
+
+    resp = execute_gadget(dev, ADDR_EVENT_NEW, 0, 3,
+                            res->addr_results + offsetof(struct bern_data, ev_data), 1, 0);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("failed to init data event\n");
+        free_dev_cmd_resp(resp);
+        goto fail;
+    }
+
+    free_dev_cmd_resp(resp);
+    resp = execute_gadget(dev, ADDR_EVENT_NEW, 0, 3,
+                          res->addr_results + offsetof(struct bern_data, ev_done), 1, 0);
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("failed to init done event\n");
+        free_dev_cmd_resp(resp);
+        goto fail;
+    }
+
+    free_dev_cmd_resp(resp);
 
     if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_SYNC, SRAM)))
     {
         printf("failed to install sync payload\n");
-        return DEV_PTR_NULL;
+        goto fail;
     }
 
     if(IS_CHECKM8_FAIL(install_payload(dev, PAYLOAD_AES_SW_BERN, SRAM)))
     {
         printf("failed to install aes payload\n");
-        return DEV_PTR_NULL;
+        goto fail;
     }
 
     resp = execute_payload(dev, PAYLOAD_SYNC, 0, 0);
@@ -110,31 +133,25 @@ DEV_PTR_T setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsign
     {
         printf("failed to execute sync payload\n");
         free_dev_cmd_resp(resp);
-        return DEV_PTR_NULL;
+        goto fail;
     }
     free_dev_cmd_resp(resp);
-
-#ifdef BERNSTEIN_CONTINUOUS
-    addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW_BERN,
-                                         sizeof(struct bern_data),
-                                         3, addr_data, addr_key, addr_constants + offset);
-#else
-    addr_async_buf = setup_payload_async(dev, PAYLOAD_AES_SW_BERN,
-                                         sizeof(struct bern_data),
-                                         4, addr_data, addr_key, addr_constants + offset, num_iter);
-#endif
-    run_payload_async(dev, PAYLOAD_AES_SW_BERN);
 
     if(IS_CHECKM8_FAIL(close_device_session(dev)))
     {
         printf("failed to close device session\n");
-        return DEV_PTR_NULL;
+        goto fail;
     }
 
-    return addr_async_buf;
+    return res;
+
+fail:
+    free(res);
+    return NULL;
 }
 
 #ifdef BERNSTEIN_WITH_USB
+
 struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_buf)
 {
     struct dev_cmd_resp *resp;
@@ -157,7 +174,19 @@ struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_bu
     }
 
     free_dev_cmd_resp(resp);
+#else
+    resp = execute_gadget(dev, ADDR_EVENT_WAIT, 0, 1,
+                            async_buf + offsetof(struct bern_data, ev_done));
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("failed to wait for data\n");
+        free_dev_cmd_resp(resp);
+        return NULL;
+    }
+
+    free_dev_cmd_resp(resp);
 #endif
+
     resp = read_gadget(dev, async_buf, sizeof(struct bern_data));
     if(IS_CHECKM8_FAIL(resp->ret))
     {
@@ -192,4 +221,5 @@ struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_bu
 
     return res;
 }
+
 #endif

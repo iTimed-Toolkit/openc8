@@ -97,6 +97,18 @@ static inline void patch_enable_demote_boot()
 }
 
 PAYLOAD_SECTION
+static inline void patch_dfu_idProduct_string()
+{
+    int8_t *patch = (int8_t *) 0x18010d067;
+
+    patch[0] = 'A';
+    patch[1] = 'p';
+    patch[2] = 'l';
+    patch[3] = 'o';
+    patch[4] = 'o';
+}
+
+PAYLOAD_SECTION
 void trampoline_function()
 {
     uint64_t addr, arg;
@@ -104,8 +116,9 @@ void trampoline_function()
     __asm__ volatile ("str x0, %0" : "=m" (addr));
     __asm__ volatile ("str x1, %0" : "=m" (arg));
 
-    //patch_enter_soft_dfu();
-    patch_enable_demote_boot();
+    patch_enter_soft_dfu();
+    patch_dfu_idProduct_string();
+//    patch_enable_demote_boot();
 
     __asm__ volatile ("ldr x0, %0"::"m" (addr));
     __asm__ volatile ("ldr x1, %0"::"m" (arg));
@@ -162,6 +175,15 @@ void entry_sync()
 
     fix_heap();
     patch_trampoline();
+//
+//    // reset checkm8 string
+//    *((unsigned char *) 0x180083d59) = 0;
+//    *((unsigned char *) 0x180083d5a) = 0;
+//    *((unsigned char *) 0x180083d5b) = 0;
+//
+//    *((unsigned int *) 0x180083d5c) = 0;
+//    *((unsigned int *) 0x180083d60) = 0;
+//    *((unsigned int *) 0x180083d64) = 0;
 
     *(ADDR_DFU_RETVAL) = -1;
     *(ADDR_DFU_STATUS) = 1;

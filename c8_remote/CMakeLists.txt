@@ -5,6 +5,7 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "-g -Wall")
 
 include_directories(include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/lib/include)
 add_subdirectory(lib)
 
 add_executable(checkm8_remote main.c src/usb_helpers.c src/exploit.c src/payload.c src/command.c)

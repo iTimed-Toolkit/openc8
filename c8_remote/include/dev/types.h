@@ -85,8 +85,8 @@ struct bern_data
 
 #ifdef BERNSTEIN_WITH_USB
     struct event ev_data;
-    struct event ev_done;
 #endif
+    struct event ev_done;
 } __attribute__ ((packed));
 
 #define N_CORR_ENTRIES 1024*256

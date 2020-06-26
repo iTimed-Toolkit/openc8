@@ -6,9 +6,10 @@
 #include <math.h>
 #include <time.h>
 #include <zconf.h>
+#include <sys/stat.h>
 
 #include "dev/types.h"
-#include <dev/addr.h>
+#include "dev/addr.h"
 #include "util/experiments.h"
 #include "util/host_crypto.h"
 
@@ -45,14 +46,36 @@ void checkm8_debug_block(const char *format, ...)
 #endif
 }
 
-void record_bern_data(struct bern_data *data, int index)
+void record_bern_data(struct bern_data *data, unsigned char *key, int index, int prefix)
 {
     int j, b;
     FILE *outfile;
     char linebuf[256];
 
+    sprintf(linebuf, "%i", prefix);
+    mkdir(linebuf, 0700);
+
+    sprintf(linebuf, "%i/KEY-%i", prefix, index);
+    outfile = fopen(linebuf, "w+");
+    if(outfile == NULL)
+    {
+        printf("failed to open key file\n");
+        return;
+    }
+
+    for(j = 0; j < 16; j++)
+    {
+        sprintf(linebuf, "%02X", key[j]);
+        fputs(linebuf, outfile);
+    }
+
+    sprintf(linebuf, "\n");
+    fputs(linebuf, outfile);
+
+    fclose(outfile);
+
 #ifdef BERNSTEIN_COLLECT1
-    sprintf(linebuf, "%i-1.dat", index);
+    sprintf(linebuf, "%i/%i-1.dat", prefix, index);
     outfile = fopen(linebuf, "w+");
     if(outfile == NULL)
     {
@@ -78,7 +101,7 @@ void record_bern_data(struct bern_data *data, int index)
 #endif
 
 #ifdef BERNSTEIN_COLLECT2
-    sprintf(linebuf, "%i-2.dat", index);
+    sprintf(linebuf, "%i/%i-2.dat", prefix, index);
     outfile = fopen(linebuf, "w+");
     if(outfile == NULL)
     {
@@ -104,7 +127,7 @@ void record_bern_data(struct bern_data *data, int index)
 #endif
 
 #ifdef BERNSTEIN_COLLECT4
-    sprintf(linebuf, "%i-4.dat", index);
+    sprintf(linebuf, "%i/%i-4.dat", prefix, index);
     outfile = fopen(linebuf, "w+");
     if(outfile == NULL)
     {
@@ -130,7 +153,7 @@ void record_bern_data(struct bern_data *data, int index)
 #endif
 
 #ifdef BERNSTEIN_COLLECT8
-    sprintf(linebuf, "%i-8.dat", index);
+    sprintf(linebuf, "%i/%i-8.dat", prefix, index);
     outfile = fopen(linebuf, "w+");
     if(outfile == NULL)
     {
@@ -158,13 +181,15 @@ void record_bern_data(struct bern_data *data, int index)
 
 int main_bernstein(unsigned int num_iter, unsigned int offset)
 {
-    DEV_PTR_T async_buf;
+    int i;
+    DEV_PTR_T argbuf;
+
+    struct bern_data *data;
+    struct bern_exp_ptrs *exp_ptrs;
+    struct dev_cmd_resp *resp;
+
     unsigned char key[16];
     memset(key, 0, 16);
-
-//    srand(time(NULL));
-//    for(int i = 0; i < 16; i++)
-//        key[i] = random();
 
     struct pwned_device *dev = exploit_device();
     if(dev == NULL || dev->status == DEV_NORMAL)
@@ -176,77 +201,74 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
     demote_device(dev);
     fix_heap(dev);
 
-#ifdef BERNSTEIN_WITH_USB
-    struct bern_data *data;
-    int i, count = 0;
-
-#ifdef BERNSTEIN_CONTINUOUS
-    async_buf = setup_bern_exp(dev, key, 0, offset);
-    if(async_buf == DEV_PTR_NULL)
+    exp_ptrs = setup_bern_exp(dev, key, num_iter, offset);
+    if(exp_ptrs == NULL)
     {
-        printf("failed to setup bernstein experiment\n");
+        printf("failed to set up bern experimnent\n");
         return -1;
     }
 
-    printf("got async buf 0x%llX size 0x%lx\n", async_buf, sizeof(struct bern_data));
-
-    while(1)
+    argbuf = get_address(dev, SRAM, 5 * sizeof(unsigned long long));
+    if(argbuf == DEV_PTR_NULL)
     {
-        for(i = 0; i < 30; i++)
-        {
-            printf("sleeping %i / 30\n", i);
-            sleep(60);
-        }
-
-        data = get_bern_exp_data(dev, async_buf);
-        if(data == NULL)
-        {
-            printf("failed to get bernstein data\n");
-            return -1;
-        }
-
-        record_bern_data(data, count);
-        free(data);
-        count++;
-    }
-#else
-    unsigned char key_values[6] = {0x00, 0x00, 0x80, 0x80, 0xFF, 0xFF};
-    for(i = 0; i < 6; i++)
-    {
-        key[0] = key_values[i];
-
-        async_buf = setup_bern_exp(dev, key, num_iter, offset);
-        if(async_buf == DEV_PTR_NULL)
-        {
-            printf("failed to set up bern experiment\n");
-            return -1;
-        }
-
-        data = get_bern_exp_data(dev, async_buf); // will hang until complete - 1.5 hours
-        if(data == NULL)
-        {
-            printf("failed to set up bern experiment\n");
-            return -1;
-        }
-
-        record_bern_data(data, count++);
-        free(data);
-
-        if(IS_CHECKM8_FAIL(uninstall_all_payloads(dev)))
-        {
-            printf("failed to uninstall all payloads\n");
-            return -1;
-        }
-
-        if(IS_CHECKM8_FAIL(uninstall_all_data(dev)))
-        {
-            printf("failed to uninstall all data\n");
-            return -1;
-        }
+        printf("failed to allocate arg buffer\n");
+        return -1;
     }
 
-#endif // BERNSTEIN_CONTINUOUS
-#endif // BERNSTEIN_WITH_USB
+    double ratio = 1.0311772745930552;
+    srand(0x69);
+    for(i = 8; i < 32; i++)
+    {
+        for(int j = 0; j < 16; j++)
+            key[j] = random();
+
+        resp = write_gadget(dev, exp_ptrs->addr_key, key, 16);
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed to write new key\n");
+            return -1;
+        }
+
+        resp = memset_gadget(dev, exp_ptrs->addr_results, 0, offsetof(struct bern_data, ev_data));
+        if(IS_CHECKM8_FAIL(resp->ret))
+        {
+            printf("failed to zero profile data\n");
+            return -1;
+        }
+
+        for(int curr_iter = 10000, last_iter = 0;
+            curr_iter <= num_iter;
+            last_iter = curr_iter, curr_iter *= ratio)
+        {
+            printf("starting profile %i - %i iterations\n", i, curr_iter);
+
+            if(setup_payload_async(dev, PAYLOAD_AES_SW_BERN, argbuf, 5,
+                                   exp_ptrs->addr_data, exp_ptrs->addr_key,
+                                   exp_ptrs->addr_constants + offset, exp_ptrs->addr_results,
+                                   curr_iter - last_iter) == DEV_PTR_NULL)
+            {
+                printf("failed to create a new task\n");
+                return -1;
+            }
+
+            if(IS_CHECKM8_FAIL(run_payload_async(dev, PAYLOAD_AES_SW_BERN)))
+            {
+                printf("failed to run async payload\n");
+                return -1;
+            }
+
+            data = get_bern_exp_data(dev, exp_ptrs->addr_results);
+            if(data == NULL)
+            {
+                printf("failed to get berstein data\n");
+                return -1;
+            }
+
+            kill_payload_async(dev, PAYLOAD_AES_SW_BERN, 0);
+            record_bern_data(data, key, i, curr_iter);
+            free(data);
+        }
+    }
 
     free_device(dev);
     return 0;
@@ -254,28 +276,5 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
 
 int main()
 {
-    main_bernstein(0, 0);
-//    struct pwned_device *dev = exploit_device();
-//    if(dev == NULL || dev->status == DEV_NORMAL)
-//    {
-//        printf("Failed to exploit device\n");
-//        return -1;
-//    }
-//
-//    demote_device(dev);
-//    usb_task_exit(dev);
-//
-//    free_device(dev);
-//    return 0;
+    main_bernstein(100000000, 0);
 }
-
-
-
-
-
-
-
-
-
-
-

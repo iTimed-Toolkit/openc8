@@ -15,7 +15,7 @@ elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "armv7l")
     set(CMAKE_RANLIB        /opt/cross/bin/aarch64-linux-ranlib)
 endif()
 
-set(CMAKE_C_FLAGS "-nostdlib -O")
+set(CMAKE_C_FLAGS "-nostdlib -O -pie")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 foreach(NAME ${PL_NAMES})
@@ -37,7 +37,7 @@ foreach(NAME ${PL_NAMES})
     add_custom_command(TARGET       payload_${NAME_ONLY} POST_BUILD
                         BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin
                         COMMAND     ${CMAKE_OBJCOPY}
-                        ARGS        -O binary -j .text -j .payload_text -j .payload_data
+                        ARGS        -O binary -j .text -j .payload_text
                                     ${CMAKE_CURRENT_BINARY_DIR}/payload_${NAME_ONLY}
                                     ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin)
 endforeach(NAME)

@@ -2,6 +2,7 @@
 
 #include "checkm8.h"
 #include "tool/usb_helpers.h"
+#include "dev/types.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -157,7 +158,7 @@ struct dev_cmd_resp *command(struct pwned_device *dev,
 #define MEMS_MAGIC 0x6d656d736d656d73ull // 'memsmems'[::-1]
 #define DONE_MAGIC 0x646f6e65646f6e65ull // 'donedone'[::-1]
 
-struct dev_cmd_resp *dev_memset(struct pwned_device *dev, unsigned long long addr, unsigned char c, int len)
+struct dev_cmd_resp *dev_memset(struct pwned_device *dev, DEV_PTR_T addr, unsigned char c, int len)
 {
     checkm8_debug_indent("dev_memset(dev = %p, addr = %lx, c = %x, len = %li)\n", dev, addr, c, len);
     unsigned long long cmd_args[5];
@@ -170,7 +171,7 @@ struct dev_cmd_resp *dev_memset(struct pwned_device *dev, unsigned long long add
     return command(dev, (unsigned char *) &cmd_args, 5 * sizeof(unsigned long long), 8);
 }
 
-struct dev_cmd_resp *dev_memcpy(struct pwned_device *dev, unsigned long long dest, unsigned long long src, int len)
+struct dev_cmd_resp *dev_memcpy(struct pwned_device *dev, DEV_PTR_T dest, DEV_PTR_T src, int len)
 {
     checkm8_debug_indent("dev_memset(dev = %p, dest = %lx, src = %lx, len = %li)\n", dev, dest, src, len);
     unsigned long long cmd_args[5];
@@ -205,7 +206,7 @@ struct dev_cmd_resp *dev_exec(struct pwned_device *dev, int response_len, int na
     return command(dev, (unsigned char *) cmd_args, (1 + nargs) * sizeof(unsigned long long), 16 + response_len);
 }
 
-struct dev_cmd_resp *dev_read_memory(struct pwned_device *dev, unsigned long long addr, int len)
+struct dev_cmd_resp *dev_read_memory(struct pwned_device *dev, DEV_PTR_T addr, int len)
 {
     checkm8_debug_indent("dev_read_memory(dev = %p, addr = %lx, len = %i)\n", dev, addr, len);
     long long index = 0, amount;
@@ -254,7 +255,7 @@ struct dev_cmd_resp *dev_read_memory(struct pwned_device *dev, unsigned long lon
     return ret;
 }
 
-struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, unsigned long long addr, unsigned char *data, int len)
+struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, DEV_PTR_T addr, unsigned char *data, int len)
 {
     checkm8_debug_indent("dev_write_memory(dev = %p, addr = %lx, data = %p, len = %i)\n", dev, addr, data, len);
 

@@ -94,7 +94,7 @@ void floppysleep_async(struct pwned_device *dev)
 
     free_dev_cmd_resp(resp);
 
-    async_buf_ptr = setup_payload_async(dev, PAYLOAD_FLOPPYSLEEP, 32, 1, init_a_ptr);
+    async_buf_ptr = setup_payload_async_alloc(dev, PAYLOAD_FLOPPYSLEEP, 32, 1, init_a_ptr);
     run_payload_async(dev, PAYLOAD_FLOPPYSLEEP);
     close_device_session(dev);
 

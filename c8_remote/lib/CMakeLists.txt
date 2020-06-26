@@ -22,23 +22,19 @@ endforeach(TARGET)
 set(CMAKE_C_FLAGS "-g -Wall")
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/payload)
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/payload/c)
 add_custom_target(payload_sources
                     BYPRODUCTS  ${PL_SRC_LIB}
+                                ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c
                     DEPENDS     ${PL_TARGETS}
                     COMMENT     "Refreshing payload library"
                     COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/librarize.py
                                         ${CMAKE_CURRENT_BINARY_DIR}/payload/bin
-                                        ${CMAKE_CURRENT_BINARY_DIR}/payload/c)
+                                        ${CMAKE_CURRENT_BINARY_DIR}/payload)
 
-add_library(payload ${PL_SRC_LIB})
+add_library(payload ${PL_SRC_LIB} ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c)
 add_dependencies(payload payload_sources)
-
-add_custom_command(TARGET       payload POST_BUILD
-                    BYPRODUCTS  ${CMAKE_SOURCE_DIR}/c8_remote/include/libpayload.h
-                    COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/headerize.py
-                                        ${CMAKE_CURRENT_BINARY_DIR}/payload/c
-                                        ${CMAKE_SOURCE_DIR}/c8_remote/include/tool)
 
 add_library(experiments experiments/crypto.c
                         experiments/system.c
