@@ -30,14 +30,14 @@ def gen_payload_getter(names, sizes):
     source_lines = \
         [
             '#include "libpayload_int.h"\n',
-            '#include <stdlib.h>\n'
-            '\n'
+            '#include <stdlib.h>\n',
+            '\n',
             'struct payload *get_payload(PAYLOAD_T p)\n',
             '{\n',
             '\tstruct payload *res;\n',
             '\tconst unsigned char *pl;\n',
             '\tint len;\n',
-            '\n'
+            '\n',
             '\tswitch(p)\n',
             '\t{\n'
         ]
@@ -54,7 +54,7 @@ def gen_payload_getter(names, sizes):
             '\t\tdefault:\n',
             '\t\t\treturn NULL;\n',
             '\t}\n',
-            '\n'
+            '\n',
             '\tres = malloc(sizeof(struct payload));\n',
             '\tif(res == NULL) return NULL;\n',
             '\n',
@@ -65,7 +65,7 @@ def gen_payload_getter(names, sizes):
             '\tres->async_base = -1ull;\n',
             '\tres->next = NULL;\n',
             '\tres->prev = NULL;\n',
-            '\treturn res;\n'
+            '\treturn res;\n',
             '}'
         ]
 
@@ -74,25 +74,28 @@ def gen_payload_getter(names, sizes):
 
 
 def gen_libpayload_int(names, sizes):
-    header_lines = ['#ifndef CHECKM8_TOOL_LIBPAYLOAD_INT_H\n',
-                    '#define CHECKM8_TOOL_LIBPAYLOAD_INT_H\n',
-                    '\n',
-                    '#include "libpayload.h"\n',
-                    "\n"
-                    'struct payload\n',
-                    '{\n',
-                    '\tPAYLOAD_T type;\n',
-                    '\tconst unsigned char *data;\n',
-                    '\tint len;\n',
-                    '\n',
-                    '\tunsigned long long install_base;\n',
-                    '\tunsigned long long async_base;\n'
-                    '\n',
-                    '\tstruct payload *next;\n',
-                    '\tstruct payload *prev;\n',
-                    '};\n',
-                    '\n',
-                    'struct payload *get_payload(PAYLOAD_T p);\n']
+    header_lines = \
+        [
+            '#ifndef CHECKM8_TOOL_LIBPAYLOAD_INT_H\n',
+            '#define CHECKM8_TOOL_LIBPAYLOAD_INT_H\n',
+            '\n',
+            '#include "libpayload.h"\n',
+            "\n",
+            'struct payload\n',
+            '{\n',
+            '\tPAYLOAD_T type;\n',
+            '\tconst unsigned char *data;\n',
+            '\tint len;\n',
+            '\n',
+            '\tunsigned long long install_base;\n',
+            '\tunsigned long long async_base;\n',
+            '\n',
+            '\tstruct payload *next;\n',
+            '\tstruct payload *prev;\n',
+            '};\n',
+            '\n',
+            'struct payload *get_payload(PAYLOAD_T p);\n'
+        ]
 
     name_lines = []
     size_lines = []
@@ -130,16 +133,16 @@ def gen_libpayload_pub(names):
 
 def gen_and_update(fname, linefunc, args, force_lines=None):
     if force_lines is None:
-        lines = linefunc(*args)    
+        lines = linefunc(*args)
     else:
         lines = force_lines
-        
+
     if os.path.exists(fname):
         with open(fname, 'r') as f:
             old_lines = f.readlines()
-            
+
         if all(map(eq,
-                   [l.strip() for l in lines], 
+                   [l.strip() for l in lines],
                    [l.strip() for l in old_lines])):
             return
 
@@ -170,7 +173,7 @@ if __name__ == '__main__':
         pname, size, pl_lines = gen_payload_impl(name)
         payload_names.append(pname)
         payload_sizes.append(size)
-        
+
         gen_and_update(lib_dir + '/c/' + pname + '.c', None, None, force_lines=pl_lines)
 
     gen_and_update(lib_dir + '/c/get_payloads.c', gen_payload_getter, [payload_names, payload_sizes])
