@@ -32,6 +32,9 @@
 #define ADDR_EVENT_WAIT                     0x10000af3c
 #define ADDR_EVENT_TRY                      0x10000af7c
 
+#define ADDR_ENTER_CRITICAL                 0x10000a4b8
+#define ADDR_EXIT_CRITICAL                  0x10000a514
+
 #define ADDR_BOOTSTRAP_TASK                 0x180080200
 
 /* Heap */
@@ -47,6 +50,31 @@
 #define ADDR_HEAP_BASE                      0x1801b4000
 #define ADDR_HEAP_END                       0x1801fffc0
 
+/* Memory */
+#define ADDR_DFU_IMG_BASE                   0x1800B0000
+#define ADDR_TLBI                           0x100000434
+#define ADDR_DC_CIVAC                       0x10000046c
+#define ADDR_DMB                            0x100000478
+
+/* USB */
+#define ADDR_CREATE_DESC                    0x10000d150
+#define ADDR_USB_CORE_DO_IO                 0x10000dc98
+#define ADDR_HANDLE_INTF_REQ                0x10000dfb8
+
+#define ADDR_CORE_DESC_SERIAL               0x1800805da
+#define ADDR_DFU_INTF_HANDLE                0x180088B48
+#define ADDR_HS_DESC                        0x180088a30
+#define ADDR_FS_DESC                        0x180088a38
+#define ADDR_USB_SERIAL                     0x180083cf8
+
+/* Standard */
+#define ADDR_DEV_MEMCPY                     0x100010730
+#define ADDR_DEV_STRLEN                     0x100010b68
+
+/* System registers */
+#define ADDR_WRITE_TTBR0                    0x1000003e4
+#define ADDR_DEMOTE_REG                     0x2102bc000
+
 /* Boot */
 #define ADDR_GETDFU_EXIT                    0x1000006c8
 #define ADDR_GETBOOT_ENTRY                  0x100000658
@@ -56,12 +84,14 @@
 #define LEN_TRAMPOLINE                      0x240
 #define TRAMPOLINE_SIZE                     0x4000
 
-#define ADDR_DFU_RETVAL                     (int *)                 0x180088ac8
-#define ADDR_DFU_STATUS                     (unsigned char *)       0x180088ac0
-#define ADDR_DFU_EVENT                      (struct event *)        0x180088af0
+#define ADDR_DFU_RETVAL                     0x180088ac8
+#define ADDR_DFU_STATUS                     0x180088ac0
+#define ADDR_DFU_EVENT                      0x180088af0
 
 /* Misc */
+#define ADDR_FUNC_GADGET                    0x10000cc4c
 #define ADDR_RANDOM_RET                     0x10000b924
+#define ADDR_NOP_GADGET                     0x10000CC6C
 #define ADDR_SYNC_ENTRY                     0x1800afc84
 #define ADDR_USB_EVENT                      (struct event *)        0x1800838c8
 

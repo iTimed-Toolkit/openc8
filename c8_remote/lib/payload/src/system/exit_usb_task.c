@@ -156,8 +156,7 @@ void patch_trampoline()
         t_src[i] = arm64_nop;
 }
 
-PAYLOAD_SECTION
-void entry_sync()
+void _start()
 {
     uint64_t *bootstrap_sp = (uint64_t *) ADDR_BOOTSTRAP_TASK + 0x25;
     uint64_t *bootstrap_stack = (uint64_t *) *bootstrap_sp;
@@ -185,11 +184,7 @@ void entry_sync()
 //    *((unsigned int *) 0x180083d60) = 0;
 //    *((unsigned int *) 0x180083d64) = 0;
 
-    *(ADDR_DFU_RETVAL) = -1;
-    *(ADDR_DFU_STATUS) = 1;
-    event_notify(ADDR_DFU_EVENT);
+    *((int *) ADDR_DFU_RETVAL) = -1;
+    *((char *) ADDR_DFU_STATUS) = 1;
+    event_notify((struct event *) ADDR_DFU_EVENT);
 }
-
-PAYLOAD_SECTION
-void entry_async()
-{}

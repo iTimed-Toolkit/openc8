@@ -1,5 +1,8 @@
 set(PL_NAMES
-        crypto:aes_busy
+        exploit:checkm8
+        exploit:handler
+        exploit:patch_tables
+
         crypto:aes_sw_bern
 
         system:cachelib
@@ -39,4 +42,4 @@ add_dependencies(payload payload_sources)
 add_library(experiments experiments/crypto.c
                         experiments/system.c
                         experiments/power.c)
-add_library(host_crypto crypto/aes_sw_impl.c crypto/aes_sw_host.c)
+add_library(host_crypto crypto/aes.c)

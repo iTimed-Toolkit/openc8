@@ -3,18 +3,6 @@
 #include "dev_cache.h"
 #include "dev_crypto.h"
 
-PAYLOAD_SECTION
-uint64_t entry_sync(unsigned char *msg, unsigned char key[16],
-                    struct aes_sbox_constants *c)
-{
-    unsigned long long start = 0;
-    unsigned char key_sched[176];
-    expand_key_sbox(key, key_sched, 11, c);
-
-    start = get_ticks();
-    aes128_sbox_encrypt_ecb(msg, key, c);
-    return get_ticks() - start;
-}
 
 PAYLOAD_SECTION
 void reset_data(struct bern_data *data)
@@ -141,8 +129,7 @@ void update_data(struct bern_data *data, unsigned char *msg_old, unsigned long l
 #endif
 }
 
-PAYLOAD_SECTION
-void entry_async(uint64_t *base)
+void _start(uint64_t *base)
 {
     unsigned int i, j, iter_count = 0;
     unsigned long long start = 0;
@@ -154,17 +141,16 @@ void entry_async(uint64_t *base)
     // get initial params
     unsigned char *msg = (unsigned char *) base[0];
     unsigned char *key = (unsigned char *) base[1];
-    struct aes_ttable_constants *c = (struct aes_ttable_constants *) base[2];
-    struct bern_data *data = (struct bern_data *) base[3];
+    struct bern_data *data = (struct bern_data *) base[2];
 
 #ifndef BERNSTEIN_CONTINUOUS
-    unsigned int num_iter = (unsigned int) base[4];
+    unsigned int num_iter = (unsigned int) base[3];
 #endif
 
-    expand_key_ttable(key, key_sched, 11, c);
+    expand_key(key, key_sched, 11);
 
     for(i = 0; i < 100000; i++)
-        aes128_ttable_encrypt_ecb(msg, key_sched, c);
+        aes128_ttable_encrypt_ecb(msg, key_sched);
 
 #ifdef BERNSTEIN_CONTINUOUS
     reset_data(data);
@@ -174,12 +160,12 @@ void entry_async(uint64_t *base)
 #endif
     {
         // randomly generate a new msg based on the old one
-        for(i = 0; i < 16; i++)
-            msg_old[i] = msg[i];
+        *((uint64_t *) &msg_old[0]) = *((uint64_t *) &msg[0]);
+        *((uint64_t *) &msg_old[8]) = *((uint64_t *) &msg[8]);
 
         // encrypt it and measure time
         start = get_ticks();
-        aes128_ttable_encrypt_ecb(msg, key_sched, c);
+        aes128_ttable_encrypt_ecb(msg, key_sched);
         timing = get_ticks() - start;
 
         // update counters

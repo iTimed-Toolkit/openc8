@@ -8,7 +8,6 @@
 #ifndef WITH_ARDUINO
 struct libusb_device_bundle
 {
-    struct libusb_context *ctx;
     struct libusb_device *device;
     struct libusb_device_handle *handle;
     struct libusb_device_descriptor *descriptor;

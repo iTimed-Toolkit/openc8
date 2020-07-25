@@ -15,7 +15,7 @@ elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "armv7l")
     set(CMAKE_RANLIB        /opt/cross/bin/aarch64-linux-ranlib)
 endif()
 
-set(CMAKE_C_FLAGS "-nostdlib -O -pie")
+set(CMAKE_C_FLAGS "-nostdlib -Os -Wl,--gc-sections")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 foreach(NAME ${PL_NAMES})
@@ -23,8 +23,6 @@ foreach(NAME ${PL_NAMES})
     string(REGEX REPLACE "^[^:]*\\:(.*)$" "\\1" NAME_ONLY ${NAME})
 
     set(SRC_NAME ${NAME}_SRCS)
-    set(${SRC_NAME} src/payload_entry.S src/payload_entry.c)
-
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src/${SRC_PATH}.c)
         list(APPEND ${SRC_NAME} src/${SRC_PATH}.c)
     endif()
@@ -37,12 +35,12 @@ foreach(NAME ${PL_NAMES})
     add_custom_command(TARGET       payload_${NAME_ONLY} POST_BUILD
                         BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin
                         COMMAND     ${CMAKE_OBJCOPY}
-                        ARGS        -O binary -j .text -j .payload_text
+                        ARGS        -O binary -j .text -j .payload_text -j .payload_data_*
                                     ${CMAKE_CURRENT_BINARY_DIR}/payload_${NAME_ONLY}
                                     ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin)
 endforeach(NAME)
 
-add_library(dev_crypto ../crypto/aes_sw_impl.c)
+add_library(dev_crypto ../crypto/aes.c)
 target_compile_definitions(dev_crypto PRIVATE DEV_CRYPTO)
 
 target_link_libraries(payload_aes_sw_bern dev_crypto)

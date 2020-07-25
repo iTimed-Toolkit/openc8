@@ -18,7 +18,7 @@ extern uint64_t fs_load(float *dividend, int divisor_base);
 //}
 
 PAYLOAD_SECTION
-uint64_t floppysleep_iteration(float *init)
+uint64_t run(float *init)
 {
     int i;
     uint64_t start, end, report;
@@ -38,23 +38,7 @@ uint64_t floppysleep_iteration(float *init)
     return end - start;
 }
 
-PAYLOAD_SECTION
-uint64_t entry_sync(float *init_ptr)
+uint64_t _start(float *init)
 {
-    return floppysleep_iteration(init_ptr);
-}
-
-PAYLOAD_SECTION
-void entry_async(uint64_t *args)
-{
-    float *init_ptr = (float *) args[0];
-    args[0] = 0;
-
-    while(1)
-    {
-        floppysleep_iteration(init_ptr);
-
-        if(args[0] % 1000000 == 0) task_resched();
-        args[0]++;
-    }
+    run(init);
 }

@@ -7,51 +7,6 @@
 
 #include "dev/addr.h"
 #include "tool/command.h"
-#include "util/host_crypto.h"
-
-DEV_PTR_T install_aes_data(struct pwned_device *dev, unsigned int offset)
-{
-    int close;
-    DEV_PTR_T res;
-    struct aes_ttable_constants *constants = get_ttable_constants();
-
-    if(is_device_session_open(dev)) close = 0;
-    else
-    {
-        close = 1;
-        if(IS_CHECKM8_FAIL(open_device_session(dev)))
-        {
-            printf("failed to open device session\n");
-            free(constants);
-            return DEV_PTR_NULL;
-        }
-    }
-
-    res = install_data_offset(dev,
-                              SRAM,
-                              (unsigned char *) constants,
-                              sizeof(struct aes_ttable_constants),
-                              offset);
-    if(res == DEV_PTR_NULL)
-    {
-        printf("failed to write AES constants\n");
-        free(constants);
-        return DEV_PTR_NULL;
-    }
-
-    if(close)
-    {
-        if(IS_CHECKM8_FAIL(close_device_session(dev)))
-        {
-            printf("failed to close device session\n");
-            free(constants);
-            return DEV_PTR_NULL;
-        }
-    }
-
-    free(constants);
-    return res;
-}
 
 struct bern_exp_ptrs *
 setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsigned int num_iter, unsigned int offset)
@@ -64,13 +19,6 @@ setup_bern_exp(struct pwned_device *dev, unsigned char key[16], unsigned int num
     if(IS_CHECKM8_FAIL(open_device_session(dev)))
     {
         printf("failed to open device session\n");
-        goto fail;
-    }
-
-    res->addr_constants = install_aes_data(dev, offset);
-    if(res->addr_constants == DEV_PTR_NULL)
-    {
-        printf("failed to install aes constants\n");
         goto fail;
     }
 

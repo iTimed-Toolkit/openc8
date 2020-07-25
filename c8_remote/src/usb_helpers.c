@@ -11,7 +11,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <libusb-1.0/libusb.h>
+#include <libirecovery.h>
+
+static bool ctx_init = false;
+static struct libusb_context *libusb_ctx;
 
 #endif
 
@@ -121,10 +126,10 @@ int open_device_session(struct pwned_device *dev)
     int i, usb_dev_count, ret = CHECKM8_FAIL_NODEV;
     libusb_device **usb_device_list = NULL;
 
-    if(dev->bundle->ctx == NULL)
+    if(!ctx_init)
     {
         checkm8_debug_indent("\tbundle ctx is NULL, allocating\n");
-        libusb_init(&dev->bundle->ctx);
+        libusb_init(&libusb_ctx);
     }
     else
     {
@@ -137,7 +142,7 @@ int open_device_session(struct pwned_device *dev)
         }
     }
 
-    usb_dev_count = libusb_get_device_list(dev->bundle->ctx, &usb_device_list);
+    usb_dev_count = libusb_get_device_list(libusb_ctx, &usb_device_list);
     checkm8_debug_indent("\tfound %i USB devices\n", usb_dev_count);
 
     dev->bundle->device = NULL;
@@ -230,7 +235,7 @@ int is_device_session_open(struct pwned_device *dev)
 #ifdef WITH_ARDUINO
     return dev->ard_fd != -1;
 #else
-    return dev->bundle->ctx != NULL && dev->bundle->device != NULL &&
+    return dev->bundle->device != NULL &&
            dev->bundle->handle != NULL && dev->bundle->descriptor != NULL;
 #endif
 }
@@ -389,20 +394,10 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
     }
 #else
     int ret;
-    unsigned char recipient = bmRequestType & 3u;
-    unsigned char rqtype = bmRequestType & (3u << 5u);
-    if(recipient == 1 && rqtype == (2u << 5u))
-    {
-        unsigned short interface = wIndex & 0xFFu;
-        ret = libusb_claim_interface(dev->bundle->handle, interface);
-        if(ret > 0)
-        {
-            checkm8_debug_indent("\tfailed to claim interface: %s\n", libusb_error_name(ret));
-            return CHECKM8_FAIL_XFER;
-        }
-    }
-
-    ret = libusb_control_transfer(dev->bundle->handle, bmRequestType, bRequest, wValue, wIndex, data, data_len,
+    ret = libusb_control_transfer(dev->bundle->handle,
+                                  bmRequestType, bRequest,
+                                  wValue, wIndex,
+                                  data, data_len,
                                   timeout);
     checkm8_debug_indent("\tgot error %s but ignoring\n", libusb_error_name(ret));
     return CHECKM8_SUCCESS;
@@ -464,7 +459,11 @@ int no_error_ctrl_transfer_data(struct pwned_device *dev,
         return CHECKM8_FAIL_PROT;
     }
 #else
-    return no_error_ctrl_transfer(dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
+    return no_error_ctrl_transfer(dev,
+                                  bmRequestType, bRequest,
+                                  wValue, wIndex,
+                                  data, data_len,
+                                  timeout);
 #endif
 }
 

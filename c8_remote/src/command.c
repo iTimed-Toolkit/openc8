@@ -2,7 +2,9 @@
 
 #include "checkm8.h"
 #include "tool/usb_helpers.h"
+
 #include "dev/types.h"
+#include "dev/addr.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +15,7 @@ void free_dev_cmd_resp(struct dev_cmd_resp *resp)
     free(resp);
 }
 
-int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len, unsigned int trigger)
+int dfu_send_data(struct pwned_device *dev, void *data, long data_len, unsigned int trigger)
 {
     checkm8_debug_indent("dfu_send_data(dev = %p, data = %p, data_len = %li)\n", dev, data, data_len);
     long long index = 0, amount;
@@ -26,7 +28,7 @@ int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len, 
 
         checkm8_debug_indent("\tsending chunk of size %li at index %li\n", amount, index);
 
-        ret = ctrl_transfer(dev, 0x21, 1, 0, 0, &data[index], amount, 0, trigger);
+        ret = ctrl_transfer(dev, 0x21, 1, 0, 0, &((unsigned char *) data)[index], amount, 0, trigger);
         if(ret > 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
         else
         {
@@ -41,8 +43,7 @@ int dfu_send_data(struct pwned_device *dev, unsigned char *data, long data_len, 
 
 static unsigned char nullbuf[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-struct dev_cmd_resp *command(struct pwned_device *dev,
-                             unsigned char *args, int arg_len, int response_len)
+struct dev_cmd_resp *command(struct pwned_device *dev, void *args, int arg_len, int response_len)
 {
     checkm8_debug_indent("command(dev = %p, args = %p, arg_len = %i, response_len = %i)\n",
                          dev, args, arg_len, response_len);
@@ -223,7 +224,7 @@ struct dev_cmd_resp *dev_read_memory(struct pwned_device *dev, DEV_PTR_T addr, i
         checkm8_debug_indent("\treading chunk of size %li at index %li\n", amount, index);
         cmd_args[0] = MEMC_MAGIC;
         cmd_args[1] = 0;
-        cmd_args[2] = DFU_IMAGE_BASE + 16;
+        cmd_args[2] = ADDR_DFU_IMG_BASE + 16;
         cmd_args[3] = addr + index;
         cmd_args[4] = amount;
 
@@ -255,7 +256,7 @@ struct dev_cmd_resp *dev_read_memory(struct pwned_device *dev, DEV_PTR_T addr, i
     return ret;
 }
 
-struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, DEV_PTR_T addr, unsigned char *data, int len)
+struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, DEV_PTR_T addr, void *data, int len)
 {
     checkm8_debug_indent("dev_write_memory(dev = %p, addr = %lx, data = %p, len = %i)\n", dev, addr, data, len);
 
@@ -263,7 +264,7 @@ struct dev_cmd_resp *dev_write_memory(struct pwned_device *dev, DEV_PTR_T addr, 
     ((unsigned long long *) cmd_args)[0] = MEMC_MAGIC;
     ((unsigned long long *) cmd_args)[1] = 0;
     ((unsigned long long *) cmd_args)[2] = addr;
-    ((unsigned long long *) cmd_args)[3] = DFU_IMAGE_BASE + 40;
+    ((unsigned long long *) cmd_args)[3] = ADDR_DFU_IMG_BASE + 40;
     ((unsigned long long *) cmd_args)[4] = len;
     memcpy(&cmd_args[40], data, len);
 

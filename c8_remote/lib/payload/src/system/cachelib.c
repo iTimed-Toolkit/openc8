@@ -1,9 +1,8 @@
 #include "bootrom_func.h"
 #include "dev_cache.h"
 
-
 PAYLOAD_SECTION
-unsigned long long l1_experiment()
+uint64_t run()
 {
     int i;
     unsigned long long start, f;
@@ -20,14 +19,7 @@ unsigned long long l1_experiment()
     return get_ticks() - start;
 }
 
-PAYLOAD_SECTION
-unsigned long long entry_sync()
+uint64_t _start()
 {
-    return l1_experiment();
-}
-
-PAYLOAD_SECTION
-void entry_async()
-{
-
+    return run();
 }

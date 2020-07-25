@@ -6,9 +6,6 @@
 
 struct bern_exp_ptrs
 {
-    DEV_PTR_T addr_async_buf;
-
-    DEV_PTR_T addr_constants;
     DEV_PTR_T addr_data;
     DEV_PTR_T addr_key;
     DEV_PTR_T addr_results;

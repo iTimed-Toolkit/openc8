@@ -18,8 +18,6 @@
 
 #define DEV_IDVENDOR    0x05AC
 #define DEV_IDPRODUCT   0x1227
-#define DFU_IMAGE_BASE  0x1800B0000ull
-#define DEMOTE_REG      0x2102BC000ull
 
 #else
 #error "Unspported checkm8 platform"

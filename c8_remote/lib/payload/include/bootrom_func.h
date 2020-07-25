@@ -122,6 +122,8 @@ static inline void check_all_chksums()
     ((BOOTROM_FUNC_V) ADDR_CHECK_ALL_CHKSUMS)();
 }
 
+/* Standard */
+
 static inline void *dev_malloc(int size)
 {
     return ((BOOTROM_FUNC_PTR) ADDR_DEV_MALLOC)(size);
@@ -135,6 +137,32 @@ static inline void *dev_memalign(int size, int constr)
 static inline void dev_free(void *ptr)
 {
     ((BOOTROM_FUNC_PTR) ADDR_DEV_FREE)(ptr);
+}
+
+static inline int dev_strlen(char *str)
+{
+    return ((BOOTROM_FUNC_I) ADDR_DEV_STRLEN)(str);
+}
+
+static inline void dev_memcpy(void *dst, void *src, int len)
+{
+    return ((BOOTROM_FUNC_V) ADDR_DEV_MEMCPY)(dst, src, len);
+}
+
+/* USB */
+static inline int usb_create_descriptor(char *str)
+{
+    return ((BOOTROM_FUNC_I) ADDR_CREATE_DESC)(str);
+}
+
+static inline int handle_intf_req(struct usb_request *req, void **out)
+{
+    return ((BOOTROM_FUNC_I) ADDR_HANDLE_INTF_REQ)(req, out);
+}
+
+static inline void usb_core_do_io(int ep, void *buf, int len, void *cb)
+{
+    ((BOOTROM_FUNC_V) ADDR_USB_CORE_DO_IO)(ep, buf, len, cb);
 }
 
 #endif //CHECKM8_TOOL_BOOTROM_FUNC_H
