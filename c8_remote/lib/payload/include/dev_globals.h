@@ -10,32 +10,35 @@
                 #name ":\n" \
                 #asm_type " " #__VA_ARGS__ "\n"); \
 
-#define __PL_GBL_PTR_FUNC__(name, type) \
+#define __PL_GBL_ATTR__(name) \
     __attribute__ ((section (".payload_data_" #name))) \
+    __attribute__ ((always_inline))
+
+#define __PL_GBL_PTR_FUNC__(name, type) \
+    __PL_GBL_ATTR__(name) \
     static inline type *name ## _ptr() { \
     type *addr; \
     __asm__ ("adr %0, " #name : "=r" (addr)); \
     return addr; }
 
+// todo: could potentially optimize reads to one ldr instruction
 #define __PL_GBL_RD_FUNC__(name, type) \
-    __attribute__ ((section (".payload_data_" #name))) \
+    __PL_GBL_ATTR__(name) \
     static inline type name ## _rd() { \
-    type retval; \
-    __asm__ ("ldr %w0, " #name : "=r" (retval)); \
-    return retval; }
+    return *name ## _ptr(); }
 
 #define __PL_GBL_ARR_RD_FUNC__(name, type) \
-    __attribute__ ((section (".payload_data_" #name))) \
+    __PL_GBL_ATTR__(name) \
     static inline type name ## _rd(int i) { \
     return name ## _ptr()[i]; }
 
 #define __PL_GBL_WR_FUNC__(name, type) \
-    __attribute__ ((section (".payload_data_" #name))) \
+    __PL_GBL_ATTR__(name) \
     static inline void name ## _wr(type v) { \
     *name ## _ptr() = v; }
 
 #define __PL_GBL_ARR_WR_FUNC__(name, type) \
-    __attribute__ ((section (".payload_data_" #name))) \
+    __PL_GBL_ATTR__(name) \
     static inline void name ## _wr(int i, type v) { \
     name ## _ptr()[i] = v; }
 
