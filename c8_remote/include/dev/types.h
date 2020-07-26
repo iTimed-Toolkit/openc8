@@ -10,7 +10,7 @@ struct install_info
     char name[INSTALL_NAME_SZ];
 
     long long len;
-    int (*handler)(void *);
+    void * (*handler)(void *);
 };
 
 struct event

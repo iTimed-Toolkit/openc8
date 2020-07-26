@@ -6,12 +6,12 @@
 #include "dev_util.h"
 #include "dev_globals.h"
 
-#define __BOOTROM_CALL__(rettype, addr, name, args, params) \
+#define __BOOTROM_CALL__(ret_type, addr, name, args, params) \
     GLOBAL_PTR(__ ## addr, addr) \
     __attribute__ ((section (".payload_data___" #name))) \
     __attribute__ ((always_inline)) \
-    static inline rettype name args { \
-    rettype (*name ## _ptr)() = GET_GLOBAL(__ ## addr); \
+    static inline ret_type name args { \
+    ret_type (*name ## _ptr)() = GET_GLOBAL(__ ## addr); \
     return name ## _ptr params; }
 
 /* Crypto */

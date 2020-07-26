@@ -3,7 +3,7 @@
 
 #include "checkm8_config.h"
 
-enum
+typedef enum
 {
     CHECKM8_SUCCESS = 0,
     CHECKM8_FAIL_INVARGS,
@@ -13,7 +13,7 @@ enum
     CHECKM8_FAIL_XFER,
     CHECKM8_FAIL_NOINST,
     CHECKM8_FAIL_PROT
-};
+} CHECKM8_STATUS;
 
 #define IS_CHECKM8_FAIL(code) code > 0
 
