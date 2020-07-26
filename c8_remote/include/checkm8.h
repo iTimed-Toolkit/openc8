@@ -3,16 +3,19 @@
 
 #include "checkm8_config.h"
 
-#define CHECKM8_SUCCESS         0
-#define CHECKM8_FAIL_INVARGS    -1
-#define CHECKM8_FAIL_NODEV      -2
-#define CHECKM8_FAIL_NOEXP      -3
-#define CHECKM8_FAIL_NOTDONE    -4
-#define CHECKM8_FAIL_XFER       -5
-#define CHECKM8_FAIL_NOINST     -6
-#define CHECKM8_FAIL_PROT       -7
+enum
+{
+    CHECKM8_SUCCESS = 0,
+    CHECKM8_FAIL_INVARGS,
+    CHECKM8_FAIL_NODEV,
+    CHECKM8_FAIL_NOEXP,
+    CHECKM8_FAIL_NOTDONE,
+    CHECKM8_FAIL_XFER,
+    CHECKM8_FAIL_NOINST,
+    CHECKM8_FAIL_PROT
+};
 
-#define IS_CHECKM8_FAIL(code) code < 0
+#define IS_CHECKM8_FAIL(code) code > 0
 
 #if CHECKM8_PLATFORM == 8010
 
@@ -30,9 +33,6 @@ struct pwned_device
         DEV_NORMAL,
         DEV_PWNED
     } status;
-
-    unsigned int idVendor;
-    unsigned int idProduct;
 
     struct payload *inst_pl;
     struct data *inst_data;

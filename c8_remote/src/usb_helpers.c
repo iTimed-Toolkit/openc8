@@ -11,12 +11,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include <libusb-1.0/libusb.h>
-#include <libirecovery.h>
-
-static bool ctx_init = false;
-static struct libusb_context *libusb_ctx;
 
 #endif
 
@@ -126,36 +121,42 @@ int open_device_session(struct pwned_device *dev)
     int i, usb_dev_count, ret = CHECKM8_FAIL_NODEV;
     libusb_device **usb_device_list = NULL;
 
-    if(!ctx_init)
+    if(libusb_init(NULL))
     {
-        checkm8_debug_indent("\tbundle ctx is NULL, allocating\n");
-        libusb_init(&libusb_ctx);
-    }
-    else
-    {
-        if(dev->bundle->descriptor != NULL &&
-           dev->bundle->descriptor->idVendor == dev->idVendor &&
-           dev->bundle->descriptor->idProduct == dev->idProduct)
-        {
-            checkm8_debug_indent("\tbundle is already valid\n");
-            return CHECKM8_SUCCESS;
-        }
+        checkm8_debug_indent("\tfailed to initiliaze libusb context\n");
+        goto fail;
     }
 
-    usb_dev_count = libusb_get_device_list(libusb_ctx, &usb_device_list);
+    if(dev->bundle->descriptor != NULL)
+    {
+        checkm8_debug_indent("\tbundle is already valid\n");
+        return CHECKM8_SUCCESS;
+    }
+
+    usb_dev_count = libusb_get_device_list(NULL, &usb_device_list);
+    if(usb_dev_count < 1)
+    {
+        checkm8_debug_indent("\tfailed to get list of usb devices\n");
+        goto fail;
+    }
+
     checkm8_debug_indent("\tfound %i USB devices\n", usb_dev_count);
-
     dev->bundle->device = NULL;
     dev->bundle->handle = NULL;
     dev->bundle->descriptor = malloc(sizeof(struct libusb_device_descriptor));
+    if(dev->bundle->descriptor == NULL)
+    {
+        checkm8_debug_indent("\tfailed to allocate descriptor for device\n");
+        goto fail_alloc_descriptor;
+    }
 
     for(i = 0; i < usb_dev_count; i++)
     {
         dev->bundle->device = usb_device_list[i];
         libusb_get_device_descriptor(dev->bundle->device, dev->bundle->descriptor);
 
-        if(dev->bundle->descriptor->idVendor == dev->idVendor &&
-           dev->bundle->descriptor->idProduct == dev->idProduct)
+        if(dev->bundle->descriptor->idVendor == DEV_IDVENDOR &&
+           dev->bundle->descriptor->idProduct == DEV_IDPRODUCT)
         {
             checkm8_debug_indent("\tchecking device %i ... match!\n", i);
             ret = CHECKM8_SUCCESS;
@@ -165,34 +166,34 @@ int open_device_session(struct pwned_device *dev)
         checkm8_debug_indent("\tchecking device %i ... no match\n", i);
     }
 
-    libusb_free_device_list(usb_device_list, usb_dev_count);
-    if(ret == CHECKM8_SUCCESS)
-    {
-        checkm8_debug_indent("\topening device and returning success\n");
-        ret = libusb_open(dev->bundle->device, &dev->bundle->handle);
-        if(ret == 0)
-        {
-            libusb_set_auto_detach_kernel_driver(dev->bundle->handle, 1);
-        }
-        else
-        {
-            checkm8_debug_indent("\tfailed to open device\n");
-            free(dev->bundle->descriptor);
-        }
-
-        return ret;
-    }
-    else
+    if(IS_CHECKM8_FAIL(ret))
     {
         checkm8_debug_indent("\tcould not find a matching device\n");
-        free(dev->bundle->descriptor);
-
-        dev->bundle->device = NULL;
-        dev->bundle->handle = NULL;
-        dev->bundle->descriptor = NULL;
+        goto fail_other;
     }
 
-    return ret;
+    checkm8_debug_indent("\topening device \n");
+    ret = libusb_open(dev->bundle->device, &dev->bundle->handle);
+    if(ret)
+    {
+        checkm8_debug_indent("\tfailed to open device\n");
+        goto fail_other;
+    }
+
+    libusb_free_device_list(usb_device_list, usb_dev_count);
+    return CHECKM8_SUCCESS;
+
+fail_other:
+    free(dev->bundle->descriptor);
+    dev->bundle->device = NULL;
+    dev->bundle->handle = NULL;
+    dev->bundle->descriptor = NULL;
+
+fail_alloc_descriptor:
+    libusb_free_device_list(usb_device_list, 1);
+
+fail:
+    return CHECKM8_FAIL_NODEV;
 #endif
 }
 
@@ -597,8 +598,8 @@ int serial_descriptor(struct pwned_device *dev, unsigned char *serial_buf, int l
 #ifdef WITH_ARDUINO
     char buf;
     struct serial_desc_args args;
-    args.dev_idVendor = dev->idVendor;
-    args.dev_idProduct = dev->idProduct;
+    args.dev_idVendor = DEV_IDVENDOR;
+    args.dev_idProduct = DEV_IDPRODUCT;
     args.len = len;
 
     checkm8_debug_indent("\tsending data to arduino\n");
