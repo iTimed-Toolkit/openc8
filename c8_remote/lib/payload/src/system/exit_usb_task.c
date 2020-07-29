@@ -1,5 +1,5 @@
 #include "dev/addr.h"
-#include "dev/types.h"
+#include "dev/shared_types.h"
 
 #include "bootrom_func.h"
 #include "dev_cache.h"

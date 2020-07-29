@@ -6,7 +6,7 @@
 #include <zconf.h>
 #include <sys/stat.h>
 
-#include "dev/types.h"
+#include "dev/shared_types.h"
 #include "dev/addr.h"
 #include "util/experiments.h"
 #include "tool/usb_helpers.h"
@@ -178,117 +178,117 @@ void record_bern_data(struct bern_data *data, unsigned char *key, int index, int
 #endif
 }
 
-int main_itimed(unsigned int num_iter, unsigned int offset)
-{
-    int i;
-    unsigned long long iter;
-    DEV_PTR_T argbuf;
-
-    struct bern_data *data;
-    struct bern_exp_ptrs *exp_ptrs;
-    struct dev_cmd_resp *resp;
-
-    unsigned char key[16];
-    memset(key, 0, 16);
-
-    struct pwned_device *dev = exploit_device();
-    if(dev == NULL || dev->status == DEV_NORMAL)
-    {
-        printf("Failed to exploit device\n");
-        return -1;
-    }
-
-    demote_device(dev);
-    fix_heap(dev);
-
-    exp_ptrs = setup_bern_exp(dev, key, num_iter, offset);
-    if(exp_ptrs == NULL)
-    {
-        printf("failed to set up bern experimnent\n");
-        return -1;
-    }
-
-    argbuf = get_address(dev, SRAM, 5 * sizeof(unsigned long long));
-    if(argbuf == DEV_PTR_NULL)
-    {
-        printf("failed to allocate arg buffer\n");
-        return -1;
-    }
-
-    resp = write_gadget(dev, argbuf, exp_ptrs, sizeof(struct bern_exp_ptrs));
-    if(IS_CHECKM8_FAIL(resp->ret))
-    {
-        printf("failed to write experiment pointers\n");
-        free_dev_cmd_resp(resp);
-        return -1;
-    }
-
-    free_dev_cmd_resp(resp);
-    double ratio = 1.0311772745930552;
-    for(i = 0; i < 32; i++)
-    {
-        for(int j = 0; j < 16; j++)
-            key[j] = random();
-
-        resp = write_gadget(dev, exp_ptrs->addr_key, key, 16);
-        if(IS_CHECKM8_FAIL(resp->ret))
-        {
-            printf("failed to write new key\n");
-            return -1;
-        }
-
-        resp = memset_gadget(dev, exp_ptrs->addr_results, 0, offsetof(struct bern_data, ev_data));
-        if(IS_CHECKM8_FAIL(resp->ret))
-        {
-            printf("failed to zero profile data\n");
-            return -1;
-        }
-
-        for(int curr_iter = 10000, last_iter = 0;
-            curr_iter <= num_iter;
-            last_iter = curr_iter, curr_iter *= ratio)
-        {
-            printf("starting profile %i - %i iterations\n", i, curr_iter);
-
-            iter = curr_iter - last_iter;
-            resp = write_gadget(dev, argbuf + sizeof(struct bern_exp_ptrs), &iter, sizeof(unsigned long long));
-            if(IS_CHECKM8_FAIL(resp->ret))
-            {
-                printf("failed to update number of iterations\n");
-                free_dev_cmd_resp(resp);
-                return -1;
-            }
-
-            free_dev_cmd_resp(resp);
-
-            if(async_payload_create(dev, PAYLOAD_AES_SW_BERN, argbuf) == DEV_PTR_NULL)
-            {
-                printf("failed to create a new task\n");
-                return -1;
-            }
-
-            if(IS_CHECKM8_FAIL(async_payload_run(dev, PAYLOAD_AES_SW_BERN)))
-            {
-                printf("failed to run async payload\n");
-                return -1;
-            }
-
-            data = get_bern_exp_data(dev, exp_ptrs->addr_results);
-            if(data == NULL)
-            {
-                printf("failed to get berstein data\n");
-                return -1;
-            }
-
-            async_payload_kill(dev, PAYLOAD_AES_SW_BERN, 0);
-            record_bern_data(data, key, i, curr_iter);
-            free(data);
-        }
-    }
-
-    free_device(dev);
-    return 0;
-}
+//int main_itimed(unsigned int num_iter, unsigned int offset)
+//{
+//    int i;
+//    unsigned long long iter;
+//    DEV_PTR_T argbuf;
+//
+//    struct bern_data *data;
+//    struct bern_exp_ptrs *exp_ptrs;
+//    struct dev_cmd_resp *resp;
+//
+//    unsigned char key[16];
+//    memset(key, 0, 16);
+//
+//    struct pwned_device *dev = exploit_device();
+//    if(dev == NULL || dev->status == DEV_NORMAL)
+//    {
+//        printf("Failed to exploit device\n");
+//        return -1;
+//    }
+//
+//    demote_device(dev);
+//    fix_heap(dev);
+//
+//    exp_ptrs = setup_bern_exp(dev, key, num_iter, offset);
+//    if(exp_ptrs == NULL)
+//    {
+//        printf("failed to set up bern experimnent\n");
+//        return -1;
+//    }
+//
+//    argbuf = get_address(dev, SRAM, 5 * sizeof(unsigned long long));
+//    if(argbuf == DEV_PTR_NULL)
+//    {
+//        printf("failed to allocate arg buffer\n");
+//        return -1;
+//    }
+//
+//    resp = write_gadget(dev, argbuf, exp_ptrs, sizeof(struct bern_exp_ptrs));
+//    if(IS_CHECKM8_FAIL(resp->ret))
+//    {
+//        printf("failed to write experiment pointers\n");
+//        free_dev_cmd_resp(resp);
+//        return -1;
+//    }
+//
+//    free_dev_cmd_resp(resp);
+//    double ratio = 1.0311772745930552;
+//    for(i = 0; i < 32; i++)
+//    {
+//        for(int j = 0; j < 16; j++)
+//            key[j] = random();
+//
+//        resp = write_gadget(dev, exp_ptrs->addr_key, key, 16);
+//        if(IS_CHECKM8_FAIL(resp->ret))
+//        {
+//            printf("failed to write new key\n");
+//            return -1;
+//        }
+//
+//        resp = memset_gadget(dev, exp_ptrs->addr_results, 0, offsetof(struct bern_data, ev_data));
+//        if(IS_CHECKM8_FAIL(resp->ret))
+//        {
+//            printf("failed to zero profile data\n");
+//            return -1;
+//        }
+//
+//        for(int curr_iter = 10000, last_iter = 0;
+//            curr_iter <= num_iter;
+//            last_iter = curr_iter, curr_iter *= ratio)
+//        {
+//            printf("starting profile %i - %i iterations\n", i, curr_iter);
+//
+//            iter = curr_iter - last_iter;
+//            resp = write_gadget(dev, argbuf + sizeof(struct bern_exp_ptrs), &iter, sizeof(unsigned long long));
+//            if(IS_CHECKM8_FAIL(resp->ret))
+//            {
+//                printf("failed to update number of iterations\n");
+//                free_dev_cmd_resp(resp);
+//                return -1;
+//            }
+//
+//            free_dev_cmd_resp(resp);
+//
+//            if(async_payload_create(dev, PAYLOAD_AES_SW_BERN, argbuf) == DEV_PTR_NULL)
+//            {
+//                printf("failed to create a new task\n");
+//                return -1;
+//            }
+//
+//            if(IS_CHECKM8_FAIL(async_payload_run(dev, PAYLOAD_AES_SW_BERN)))
+//            {
+//                printf("failed to run async payload\n");
+//                return -1;
+//            }
+//
+//            data = get_bern_exp_data(dev, exp_ptrs->addr_results);
+//            if(data == NULL)
+//            {
+//                printf("failed to get berstein data\n");
+//                return -1;
+//            }
+//
+//            async_payload_kill(dev, PAYLOAD_AES_SW_BERN, 0);
+//            record_bern_data(data, key, i, curr_iter);
+//            free(data);
+//        }
+//    }
+//
+//    free_device(dev);
+//    return 0;
+//}
 
 int main_test_usb()
 {
@@ -299,24 +299,26 @@ int main_test_usb()
         return -1;
     }
 
-    demote_device(dev);
-    fix_heap(dev);
+    install_utils(dev);
 
-    unsigned char data[100];
-    memset(data, 'A', 100);
+//    demote_device(dev);
+//    fix_heap(dev);
+//
+//    unsigned char data[100];
+//    memset(data, 'A', 100);
+//
+//    open_device_session(dev);
+//
+//    int retval = -1;
+//    char status = 1;
+//    char serial[] = "CPID:8010 CPRV:11 CPFM:03 SCEP:01 BDID:0C ECID:0011708200D36326 IBFL:3C SRTG:[iBoot-2696.0.0.1.33]";
+//
+////    write_gadget(dev, ADDR_USB_SERIAL, serial, sizeof(serial));
+////    write_gadget(dev, ADDR_DFU_RETVAL, &retval, 4);
+//    write_gadget(dev, ADDR_DFU_STATUS, &status, 1);
+//    execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1, ADDR_DFU_EVENT);
 
-    open_device_session(dev);
-
-    int retval = -1;
-    char status = 1;
-    char serial[] = "CPID:8010 CPRV:11 CPFM:03 SCEP:01 BDID:0C ECID:0011708200D36326 IBFL:3C SRTG:[iBoot-2696.0.0.1.33]";
-
-//    write_gadget(dev, ADDR_USB_SERIAL, serial, sizeof(serial));
-//    write_gadget(dev, ADDR_DFU_RETVAL, &retval, 4);
-    write_gadget(dev, ADDR_DFU_STATUS, &status, 1);
-    execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1, ADDR_DFU_EVENT);
-
-    close_device_session(dev);
+//    close_device_session(dev);
 }
 
 int main()

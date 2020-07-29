@@ -52,6 +52,10 @@
     __PL_GBL_ARR_RD_FUNC__(name, type) \
     __PL_GBL_ARR_WR_FUNC__(name, type)
 
+#define __CHECK_STRUCT_SIZE__(cond) \
+    void checker(){ \
+    ((void) sizeof(char[1-2*!!(cond)])); }
+
 /* Declaration */
 
 #define GLOBAL_CHAR(name, value) \
@@ -95,6 +99,7 @@
     __PL_GBL_STD_FUNCS__(name, void *)
 
 #define GLOBAL_STRUCT(name, type, size) \
+    __CHECK_STRUCT_SIZE__(sizeof(type) == size - 1) \
     __PL_GBL_INIT__(name, ".skip", size) \
     __PL_GBL_PTR_FUNC__(name, type)
 

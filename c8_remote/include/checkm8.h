@@ -12,10 +12,11 @@ typedef enum
     CHECKM8_FAIL_NOTDONE,
     CHECKM8_FAIL_XFER,
     CHECKM8_FAIL_NOINST,
-    CHECKM8_FAIL_PROT
+    CHECKM8_FAIL_PROT,
+    CHECKM8_FAIL_INT
 } CHECKM8_STATUS;
 
-#define IS_CHECKM8_FAIL(code) code > 0
+#define IS_CHECKM8_FAIL(code) code < 0
 
 #if CHECKM8_PLATFORM == 8010
 
@@ -44,15 +45,6 @@ struct pwned_device
 #endif
 };
 
-struct dev_cmd_resp
-{
-    int ret;
-    unsigned long long magic;
-    unsigned long long retval;
-    unsigned char *data;
-    int len;
-};
-
 struct pwned_device *exploit_device();
 void free_device(struct pwned_device *dev);
 
@@ -62,7 +54,5 @@ int fix_heap(struct pwned_device *dev);
 int open_device_session(struct pwned_device *dev);
 int close_device_session(struct pwned_device *dev);
 int is_device_session_open(struct pwned_device *dev);
-
-void free_dev_cmd_resp(struct dev_cmd_resp *resp);
 
 #endif //CHECKM8_TOOL_CHECKM8_H

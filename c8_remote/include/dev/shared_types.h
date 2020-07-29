@@ -1,48 +1,73 @@
-#ifndef CHECKM8_TOOL_TYPES_H
-#define CHECKM8_TOOL_TYPES_H
+#ifndef CHECKM8_TOOL_SHARED_TYPES_H
+#define CHECKM8_TOOL_SHARED_TYPES_H
 
 #include "experiment_config.h"
 
-#define INSTALL_NAME_SZ 16
+#define NUM_GADGETS     32
+#define NUM_ADDRESSES   32
+#define NUM_ASYNC       4
 
-struct install_info
+/* Installation */
+struct install_args
 {
-    char name[INSTALL_NAME_SZ];
+    int type;
+    int len;
+    unsigned long long addr;
+} __attribute__ ((packed));
 
-    long long len;
-    void * (*handler)(void *);
+/* Utils */
+struct rw_args
+{
+    unsigned long long addr;
+    int len;
+} __attribute__ ((packed));
+
+struct exec_args
+{
+    unsigned long long (*addr)();
+
+    unsigned long long args[8];
+} __attribute__ ((packed));
+
+struct data_args
+{
+    enum
+    {
+        DATA_STATUS,
+        DATA_INSTALL,
+        DATA_UNINSTALL
+    } cmd;
+
+    unsigned long long addr;
+    int len;
+} __attribute__ ((packed));
+
+struct async_args
+{
+    enum
+    {
+        ASYNC_CREATE,
+        ASYNC_RUN,
+        ASYNC_FREE
+    } cmd;
+
+    char name[16];
+    unsigned long long func;
+    unsigned long long arg;
 };
 
-struct event
+/* Responses */
+struct cmd_resp
 {
-    unsigned int dat0;
-    unsigned int dat1;
-    unsigned long long dat2;
-    unsigned long long dat3;
-} __attribute__ ((packed));
+    enum
+    {
+        CMD_SUCCESS,
+        CMD_FAIL_INVALID,
+        CMD_FAIL_FULL,
+        CMD_FAIL_NOTFOUND,
+    } status;
 
-struct heap_header
-{
-    unsigned long long chksum;
-    unsigned long long pad[3];
-
-    unsigned long long curr_size;
-    unsigned long long curr_free: 1;
-
-    unsigned long long prev_free: 1;
-    unsigned long long prev_size: (sizeof(unsigned long long) * 8 - 2);
-
-    unsigned long long pad_start;
-    unsigned long long pad_end;
-} __attribute__ ((packed));
-
-struct usb_request
-{
-    unsigned char bmRequestType;
-    unsigned char bRequest;
-    unsigned short wValue;
-    unsigned short wIndex;
-    unsigned short wLength;
+    unsigned long long args[2];
 } __attribute__ ((packed));
 
 struct bern_data
@@ -82,14 +107,9 @@ struct bern_data
     unsigned long long count8;
     unsigned long long ttotal8;
 #endif
-
-#ifdef BERNSTEIN_WITH_USB
-    struct event ev_data;
-#endif
-    struct event ev_done;
 } __attribute__ ((packed));
 
 #define DEV_PTR_NULL       -1ull
 typedef unsigned long long DEV_PTR_T;
 
-#endif //CHECKM8_TOOL_TYPES_H
+#endif //CHECKM8_TOOL_SHARED_TYPES_H

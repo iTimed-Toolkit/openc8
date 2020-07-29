@@ -1,5 +1,5 @@
 #include "bootrom_func.h"
-#include "dev/types.h"
+#include "dev/shared_types.h"
 #include "dev_cache.h"
 #include "dev_crypto.h"
 
@@ -195,7 +195,7 @@ void _start(uint64_t *base)
     }
 
 #ifndef BERNSTEIN_CONTINUOUS
-    event_notify(&data->ev_done);
+//    event_notify(&data->ev_done);
     task_exit(0);
 #endif
 }

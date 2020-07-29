@@ -62,7 +62,7 @@ def gen_payload_getter(names, sizes):
             '\tres->len = len;\n',
             '\tres->data = pl;\n',
             '\tres->install_base = -1ull;\n',
-            '\tres->async_base = -1ull;\n',
+            '\tres->intf = -1;\n',
             '\tres->next = NULL;\n',
             '\tres->prev = NULL;\n',
             '\treturn res;\n',
@@ -88,7 +88,7 @@ def gen_libpayload_int(names, sizes):
             '\tint len;\n',
             '\n',
             '\tunsigned long long install_base;\n',
-            '\tunsigned long long async_base;\n',
+            '\tunsigned short intf;\n',
             '\n',
             '\tstruct payload *next;\n',
             '\tstruct payload *prev;\n',
@@ -119,7 +119,8 @@ def gen_libpayload_pub(names):
             '#define CHECKM8_TOOL_LIBPAYLOAD_H\n',
             '\n',
             'typedef enum\n',
-            '{\n'
+            '{\n',
+            '\tPAYLOAD_BUILTIN = -1,\n'
         ]
 
     for name in names:

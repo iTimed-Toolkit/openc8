@@ -2,7 +2,7 @@
 #define CHECKM8_TOOL_EXPERIMENTS_H
 
 #include "tool/payload.h"
-#include "dev/types.h"
+#include "dev/shared_types.h"
 
 struct bern_exp_ptrs
 {

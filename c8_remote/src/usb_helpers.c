@@ -15,9 +15,14 @@
 
 #endif
 
+static int open_count = 0;
+
 int open_device_session(struct pwned_device *dev)
 {
     checkm8_debug_indent("open_device_session(dev = %p)\n", dev);
+    open_count++;
+    if(open_count > 1)
+        return CHECKM8_SUCCESS;
 
 #ifdef WITH_ARDUINO
     // based on https://github.com/todbot/arduino-serial/blob/master/arduino-serial-lib.c
@@ -200,6 +205,9 @@ fail:
 int close_device_session(struct pwned_device *dev)
 {
     checkm8_debug_indent("close_device_session(dev = %p)\n", dev);
+    open_count--;
+    if(open_count > 0)
+        return CHECKM8_SUCCESS;
 
 #ifdef WITH_ARDUINO
     int ret = close(dev->ard_fd);

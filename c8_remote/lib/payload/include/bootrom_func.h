@@ -2,9 +2,9 @@
 #define CHECKM8_TOOL_BOOTROM_FUNC_H
 
 #include "dev/addr.h"
-#include "dev/types.h"
 #include "dev_util.h"
 #include "dev_globals.h"
+#include "bootrom_types.h"
 
 #define __BOOTROM_CALL__(ret_type, addr, name, args, params) \
     GLOBAL_PTR(__ ## addr, addr) \
@@ -53,7 +53,7 @@ __BOOTROM_CALL__(void, ADDR_WFI, wfi,
 /* Tasking */
 
 __BOOTROM_CALL__(void *, ADDR_TASK_NEW, task_new,
-                 (char *name, void * func, void *args, int ssize),
+                 (char *name, void *func, void *args, int ssize),
                  (name, func, args, ssize))
 
 __BOOTROM_CALL__(void, ADDR_TASK_RUN, task_run,
@@ -105,6 +105,15 @@ __BOOTROM_CALL__(void, ADDR_CHECK_BLOCK_CHKSUM, check_block_chksum,
 __BOOTROM_CALL__(void, ADDR_CHECK_ALL_CHKSUMS, check_all_chksums,
                  (), ())
 
+__BOOTROM_CALL__(void *, ADDR_DEV_MALLOC, dev_malloc,
+                 (int size), (size))
+
+__BOOTROM_CALL__(void *, ADDR_DEV_MEMALIGN, dev_memalign,
+                 (int size, int constr), (size, constr))
+
+__BOOTROM_CALL__(void, ADDR_DEV_FREE, dev_free,
+                 (void *ptr), (ptr))
+
 /* USB */
 
 __BOOTROM_CALL__(int, ADDR_CREATE_DESC, usb_create_descriptor,
@@ -120,18 +129,13 @@ __BOOTROM_CALL__(int, ADDR_HANDLE_INTF_REQ, handle_intf_req,
 
 /* Standard */
 
-__BOOTROM_CALL__(void *, ADDR_DEV_MALLOC, dev_malloc,
-                 (long long size), (size))
-
-__BOOTROM_CALL__(void *, ADDR_DEV_MEMALIGN, dev_memalign,
-                 (int size, int constr), (size, constr))
-
-__BOOTROM_CALL__(void, ADDR_DEV_FREE, dev_free,
-                 (void *ptr), (ptr))
-
 __BOOTROM_CALL__(void, ADDR_DEV_MEMCPY, dev_memcpy,
-                 (void *dst, void *src, long long len),
+                 (void *dst, void *src, int len),
                  (dst, src, len))
+
+__BOOTROM_CALL__(void, ADDR_DEV_MEMSET, dev_memset,
+                 (void *dst, char c, int len),
+                 (dst, c, len))
 
 __BOOTROM_CALL__(int, ADDR_DEV_STRLEN, dev_strlen,
                  (char *str), (str))

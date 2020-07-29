@@ -2,7 +2,7 @@
 #define CHECKM8_TOOL_ADDR_H
 
 #include "checkm8_config.h"
-#include "types.h"
+#include "shared_types.h"
 
 #if CHECKM8_PLATFORM == 8010
 
@@ -69,6 +69,7 @@
 
 /* Standard */
 #define ADDR_DEV_MEMCPY                     0x100010730
+#define ADDR_DEV_MEMSET                     0x100010960
 #define ADDR_DEV_STRLEN                     0x100010b68
 
 /* System registers */

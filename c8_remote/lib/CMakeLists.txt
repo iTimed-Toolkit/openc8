@@ -10,6 +10,12 @@ set(PL_NAMES
         system:sync
 
         power:floppysleep
+
+        util:read
+        util:write
+        util:exec
+        util:data
+        util:async
         )
 
 foreach(NAME ${PL_NAMES})
@@ -30,6 +36,8 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/payload/c)
 add_custom_target(payload_sources
                     BYPRODUCTS  ${PL_SRC_LIB}
                                 ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c
+                                ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload.h
+                                ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload_int.h
                     DEPENDS     ${PL_TARGETS}
                     COMMENT     "Refreshing payload library"
                     COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/librarize.py
