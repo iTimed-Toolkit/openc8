@@ -1,6 +1,8 @@
 #ifndef CHECKM8_TOOL_DEV_GLOBALS_H
 #define CHECKM8_TOOL_DEV_GLOBALS_H
 
+#include "dev/shared_types.h"
+
 /* Constructors */
 
 #define __PL_GBL_INIT__(name, asm_type, ...) \
@@ -32,15 +34,16 @@
     static inline type name ## _rd(int i) { \
     return name ## _ptr()[i]; }
 
+// todo: these could probably be optimized
 #define __PL_GBL_WR_FUNC__(name, type) \
     __PL_GBL_ATTR__(name) \
     static inline void name ## _wr(type v) { \
-    *name ## _ptr() = v; }
+    *(type *) (WRITEABLE_SRAM((uint64_t) name ## _ptr())) = v; }
 
 #define __PL_GBL_ARR_WR_FUNC__(name, type) \
     __PL_GBL_ATTR__(name) \
     static inline void name ## _wr(int i, type v) { \
-    name ## _ptr()[i] = v; }
+    ((type *)(WRITEABLE_SRAM((uint64_t) name ## _ptr())))[i] = v; }
 
 #define __PL_GBL_STD_FUNCS__(name, type) \
     __PL_GBL_PTR_FUNC__(name, type) \

@@ -114,6 +114,23 @@ __BOOTROM_CALL__(void *, ADDR_DEV_MEMALIGN, dev_memalign,
 __BOOTROM_CALL__(void, ADDR_DEV_FREE, dev_free,
                  (void *ptr), (ptr))
 
+/* Memory */
+
+__BOOTROM_CALL__(void, ADDR_WRITE_TTBR0, write_ttbr0,
+                 (unsigned long long val), (val))
+
+__BOOTROM_CALL__(void, ADDR_DC_CIVAC, dc_civac,
+                 (void *addr), (addr));
+
+__BOOTROM_CALL__(void, ADDR_TLBI, tlbi, (), ())
+
+__BOOTROM_CALL__(void, ADDR_DMB, dmb, (), ())
+
+__BOOTROM_CALL__(int, ADDR_MAP_RANGE, map_range,
+                 (long long vaddr, long long paddr,
+                         int size, page_permission perm),
+                 (vaddr, paddr, size, perm))
+
 /* USB */
 
 __BOOTROM_CALL__(int, ADDR_CREATE_DESC, usb_create_descriptor,

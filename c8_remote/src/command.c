@@ -3,6 +3,8 @@
 #include "checkm8.h"
 #include "tool/usb_helpers.h"
 
+#include <stdint.h>
+
 int send_data(struct pwned_device *dev, void *data, long data_len, unsigned int trigger)
 {
     checkm8_debug_indent("dfu_send_data(dev = %p, data = %p, data_len = %li)\n", dev, data, data_len);
@@ -16,7 +18,7 @@ int send_data(struct pwned_device *dev, void *data, long data_len, unsigned int 
 
         checkm8_debug_indent("\tsending chunk of size %li at index %li\n", amount, index);
 
-        ret = ctrl_transfer(dev, 0x21, 1, 0, 0, &((unsigned char *) data)[index], amount, 0, trigger);
+        ret = ctrl_transfer(dev, 0x21, 1, 0, 0, &((uint8_t *) data)[index], amount, 0, trigger);
         if(ret > 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
         else
         {
@@ -29,9 +31,9 @@ int send_data(struct pwned_device *dev, void *data, long data_len, unsigned int 
     return CHECKM8_SUCCESS;
 }
 
-int reset_total_received(struct pwned_device *dev)
+int reset_img_base(struct pwned_device *dev)
 {
-    checkm8_debug_indent("reset_total_received(dev = %p)\n", dev);
+    checkm8_debug_indent("reset_img_base(dev = %p)\n", dev);
     unsigned char buf[16] = {0};
     int ret = send_data(dev, buf, 16, 0);
     if(IS_CHECKM8_FAIL(ret))
@@ -87,7 +89,7 @@ int command(struct pwned_device *dev,
         }
     }
 
-    ret = reset_total_received(dev);
+    ret = reset_img_base(dev);
     if(IS_CHECKM8_FAIL(ret))
     {
         checkm8_debug_indent("\tfailed to reset DFU total received\n");

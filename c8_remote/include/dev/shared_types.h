@@ -7,6 +7,11 @@
 #define NUM_ADDRESSES   32
 #define NUM_ASYNC       4
 
+#define EXECUTABLE_SRAM(addr)   addr + 0x2000000
+#define WRITEABLE_SRAM(addr)    addr - 0x2000000
+
+#define WRITEABLE_ROM(addr)     addr + 0x2000000
+
 /* Installation */
 struct install_args
 {

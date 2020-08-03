@@ -55,6 +55,7 @@
 #define ADDR_TLBI                           0x100000434
 #define ADDR_DC_CIVAC                       0x10000046c
 #define ADDR_DMB                            0x100000478
+#define ADDR_MAP_RANGE                      0x10000b4ec
 
 /* USB */
 #define ADDR_CREATE_DESC                    0x10000d150
@@ -77,10 +78,6 @@
 #define ADDR_DEMOTE_REG                     0x2102bc000
 
 /* Boot */
-#define ADDR_GETDFU_EXIT                    0x1000006c8
-#define ADDR_GETBOOT_ENTRY                  0x100000658
-#define ADDR_EN_BOOT_INTF                   0x100008088
-
 #define ADDR_TRAMPOLINE                     0x1800ac000
 #define LEN_TRAMPOLINE                      0x240
 #define TRAMPOLINE_SIZE                     0x4000

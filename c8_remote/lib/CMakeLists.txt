@@ -10,6 +10,7 @@ set(PL_NAMES
         system:sync
 
         power:floppysleep
+        power:trigger
 
         util:read
         util:write

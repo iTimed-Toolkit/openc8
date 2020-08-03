@@ -123,7 +123,7 @@ int open_device_session(struct pwned_device *dev)
         return CHECKM8_FAIL_PROT;
     }
 #else
-    int i, usb_dev_count, ret = CHECKM8_FAIL_NODEV;
+    int i, usb_dev_count, ret = -CHECKM8_FAIL_NODEV;
     libusb_device **usb_device_list = NULL;
 
     if(libusb_init(NULL))
@@ -198,7 +198,7 @@ fail_alloc_descriptor:
     libusb_free_device_list(usb_device_list, 1);
 
 fail:
-    return CHECKM8_FAIL_NODEV;
+    return -CHECKM8_FAIL_NODEV;
 #endif
 }
 
@@ -334,7 +334,7 @@ int partial_ctrl_transfer(struct pwned_device *dev,
     {
         checkm8_debug_indent("\tfailed to submit async USB transfer: %s\n", libusb_error_name(ret));
         libusb_free_transfer(usb_transfer);
-        return CHECKM8_FAIL_XFER;
+        return -CHECKM8_FAIL_XFER;
     }
 
     while(1)
@@ -346,7 +346,7 @@ int partial_ctrl_transfer(struct pwned_device *dev,
             if(ret != 0)
             {
                 checkm8_debug_indent("\tfailed to cancel async USB transfer: %s\n", libusb_error_name(ret));
-                return CHECKM8_FAIL_XFER;
+                return -CHECKM8_FAIL_XFER;
             }
 
             return CHECKM8_SUCCESS;

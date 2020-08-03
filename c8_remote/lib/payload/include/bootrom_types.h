@@ -33,4 +33,13 @@ struct usb_request
     unsigned short wLength;
 } __attribute__ ((packed));
 
+typedef enum {
+    dev_rx,
+    dev_r,
+    dev_rw,
+    normal_rx,
+    normal_r,
+    normal_rw,
+} page_permission;
+
 #endif //CHECKM8_TOOL_BOOTROM_TYPES_H

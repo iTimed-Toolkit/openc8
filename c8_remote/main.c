@@ -2,12 +2,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include <zconf.h>
 #include <sys/stat.h>
 
 #include "dev/shared_types.h"
-#include "dev/addr.h"
 #include "util/experiments.h"
 #include "tool/usb_helpers.h"
 
@@ -299,29 +296,14 @@ int main_test_usb()
         return -1;
     }
 
-    install_utils(dev);
+    install_payload(dev, PAYLOAD_EXIT_USB_TASK);
+    execute_payload(dev, PAYLOAD_EXIT_USB_TASK, NULL, 0, NULL, 0);
 
-//    demote_device(dev);
-//    fix_heap(dev);
-//
-//    unsigned char data[100];
-//    memset(data, 'A', 100);
-//
-//    open_device_session(dev);
-//
-//    int retval = -1;
-//    char status = 1;
-//    char serial[] = "CPID:8010 CPRV:11 CPFM:03 SCEP:01 BDID:0C ECID:0011708200D36326 IBFL:3C SRTG:[iBoot-2696.0.0.1.33]";
-//
-////    write_gadget(dev, ADDR_USB_SERIAL, serial, sizeof(serial));
-////    write_gadget(dev, ADDR_DFU_RETVAL, &retval, 4);
-//    write_gadget(dev, ADDR_DFU_STATUS, &status, 1);
-//    execute_gadget(dev, ADDR_EVENT_NOTIFY, 0, 1, ADDR_DFU_EVENT);
-
-//    close_device_session(dev);
+    close_device_session(dev);
+    return 0;
 }
 
 int main()
 {
-    main_test_usb();
+    return main_test_usb();
 }
