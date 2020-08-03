@@ -2,7 +2,6 @@
 #include "dev/shared_types.h"
 
 #include "bootrom_func.h"
-#include "arm64.h"
 
 PAYLOAD_SECTION
 static inline void patch_enter_soft_dfu()
