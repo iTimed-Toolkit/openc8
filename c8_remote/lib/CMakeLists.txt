@@ -36,6 +36,7 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/payload/c)
 add_custom_target(payload_sources
                     BYPRODUCTS  ${PL_SRC_LIB}
+                                ${CMAKE_CURRENT_BINARY_DIR}/payload/c/payload_pongo.c
                                 ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c
                                 ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload.h
                                 ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload_int.h
