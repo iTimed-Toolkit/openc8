@@ -1,0 +1,3 @@
+[submodule "c8_remote/lib/payload/pongoOS"]
+	path = c8_remote/lib/payload/pongoOS
+	url = git@github.ncsu.edu:iPhone-AES-Research/pongoOS.git

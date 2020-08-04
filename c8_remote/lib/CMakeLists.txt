@@ -39,13 +39,15 @@ add_custom_target(payload_sources
                                 ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c
                                 ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload.h
                                 ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload_int.h
-                    DEPENDS     ${PL_TARGETS}
+                    DEPENDS     ${PL_TARGETS} payload_pongo
                     COMMENT     "Refreshing payload library"
                     COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/librarize.py
                                         ${CMAKE_CURRENT_BINARY_DIR}/payload/bin
                                         ${CMAKE_CURRENT_BINARY_DIR}/payload)
 
-add_library(payload ${PL_SRC_LIB} ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c)
+add_library(payload ${PL_SRC_LIB}
+                ${CMAKE_CURRENT_BINARY_DIR}/payload/c/payload_pongo.c
+                ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c)
 add_dependencies(payload payload_sources)
 
 add_library(experiments experiments/crypto.c
