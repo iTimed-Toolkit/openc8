@@ -75,6 +75,7 @@ struct cmd_resp
     unsigned long long args[2];
 } __attribute__ ((packed));
 
+/* Crypto */
 struct bern_data
 {
 #ifdef BERNSTEIN_COLLECT1
@@ -112,6 +113,39 @@ struct bern_data
     unsigned long long count8;
     unsigned long long ttotal8;
 #endif
+} __attribute__ ((packed));
+
+struct hw_aes_args
+{
+    enum
+    {
+        DIR_ENC = 0x0,
+        DIR_DEC = 0x1
+    } dir;
+
+    enum
+    {
+        MODE_ECB = 0x00,
+        MODE_CBC = 0x10
+    } mode;
+
+    enum
+    {
+        KEY_USER = 0x000,
+        KEY_UID = 0x100,
+        KEY_GID0 = 0x200,
+        KEY_GID1 = 0x201
+    } type;
+
+    enum
+    {
+        SIZE_128 = 0x00000000,
+        SIZE_192 = 0x10000000,
+        SIZE_256 = 0x20000000
+    } size;
+
+    unsigned char msg[16];
+    unsigned char key[16];
 } __attribute__ ((packed));
 
 #define DEV_PTR_NULL       -1ull

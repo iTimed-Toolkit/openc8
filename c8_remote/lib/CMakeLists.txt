@@ -4,6 +4,7 @@ set(PL_NAMES
         exploit:patch_tables
 
         crypto:aes_sw_bern
+        crypto:aes_hw
 
         system:cachelib
         system:exit_usb_task

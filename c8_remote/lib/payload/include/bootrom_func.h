@@ -17,8 +17,8 @@
 /* Crypto */
 
 __BOOTROM_CALL__(int, ADDR_HARDWARE_AES, hardware_aes,
-                 (uint64_t cmd, uint8_t * src, uint8_t * dst,
-                         int len, uint64_t opts, uint8_t * key, uint8_t * iv),
+                 (uint64_t cmd, uint8_t *src, uint8_t *dst,
+                         int len, uint64_t opts, uint8_t *key, uint8_t *iv),
                  (cmd, src, dst, len, opts, key, iv))
 
 __BOOTROM_CALL__(int, ADDR_GET_RANDOM, get_random,

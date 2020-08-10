@@ -2,6 +2,7 @@
 #define CHECKM8_TOOL_CHECKM8_H
 
 #include "checkm8_config.h"
+#include <stdbool.h>
 
 typedef enum
 {
@@ -45,11 +46,12 @@ struct pwned_device
 #endif
 };
 
-struct pwned_device *exploit_device();
+struct pwned_device *exploit_device(bool sync);
 void free_device(struct pwned_device *dev);
 
 int demote_device(struct pwned_device *dev);
 int fix_heap(struct pwned_device *dev);
+int install_pongo(struct pwned_device *dev);
 
 int open_device_session(struct pwned_device *dev);
 int close_device_session(struct pwned_device *dev);

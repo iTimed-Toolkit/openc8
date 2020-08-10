@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
 #include "dev/shared_types.h"
@@ -9,6 +10,7 @@
 #include "tool/usb_helpers.h"
 
 #ifdef CHECKM8_LOGGING
+
 #include <stdarg.h>
 #include <execinfo.h>
 
@@ -289,17 +291,54 @@ void record_bern_data(struct bern_data *data, unsigned char *key, int index, int
 
 int main_test_usb()
 {
-    struct pwned_device *dev = exploit_device();
+    struct pwned_device *dev = exploit_device(true);
     if(dev == NULL || dev->status == DEV_NORMAL)
     {
         printf("Failed to exploit device\n");
         return -1;
     }
 
-    install_payload(dev, PAYLOAD_EXIT_USB_TASK);
-    execute_payload(dev, PAYLOAD_EXIT_USB_TASK, NULL, 0, NULL, 0);
+    install_payload(dev, PAYLOAD_AES_HW);
 
-    close_device_session(dev);
+    struct hw_aes_args args = {
+            .dir = DIR_ENC,
+            .mode = MODE_ECB,
+            .type = KEY_GID1,
+            .size = SIZE_128,
+
+            .msg = {0},
+            .key = {0, 1, 2, 3,
+                    0, 1, 2, 3,
+                    0, 1, 2, 3,
+                    0, 1, 2, 3,
+            }
+    };
+
+    unsigned char res[16];
+    execute_payload(dev, PAYLOAD_AES_HW,
+                    &args, sizeof(struct hw_aes_args),
+                    res, 16);
+
+    printf("result: ");
+    for(int i = 0; i < 16; i++)
+    {
+        printf("%02X ", res[i]);
+    }
+    printf("\n");
+
+//    close_device_session(dev);
+//    free_device(dev);
+//    sleep(5);
+//
+//    // should be in iBoot now
+//    dev = exploit_device(false);
+//    if(dev == NULL || dev->status == DEV_NORMAL)
+//    {
+//        printf("Failed to exploit device\n");
+//        return -1;
+//    }
+
+//    install_pongo(dev);
     return 0;
 }
 
