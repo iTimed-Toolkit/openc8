@@ -12,6 +12,7 @@ int install_utils(struct pwned_device *dev);
 int install_payload(struct pwned_device *dev, PAYLOAD_T p);
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p);
 int uninstall_all_payloads(struct pwned_device *dev);
+int payload_is_installed(struct pwned_device *dev, PAYLOAD_T p);
 
 int execute_payload(struct pwned_device *dev, PAYLOAD_T p, void *arg, int arg_len, void *resp, int resp_len);
 int async_payload_create(struct pwned_device *dev, PAYLOAD_T p, DEV_PTR_T arg);

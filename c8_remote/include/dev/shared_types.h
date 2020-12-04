@@ -148,6 +148,54 @@ struct hw_aes_args
     unsigned char key[16];
 } __attribute__ ((packed));
 
+typedef enum
+{
+    HX_DIR_DEC = 0,
+    HX_DIR_ENC
+} hx_dir_t;
+
+typedef enum
+{
+    HX_MODE_ECB = 0,
+    HX_MODE_CBC
+} hx_mode_t;
+
+typedef enum
+{
+    HX_KEYSIZE_128 = 0,
+    HX_KEYSIZE_192,
+    HX_KEYSIZE_256
+} hx_keysize_t;
+
+typedef enum
+{
+    HX_KEY_NONE = -1,
+    HX_KEY_USER,
+    HX_KEY_UID,
+    HX_KEY_GID0,
+    HX_KEY_GID1
+} hx_keytype_t;
+
+struct hx_aes_ctx
+{
+    hx_dir_t encdir;
+    hx_mode_t encmode;
+    hx_keysize_t keysize;
+    hx_keytype_t keytype;
+
+    unsigned char msg[32];
+    unsigned char key[32];
+    unsigned char iv[32];
+} __attribute__ ((packed));
+
+struct gpio_test_args
+{
+    int count;
+
+    int num_zeroes;
+    int num_ones;
+} __attribute__ ((packed));
+
 #define DEV_PTR_NULL       -1ull
 typedef unsigned long long DEV_PTR_T;
 

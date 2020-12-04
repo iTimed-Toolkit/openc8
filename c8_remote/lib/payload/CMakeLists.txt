@@ -7,15 +7,9 @@ if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     set(CMAKE_ASM_COMPILER  /opt/aarch64-none-elf/bin/aarch64-none-elf-gcc)
     set(CMAKE_OBJCOPY       /opt/aarch64-none-elf/bin/aarch64-none-elf-objcopy)
     set(CMAKE_RANLIB        /opt/aarch64-none-elf/bin/aarch64-none-elf-ranlib)
-elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "armv7l")
-    # raspberry pi
-    set(CMAKE_C_COMPILER    /opt/cross/bin/aarch64-linux-gcc)
-    set(CMAKE_ASM_COMPILER  /opt/cross/bin/aarch64-linux-gcc)
-    set(CMAKE_OBJCOPY       /opt/cross/bin/aarch64-linux-objcopy)
-    set(CMAKE_RANLIB        /opt/cross/bin/aarch64-linux-ranlib)
 endif()
 
-set(CMAKE_C_FLAGS "-nostdlib -Os -Wl,--gc-sections")
+set(CMAKE_C_FLAGS "-nostdlib -Os -Wl,--gc-sections -fno-ipa-cp")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 foreach(NAME ${PL_NAMES})
@@ -44,4 +38,7 @@ add_library(dev_crypto ../crypto/aes.c)
 target_compile_definitions(dev_crypto PRIVATE DEV_CRYPTO)
 
 target_link_libraries(payload_aes_sw_bern dev_crypto)
-add_subdirectory(pongoOS)
+
+if(WITH_PONGO)
+    add_subdirectory(pongoOS)
+endif()

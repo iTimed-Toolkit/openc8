@@ -1,12 +1,14 @@
 #include "checkm8.h"
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
 #include "dev/shared_types.h"
 #include "util/experiments.h"
+#include "util/armv8.h"
 #include "tool/usb_helpers.h"
 
 #ifdef CHECKM8_LOGGING
@@ -289,7 +291,7 @@ void record_bern_data(struct bern_data *data, unsigned char *key, int index, int
 //    return 0;
 //}
 
-int main_test_usb()
+int main_test_aes_hw()
 {
     struct pwned_device *dev = exploit_device(true);
     if(dev == NULL || dev->status == DEV_NORMAL)
@@ -299,24 +301,29 @@ int main_test_usb()
     }
 
     install_payload(dev, PAYLOAD_AES_HW);
+    struct hx_aes_ctx args = {
+            .encdir = HX_DIR_ENC,
+            .encmode = HX_MODE_ECB,
+            .keytype = HX_KEY_USER,
+            .keysize = HX_KEYSIZE_128,
 
-    struct hw_aes_args args = {
-            .dir = DIR_ENC,
-            .mode = MODE_ECB,
-            .type = KEY_GID1,
-            .size = SIZE_128,
-
-            .msg = {0},
-            .key = {0, 1, 2, 3,
-                    0, 1, 2, 3,
-                    0, 1, 2, 3,
-                    0, 1, 2, 3,
-            }
+            .msg = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                    0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+                    0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+                    0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f},
+            .key = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                    0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+                    0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+                    0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f},
+            .iv = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                   0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+                   0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+                   0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f},
     };
 
     unsigned char res[16];
     execute_payload(dev, PAYLOAD_AES_HW,
-                    &args, sizeof(struct hw_aes_args),
+                    &args, sizeof(struct hx_aes_ctx),
                     res, 16);
 
     printf("result: ");
@@ -325,24 +332,77 @@ int main_test_usb()
         printf("%02X ", res[i]);
     }
     printf("\n");
+    return 0;
+}
 
-//    close_device_session(dev);
-//    free_device(dev);
-//    sleep(5);
-//
-//    // should be in iBoot now
-//    dev = exploit_device(false);
-//    if(dev == NULL || dev->status == DEV_NORMAL)
-//    {
-//        printf("Failed to exploit device\n");
-//        return -1;
-//    }
+int main_test_aes_hw_builtin()
+{
+    struct pwned_device *dev = exploit_device(true);
+    if(dev == NULL || dev->status == DEV_NORMAL)
+    {
+        printf("Failed to exploit device\n");
+        return -1;
+    }
 
-//    install_pongo(dev);
+    if(payload_is_installed(dev, PAYLOAD_AES_HW_BUILTIN))
+        uninstall_payload(dev, PAYLOAD_AES_HW_BUILTIN);
+
+    install_payload(dev, PAYLOAD_AES_HW_BUILTIN);
+    struct hw_aes_args args = {
+            .dir = DIR_ENC,
+            .mode = MODE_ECB,
+            .type = KEY_UID,
+            .size = SIZE_128,
+
+            .msg = {0},
+            .key = {0, 1, 2, 3,
+                    0, 1, 2, 3,
+                    0, 1, 2, 3,
+                    0, 1, 2, 4}
+    };
+
+    unsigned char res[16];
+    execute_payload(dev, PAYLOAD_AES_HW_BUILTIN,
+                    &args, sizeof(struct hx_aes_ctx),
+                    res, 16);
+
+    printf("result: ");
+    for(int i = 0; i < 16; i++)
+    {
+        if(i % 4 == 0) printf(" ");
+        printf("%02X", res[i]);
+    }
+    printf("\n");
+    return 0;
+}
+
+
+int main_test_gpio()
+{
+    struct pwned_device *dev = exploit_device(true);
+    if(dev == NULL || dev->status == DEV_NORMAL)
+    {
+        printf("Failed to exploit device\n");
+        return -1;
+    }
+
+    install_payload(dev, PAYLOAD_GPIO_TEST);
+    printf("starting\n");
+    struct gpio_test_args args = {
+            .count = 1,
+            .num_zeroes = 5000000,
+            .num_ones = 5000000
+    };
+
+    execute_payload(dev, PAYLOAD_GPIO_TEST,
+                    &args, sizeof(struct gpio_test_args),
+                    &args, sizeof(struct gpio_test_args));
+
+    printf("read %i zeroes, %i ones\n", args.num_zeroes, args.num_ones);
     return 0;
 }
 
 int main()
 {
-    return main_test_usb();
+    return main_hardware_aes();
 }

@@ -131,14 +131,7 @@ int sync_payloads(struct pwned_device *dev)
     }
 
     // 0xFFFF is the status command - first installed gadget in handler.c
-    ret = command(dev, (short) 0xFFFF, NULL, 0, &resp, sizeof(struct cmd_resp));
-    if(IS_CHECKM8_FAIL(ret))
-    {
-        checkm8_debug_indent("\tfailed to get status of device\n");
-        goto close;
-    }
-
-    len = sizeof(struct cmd_resp) + resp.args[0] * sizeof(struct install_args);
+    len = sizeof(struct cmd_resp) + NUM_GADGETS * sizeof(struct install_args);
     installed_buf = malloc(len);
     if(installed_buf == NULL)
     {
@@ -150,14 +143,16 @@ int sync_payloads(struct pwned_device *dev)
     ret = command(dev, (short) 0xFFFF, NULL, 0, installed_buf, len);
     if(IS_CHECKM8_FAIL(ret))
     {
-        checkm8_debug_indent("\tfailed to get installed gadgets\n");
-        goto free;
+        checkm8_debug_indent("\tfailed to get status of device\n");
+        goto close;
     }
 
+    memcpy(&resp, installed_buf, sizeof(struct cmd_resp));
     installed = (installed_buf + sizeof(struct cmd_resp));
+
     for(i = 0; i < resp.args[0]; i++)
     {
-        // ignore builtins
+        // ignore builtins and empty slots
         if(installed[i].type == PAYLOAD_BUILTIN)
             continue;
 
@@ -303,7 +298,7 @@ int install_payload(struct pwned_device *dev, PAYLOAD_T p)
     memcpy(buf, &args, sizeof(struct install_args));
     memcpy(buf + sizeof(struct install_args), pl->data, pl->len);
 
-    // 0xFFFF is the install command - second installed gadget in handler.c
+    // 0xFFFE is the install command - second installed gadget in handler.c
     ret = command(dev, (short) 0xFFFE, buf, len, &resp, sizeof(struct cmd_resp));
     if(IS_CHECKM8_FAIL(ret))
     {
@@ -350,8 +345,60 @@ int install_utils(struct pwned_device *dev)
 
 int uninstall_payload(struct pwned_device *dev, PAYLOAD_T p)
 {
-    // TODO
-    return -CHECKM8_FAIL_INT;
+    checkm8_debug_indent("uninstall_payload()\n");
+
+    int ret;
+    struct payload *inst, *pl;
+    struct install_args args;
+    struct cmd_resp resp;
+
+    inst = dev_retrieve_payload(dev, p);
+    if(inst == NULL)
+    {
+        checkm8_debug_indent("\tpayload is not installed, so not uninstalling\n");
+        return CHECKM8_SUCCESS;
+    }
+
+    pl = get_payload(p);
+    if(pl == NULL)
+    {
+        checkm8_debug_indent("\tinvalid payload %i\n", p);
+        return -CHECKM8_FAIL_INVARGS;
+    }
+
+    if(inst->len != pl->len)
+    {
+        checkm8_debug_indent("\twarning: mismatch between installed and compiled lengths. removing old version.\n");
+    }
+
+    args.type = p;
+    args.len = inst->len;
+    args.addr = inst->install_base;
+
+    ret = command(dev, (short) 0xFFFD,
+                  &args, sizeof(struct install_args),
+                  &resp, sizeof(struct cmd_resp));
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        checkm8_debug_indent("\tfailed to execute gadget uninstaller\n");
+        return ret;
+    }
+
+    if(resp.status != CMD_SUCCESS)
+    {
+        checkm8_debug_indent("\tuninstallation gadgedt returned %i\n", resp.status);
+        return -CHECKM8_FAIL_NOTDONE;
+    }
+
+    dev_unlink_payload(dev, inst);
+    free(inst);
+    free(pl);
+    return CHECKM8_SUCCESS;
+}
+
+int payload_is_installed(struct pwned_device *dev, PAYLOAD_T p)
+{
+    return dev_retrieve_payload(dev, p) != NULL;
 }
 
 int uninstall_all_payloads(struct pwned_device *dev)

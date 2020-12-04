@@ -57,10 +57,13 @@
 #define ADDR_DMB                            0x100000478
 #define ADDR_MAP_RANGE                      0x10000b4ec
 
-/* USB */
+/* IO */
 #define ADDR_CREATE_DESC                    0x10000d150
 #define ADDR_USB_CORE_DO_IO                 0x10000dc98
 #define ADDR_HANDLE_INTF_REQ                0x10000dfb8
+
+#define ADDR_GPIO_READ                      0x100001e30
+#define ADDR_GPIO_WRITE                     0x100001e78
 
 #define ADDR_CORE_DESC_SERIAL               0x1800805da
 #define ADDR_DFU_INTF_HANDLE                0x180088B48

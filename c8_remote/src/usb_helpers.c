@@ -264,15 +264,20 @@ void ard_read(struct pwned_device *dev, unsigned char *target, int nbytes)
 
 #endif
 
+int cancelled = 0;
+void callback(struct libusb_transfer *transfer)
+{
+//    printf("transferred %i bytes with status %i\n", transfer->actual_length, transfer->status);
+    cancelled = 1;
+}
+
 int partial_ctrl_transfer(struct pwned_device *dev,
                           unsigned char bmRequestType, unsigned char bRequest,
                           unsigned short wValue, unsigned short wIndex,
                           unsigned char *data, unsigned short data_len,
                           unsigned int timeout)
 {
-    checkm8_debug_indent(
-            "partial_ctrl_transfer(dev = %p, bmRequestType = %i, bRequest = %i, wValue = %i, wIndex = %i, data = %p, data_len = %i, timeout = %i)\n",
-            dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
+    checkm8_debug_indent("partial_ctrl_transfer()\n");
 
 #ifdef WITH_ARDUINO
     char buf;
@@ -321,14 +326,14 @@ int partial_ctrl_transfer(struct pwned_device *dev,
     unsigned char usb_transfer_buf[8 + data_len];
     int ret;
 
-    gettimeofday(&start, NULL);
-
     struct libusb_transfer *usb_transfer = libusb_alloc_transfer(0);
     libusb_fill_control_setup(usb_transfer_buf, bmRequestType, bRequest, wValue, wIndex, data_len);
     memcpy(&usb_transfer_buf[8], data, data_len);
-    libusb_fill_control_transfer(usb_transfer, dev->bundle->handle, usb_transfer_buf, NULL, NULL, 1);
+    libusb_fill_control_transfer(usb_transfer, dev->bundle->handle, usb_transfer_buf, callback, NULL, 100);
 
     checkm8_debug_indent("\tsubmiting urb\n");
+    cancelled = 0;
+
     ret = libusb_submit_transfer(usb_transfer);
     if(ret != 0)
     {
@@ -337,18 +342,22 @@ int partial_ctrl_transfer(struct pwned_device *dev,
         return -CHECKM8_FAIL_XFER;
     }
 
+    gettimeofday(&start, NULL);
     while(1)
     {
         gettimeofday(&end, NULL);
-        if((1000000 * end.tv_sec + end.tv_usec) - (1000000 * end.tv_sec + start.tv_usec) > timeout)
+        if(((1000000 * end.tv_sec + end.tv_usec) -
+            (1000000 * start.tv_sec + start.tv_usec)) / 1 > timeout)
         {
             ret = libusb_cancel_transfer(usb_transfer);
             if(ret != 0)
             {
                 checkm8_debug_indent("\tfailed to cancel async USB transfer: %s\n", libusb_error_name(ret));
+                while(cancelled == 0) libusb_handle_events(NULL);
                 return -CHECKM8_FAIL_XFER;
             }
 
+            while(cancelled == 0) libusb_handle_events(NULL);
             return CHECKM8_SUCCESS;
         }
     }
@@ -361,9 +370,7 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
                            unsigned char *data, unsigned short data_len,
                            unsigned int timeout)
 {
-    checkm8_debug_indent(
-            "no_error_ctrl_transfer(dev = %p, bmRequestType = %i, bRequest = %i, wValue = %i, wIndex = %i, data = %p, data_len = %i, timeout = %i)\n",
-            dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
+    checkm8_debug_indent("no_error_ctrl_transfer()\n");
 
 #ifdef WITH_ARDUINO
     char buf;
@@ -408,8 +415,12 @@ int no_error_ctrl_transfer(struct pwned_device *dev,
                                   wValue, wIndex,
                                   data, data_len,
                                   timeout);
-    checkm8_debug_indent("\tgot error %s but ignoring\n", libusb_error_name(ret));
-    return CHECKM8_SUCCESS;
+    checkm8_debug_indent("\tgot error %s (%i) but ignoring\n", libusb_error_name(ret), ret);
+
+    if(ret == LIBUSB_ERROR_TIMEOUT)
+        return CHECKM8_SUCCESS;
+    else
+        return -CHECKM8_FAIL_XFER;
 #endif
 }
 
@@ -419,9 +430,7 @@ int no_error_ctrl_transfer_data(struct pwned_device *dev,
                                 unsigned char *data, unsigned short data_len,
                                 unsigned int timeout)
 {
-    checkm8_debug_indent(
-            "no_error_ctrl_transfer_data(dev = %p, bmRequestType = %i, bRequest = %i, wValue = %i, wIndex = %i, data = %p, data_len = %i, timeout = %i)\n",
-            dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
+    checkm8_debug_indent("no_error_ctrl_transfer_data()\n");
 #ifdef WITH_ARDUINO
     int amount, index = 0;
     char buf;

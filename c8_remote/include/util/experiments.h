@@ -19,7 +19,6 @@ struct bern_data *get_bern_exp_data(struct pwned_device *dev, DEV_PTR_T async_bu
 void usb_task_exit(struct pwned_device *dev);
 
 /* Power */
-void floppysleep(struct pwned_device *dev);
-void floppysleep_async(struct pwned_device *dev);
+int main_hardware_aes();
 
 #endif //CHECKM8_TOOL_EXPERIMENTS_H
