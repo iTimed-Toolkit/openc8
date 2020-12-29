@@ -47,13 +47,15 @@ struct pwned_device
 };
 
 struct pwned_device *exploit_device(bool sync);
+int checkra1n_device(struct pwned_device *dev);
+
 void free_device(struct pwned_device *dev);
 
 int demote_device(struct pwned_device *dev);
 int fix_heap(struct pwned_device *dev);
 int install_pongo(struct pwned_device *dev);
 
-int open_device_session(struct pwned_device *dev);
+int open_device_session(struct pwned_device *dev, int idVendor, int idProduct);
 int close_device_session(struct pwned_device *dev);
 int is_device_session_open(struct pwned_device *dev);
 

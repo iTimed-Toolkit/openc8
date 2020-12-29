@@ -12,6 +12,9 @@
 
 #define WRITEABLE_ROM(addr)     addr + 0x2000000
 
+#define CR_EXECUTABLE_SRAM(addr)    addr - 0x40000000
+#define CR_WRITEABLE_SRAM(addr)     addr - 0x3E000000
+
 /* Installation */
 struct install_args
 {

@@ -85,6 +85,8 @@
 #define LEN_TRAMPOLINE                      0x240
 #define TRAMPOLINE_SIZE                     0x4000
 
+#define ADDR_GET_IMG_USB                    0x10000de84
+
 #define ADDR_DFU_RETVAL                     0x180088ac8
 #define ADDR_DFU_STATUS                     0x180088ac0
 #define ADDR_DFU_EVENT                      0x180088af0

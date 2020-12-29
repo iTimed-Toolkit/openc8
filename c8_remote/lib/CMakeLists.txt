@@ -1,6 +1,7 @@
 set(PL_NAMES
         exploit:checkm8
-        exploit:checkra1n
+        exploit:checkra1n_stage1
+        exploit:checkra1n_stage2
         exploit:handler
         exploit:patch_tables
 
@@ -38,36 +39,26 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/payload)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/payload/c)
 
+list(APPEND TO_LIBRARIZE "${CMAKE_CURRENT_BINARY_DIR}/payload/bin/")
+
 if(WITH_PONGO)
-    add_custom_target(payload_sources
-                        BYPRODUCTS  ${PL_SRC_LIB}
-                                    ${CMAKE_CURRENT_BINARY_DIR}/payload/c/payload_pongo.c
-                                    ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c
-                                    ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload.h
-                                    ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload_int.h
-                        DEPENDS     ${PL_TARGETS} payload_pongo
-                        COMMENT     "Refreshing payload library"
-                        COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/librarize.py
-                                            ${CMAKE_CURRENT_BINARY_DIR}/payload/bin
-                                            ${CMAKE_CURRENT_BINARY_DIR}/payload)
-    add_library(payload ${PL_SRC_LIB}
-                    ${CMAKE_CURRENT_BINARY_DIR}/payload/c/payload_pongo.c
-                    ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c)
-else()
-    add_custom_target(payload_sources
-                        BYPRODUCTS  ${PL_SRC_LIB}
-                                    ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c
-                                    ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload.h
-                                    ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload_int.h
-                        DEPENDS     ${PL_TARGETS}
-                        COMMENT     "Refreshing payload library"
-                        COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/librarize.py
-                                            ${CMAKE_CURRENT_BINARY_DIR}/payload/bin
-                                            ${CMAKE_CURRENT_BINARY_DIR}/payload)
-    add_library(payload ${PL_SRC_LIB}
-                    ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c)
+    list(APPEND PL_TARGETS payload_pongo)
+    list(APPEND PL_SRC_LIB "${CMAKE_CURRENT_BINARY_DIR}/payload/c/payload_pongo.c")
+    list(APPEND TO_LIBRARIZE ${CMAKE_CURRENT_BINARY_DIR}/payload/pongoOS/Pongo.bin)
 endif()
 
+add_custom_target(payload_sources
+                    BYPRODUCTS  ${PL_SRC_LIB}
+                                ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c
+                                ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload.h
+                                ${CMAKE_CURRENT_BINARY_DIR}/include/libpayload_int.h
+                    DEPENDS     ${PL_TARGETS}
+                    COMMENT     "Refreshing payload library"
+                    COMMAND     python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/librarize.py
+                                        ${TO_LIBRARIZE}
+                                        ${CMAKE_CURRENT_BINARY_DIR}/payload)
+add_library(payload ${PL_SRC_LIB}
+                ${CMAKE_CURRENT_BINARY_DIR}/payload/c/get_payloads.c)
 add_dependencies(payload payload_sources)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/experiments)

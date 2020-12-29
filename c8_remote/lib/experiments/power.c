@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -42,6 +43,7 @@ void *hardware_aes_thread(void *arg)
     struct thread_tracker *tracker = (struct thread_tracker *) arg;
     struct hardware_aes_arg *params = get_arg(tracker);
 
+    struct timeval start, now;
     int i, read_len, write_len, recv, sent;
     long count;
 
@@ -60,6 +62,8 @@ void *hardware_aes_thread(void *arg)
     };
 
     count = 0;
+    gettimeofday(&start, NULL);
+
     while(1)
     {
         read_len = 0;
@@ -89,7 +93,7 @@ void *hardware_aes_thread(void *arg)
         printf("%i.%li < ", params->cli_num, count);
         for(i = 0; i < 16; i++)
             printf("%02X", res[i]);
-        printf("\n");
+//        printf("\n");
 
         write_len = 0;
         while(write_len < 16)
@@ -105,6 +109,11 @@ void *hardware_aes_thread(void *arg)
         }
 
         count++;
+        gettimeofday(&now, NULL);
+
+        printf(" rate = %.5f/s\n", (double) count / (((1000000.0 * now.tv_sec + now.tv_usec) -
+                                                      (1000000.0 * start.tv_sec + start.tv_usec))
+                                                     / 1000000.0));
     }
 
 done:

@@ -123,7 +123,7 @@ int sync_payloads(struct pwned_device *dev)
 
     void *installed_buf;
 
-    ret = open_device_session(dev);
+    ret = open_device_session(dev, DEV_IDVENDOR, DEV_IDPRODUCT);
     if(IS_CHECKM8_FAIL(ret))
     {
         checkm8_debug_indent("\tfailed to open device session\n");

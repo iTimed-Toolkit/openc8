@@ -17,7 +17,7 @@
 
 static int open_count = 0;
 
-int open_device_session(struct pwned_device *dev)
+int open_device_session(struct pwned_device *dev, int idVendor, int idProduct)
 {
     checkm8_debug_indent("open_device_session(dev = %p)\n", dev);
     open_count++;
@@ -128,7 +128,7 @@ int open_device_session(struct pwned_device *dev)
 
     if(libusb_init(NULL))
     {
-        checkm8_debug_indent("\tfailed to initiliaze libusb context\n");
+        checkm8_debug_indent("\tfailed to initialize libusb context\n");
         goto fail;
     }
 
@@ -160,8 +160,8 @@ int open_device_session(struct pwned_device *dev)
         dev->bundle->device = usb_device_list[i];
         libusb_get_device_descriptor(dev->bundle->device, dev->bundle->descriptor);
 
-        if(dev->bundle->descriptor->idVendor == DEV_IDVENDOR &&
-           dev->bundle->descriptor->idProduct == DEV_IDPRODUCT)
+        if(dev->bundle->descriptor->idVendor == idVendor &&
+           dev->bundle->descriptor->idProduct == idProduct)
         {
             checkm8_debug_indent("\tchecking device %i ... match!\n", i);
             ret = CHECKM8_SUCCESS;
@@ -253,12 +253,12 @@ int is_device_session_open(struct pwned_device *dev)
 
 void ard_read(struct pwned_device *dev, unsigned char *target, int nbytes)
 {
-    int index = 0, amount;
-    while(index < nbytes)
+    int boot_index = 0, amount;
+    while(boot_index < nbytes)
     {
-        amount = read(dev->ard_fd, &target[index], nbytes - index);
+        amount = read(dev->ard_fd, &target[boot_index], nbytes - boot_index);
         if(amount == 0) usleep(5000);
-        else index += amount;
+        else boot_index += amount;
     }
 }
 
@@ -432,7 +432,7 @@ int no_error_ctrl_transfer_data(struct pwned_device *dev,
 {
     checkm8_debug_indent("no_error_ctrl_transfer_data()\n");
 #ifdef WITH_ARDUINO
-    int amount, index = 0;
+    int amount, boot_index = 0;
     char buf;
     struct usb_xfer_args args;
     args.bmRequestType = bmRequestType;
@@ -449,14 +449,14 @@ int no_error_ctrl_transfer_data(struct pwned_device *dev,
     if(buf == PROT_ACK)
     {
         checkm8_debug_indent("\treceived argument ack\n");
-        while(index < data_len)
+        while(boot_index < data_len)
         {
             amount = 0;
             ard_read(dev, (unsigned char *) &amount, 2);
             checkm8_debug_indent("\twriting data chunk of size %i\n", amount);
-            write(dev->ard_fd, &data[index], amount);
+            write(dev->ard_fd, &data[boot_index], amount);
 
-            index += amount;
+            boot_index += amount;
         }
 
         ard_read(dev, (unsigned char *) &buf, 1);
@@ -496,7 +496,7 @@ int ctrl_transfer(struct pwned_device *dev,
             dev, bmRequestType, bRequest, wValue, wIndex, data, data_len, timeout);
 
 #ifdef WITH_ARDUINO
-    unsigned int amount, index, size;
+    unsigned int amount, boot_index, size;
     char buf;
     struct usb_xfer_args args;
     args.bmRequestType = bmRequestType;
@@ -536,15 +536,15 @@ int ctrl_transfer(struct pwned_device *dev,
         }
         else
         {
-            index = 0;
-            while(index < data_len)
+            boot_index = 0;
+            while(boot_index < data_len)
             {
                 amount = 0;
                 ard_read(dev, (unsigned char *) &amount, 2);
                 checkm8_debug_indent("\twriting data chunk of size %i\n", amount);
 
-                write(dev->ard_fd, &data[index], amount);
-                index += amount;
+                write(dev->ard_fd, &data[boot_index], amount);
+                boot_index += amount;
             }
         }
 

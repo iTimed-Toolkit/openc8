@@ -402,6 +402,19 @@ int main_test_gpio()
     return 0;
 }
 
+int main_checkra1n()
+{
+    struct pwned_device *dev = exploit_device(false);
+    if(dev == NULL || dev->status == DEV_NORMAL)
+    {
+        printf("Failed to exploit device\n");
+        return -1;
+    }
+
+    checkra1n_device(dev);
+    return 0;
+}
+
 int main()
 {
     return main_hardware_aes();

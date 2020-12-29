@@ -48,7 +48,7 @@
 #define __PL_GBL_STD_FUNCS__(name, type) \
     __PL_GBL_PTR_FUNC__(name, type) \
     __PL_GBL_RD_FUNC__(name, type) \
-    __PL_GBL_WR_FUNC__(name, type) \
+    __PL_GBL_WR_FUNC__(name, type)
 
 #define __PL_GBL_ARR_FUNCS__(name, type) \
     __PL_GBL_PTR_FUNC__(name, type) \

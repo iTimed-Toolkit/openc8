@@ -4,6 +4,7 @@
 #include "tool/usb_helpers.h"
 
 #include <stdint.h>
+#include <stdio.h>
 
 int send_data(struct pwned_device *dev, void *data, long data_len, unsigned int trigger)
 {
@@ -16,7 +17,7 @@ int send_data(struct pwned_device *dev, void *data, long data_len, unsigned int 
         if(data_len - index >= MAX_PACKET_SIZE) amount = MAX_PACKET_SIZE;
         else amount = data_len - index;
 
-        checkm8_debug_indent("\tsending chunk of size %li at index %li\n", amount, index);
+        checkm8_debug_indent("\tsending chunk of size %li at boot_index %li\n", amount, index);
 
         ret = ctrl_transfer(dev, 0x21, 1, 0, 0, &((uint8_t *) data)[index], amount, 0, trigger);
         if(ret > 0) checkm8_debug_indent("\ttransferred %i bytes\n", ret);
@@ -66,6 +67,43 @@ int reset_img_base(struct pwned_device *dev)
     return CHECKM8_SUCCESS;
 }
 
+int exit_dfu_mode(struct pwned_device *dev)
+{
+    int ret;
+    uint64_t tmp;
+
+    ret = ctrl_transfer(dev, 0x21, 1, 0, 0, NULL, 0, 0, 0);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        checkm8_debug_indent("\trequest failed with error code %i (%s)\n", ret, usb_error_name(ret));
+        return ret;
+    }
+
+    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, (uint8_t *) &tmp, 8, 0, 0);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        checkm8_debug_indent("\trequest failed with error code %i (%s)\n", ret, usb_error_name(ret));
+        return ret;
+    }
+
+    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, (uint8_t *) &tmp, 8, 0, 0);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        checkm8_debug_indent("\trequest failed with error code %i (%s)\n", ret, usb_error_name(ret));
+        return ret;
+    }
+
+    ret = ctrl_transfer(dev, 0xA1, 3, 0, 0, (uint8_t *) &tmp, 8, 0, 0);
+    if(IS_CHECKM8_FAIL(ret))
+    {
+        checkm8_debug_indent("\trequest failed with error code %i (%s)\n", ret, usb_error_name(ret));
+        return ret;
+    }
+
+    reset(dev);
+    return CHECKM8_SUCCESS;
+}
+
 int command(struct pwned_device *dev,
             short intf,
             void *cmd_args, int cmd_arg_len,
@@ -79,7 +117,7 @@ int command(struct pwned_device *dev,
     if(is_device_session_open(dev)) close = 0;
     else
     {
-        ret = open_device_session(dev);
+        ret = open_device_session(dev, DEV_IDVENDOR, DEV_IDPRODUCT);
         close = 1;
 
         if(IS_CHECKM8_FAIL(ret))
@@ -171,22 +209,22 @@ int command(struct pwned_device *dev,
 //struct dev_cmd_resp *dev_read_memory(struct pwned_device *dev, DEV_PTR_T addr, int len)
 //{
 //    checkm8_debug_indent("dev_read_memory(dev = %p, addr = %lx, len = %i)\n", dev, addr, len);
-//    long long index = 0, amount;
+//    long long boot_index = 0, amount;
 //
 //    unsigned long long cmd_args[5];
 //    struct dev_cmd_resp *resp, *ret = calloc(1, sizeof(struct dev_cmd_resp));
 //    ret->data = calloc(1, len);
 //
-//    while(index < len)
+//    while(boot_index < len)
 //    {
-//        if(len - index >= CMD_USB_READ_LIMIT - 16) amount = CMD_USB_READ_LIMIT - 16;
-//        else amount = len - index;
+//        if(len - boot_index >= CMD_USB_READ_LIMIT - 16) amount = CMD_USB_READ_LIMIT - 16;
+//        else amount = len - boot_index;
 //
-//        checkm8_debug_indent("\treading chunk of size %li at index %li\n", amount, index);
+//        checkm8_debug_indent("\treading chunk of size %li at boot_index %li\n", amount, boot_index);
 //        cmd_args[0] = MEMC_MAGIC;
 //        cmd_args[1] = 0;
 //        cmd_args[2] = ADDR_DFU_IMG_BASE + 16;
-//        cmd_args[3] = addr + index;
+//        cmd_args[3] = addr + boot_index;
 //        cmd_args[4] = amount;
 //
 //        resp = command(dev, (unsigned char *) &cmd_args, 5 * sizeof(unsigned long long), 16 + amount);
@@ -205,11 +243,11 @@ int command(struct pwned_device *dev,
 //        else
 //        {
 //            checkm8_debug_indent("\tsuccessfully copied chunk\n");
-//            memcpy(&ret->data[index], resp->data, amount);
+//            memcpy(&ret->data[boot_index], resp->data, amount);
 //            free_dev_cmd_resp(resp);
 //        }
 //
-//        index += amount;
+//        boot_index += amount;
 //    }
 //
 //    ret->magic = DONE_MAGIC;

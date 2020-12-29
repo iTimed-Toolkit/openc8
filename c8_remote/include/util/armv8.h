@@ -1,9 +1,10 @@
-//
-// Created by grg on 11/13/20.
-//
-
 #ifndef CHECKM8_TOOL_ARMV8_H
 #define CHECKM8_TOOL_ARMV8_H
+
+#ifndef __STDINT_DEFINED
+#include <stdint.h>
+#define __STDINT_DEFINED
+#endif
 
 typedef enum
 {
@@ -69,5 +70,7 @@ inline uint32_t br(armv8_reg_t dst)
 {
     return __OP_BR | __BR_DST(dst);
 }
+
+#define NOP()               (uint32_t)  (0b11010101000000110010000000011111u)
 
 #endif //CHECKM8_TOOL_ARMV8_H

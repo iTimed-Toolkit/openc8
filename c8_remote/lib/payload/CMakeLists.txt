@@ -1,15 +1,12 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-    # regular desktop
-    set(CMAKE_C_COMPILER    /opt/aarch64-none-elf/bin/aarch64-none-elf-gcc)
-    set(CMAKE_ASM_COMPILER  /opt/aarch64-none-elf/bin/aarch64-none-elf-gcc)
-    set(CMAKE_OBJCOPY       /opt/aarch64-none-elf/bin/aarch64-none-elf-objcopy)
-    set(CMAKE_RANLIB        /opt/aarch64-none-elf/bin/aarch64-none-elf-ranlib)
-endif()
+set(CMAKE_C_COMPILER    /opt/aarch64-none-elf/bin/aarch64-none-elf-gcc)
+set(CMAKE_ASM_COMPILER  /opt/aarch64-none-elf/bin/aarch64-none-elf-gcc)
+set(CMAKE_OBJCOPY       /opt/aarch64-none-elf/bin/aarch64-none-elf-objcopy)
+set(CMAKE_RANLIB        /opt/aarch64-none-elf/bin/aarch64-none-elf-ranlib)
 
-set(CMAKE_C_FLAGS "-nostdlib -Os -Wl,--gc-sections -fno-ipa-cp")
+set(CMAKE_C_FLAGS "-nostdlib -Os -Wl,--gc-sections -fno-ipa-cp -fno-builtin")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 foreach(NAME ${PL_NAMES})
@@ -29,7 +26,7 @@ foreach(NAME ${PL_NAMES})
     add_custom_command(TARGET       payload_${NAME_ONLY} POST_BUILD
                         BYPRODUCTS  ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin
                         COMMAND     ${CMAKE_OBJCOPY}
-                        ARGS        -O binary -j .text -j .payload_text -j .payload_data_*
+                        ARGS        -O binary -j .text -j .payload_text* -j .payload_data_*
                                     ${CMAKE_CURRENT_BINARY_DIR}/payload_${NAME_ONLY}
                                     ${CMAKE_CURRENT_BINARY_DIR}/bin/payload_${NAME_ONLY}.bin)
 endforeach(NAME)

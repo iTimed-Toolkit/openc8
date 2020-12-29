@@ -6,7 +6,10 @@ from operator import eq
 
 def gen_payload_impl(name):
     source_lines = []
-    payload_name = os.path.basename(name).split('.')[0]
+    payload_name = os.path.basename(name).split('.')[0].lower()
+    if not payload_name.startswith('payload_'):
+        payload_name = 'payload_' + payload_name
+    
     with open(name, 'rb') as fbin:
         fbytes = fbin.read()
 

@@ -58,7 +58,7 @@ __BOOTROM_CALL__(void, ADDR_SHA1, sha1,
 
 /*
  * Turn on/off one of the SoC's peripheral devices
- *  device: the index of the device to clock
+ *  device: the boot_index of the device to clock
  *  power: whether to turn the device on or off
  */
 __BOOTROM_CALL__(int, ADDR_CLOCK_GATE, clock_gate,
