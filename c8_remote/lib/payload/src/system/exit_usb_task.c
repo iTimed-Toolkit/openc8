@@ -1,63 +1,34 @@
 #include "dev/addr.h"
 #include "dev/shared_types.h"
+#include "util/armv8.h"
 
 #include "bootrom_func.h"
 
-static inline void patch_enter_soft_dfu()
-{
-    uint32_t *patch = (uint32_t *) 0x1800b2f40;
-    *patch = 0x52801408; // mov	w8, #0xa0
-}
-
-static inline void patch_remove_dfu_img_load()
-{
-    uint32_t *patch = (uint32_t *) 0x1800b3518;
-    *patch = 0xd2800000; // mov x0, 0x0
-}
-
-GLOBAL_STR(patch_format_str,
-           "SDOM:%02X CPID:%04X CPRV:%02X CPFM:%02X SCEP:%02X BDID:%02X ECID:%016llX IBFL:%02X PWND:[checkm8]")
-
-static inline void patch_iserial()
-{
-    int i, len;
-    char *base = (char *) 0x1800b0140;
-    for(len = 0; GET_GLOBAL_AT(patch_format_str, len) != 0; len++);
-
-    for(i = 0; i < len; i++)
-        base[i] = GET_GLOBAL_AT(patch_format_str, i);
-
-    uint32_t *patch = (uint32_t *) 0x1800db4cc;
-    *patch = 0x10ea63a4; // adr x4, -0x2b38c
-}
-
-static inline void patch_boot_after_abort()
-{
-    uint32_t *patch = (uint32_t *) 0x1800b34e0;
-    *patch = 0xd503201f; // nop;
-}
-
-static inline void patch_jump_to_pongo()
-{
-    *((uint32_t *) 0x1800d5eec) = 0xd63f0000; // blr x0
-}
-
 static inline void patch_enable_demote_boot()
 {
-    uint32_t *patch = (uint32_t *) 0x1800c29ec;
-    *patch = 0x52800029;    // mov  w9, #0x1
+    uint32_t *patch = (uint32_t *) 0x1800c3334;
+    *patch = MOVZ(X9, 0x1, 0);    // mov  w9, #0x1
+}
+
+static inline void patch_avoid_start_sep()
+{
+    uint32_t *patch = (uint32_t *) 0x1800b3be4;
+    *patch = MOVZ(X0, 0, 0);
 }
 
 PAYLOAD_SECTION
 void patch_function()
 {
-    patch_enter_soft_dfu();
-    patch_remove_dfu_img_load();
-    patch_iserial();
-    patch_boot_after_abort();
+//    patch_enter_soft_dfu();
+//    patch_remove_dfu_img_load();
+//    patch_iserial();
+//    patch_boot_after_abort();
 //    patch_jump_to_pongo();
 
-//    patch_enable_demote_boot();
+    patch_enable_demote_boot();
+    patch_avoid_start_sep();
+
+    __asm__ volatile ("b 0");
 }
 
 void _start()

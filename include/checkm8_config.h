@@ -1,7 +1,7 @@
 #ifndef CHECKM8_TOOL_CHECKM8_CONFIG_H
 #define CHECKM8_TOOL_CHECKM8_CONFIG_H
 
-//#define CHECKM8_LOGGING
+#define CHECKM8_LOGGING
 //#define DEBUG_PAYLOADS
 
 //#define WITH_ARDUINO
@@ -9,7 +9,7 @@
 #define ARDUINO_BAUD 115200
 
 #define CHECKM8_PLATFORM 8010
-//#define MIMIC_CHECKRA1N
+#define MIMIC_CHECKRA1N
 
 void checkm8_debug_indent(const char *format, ...);
 void checkm8_debug_block(const char *format, ...);

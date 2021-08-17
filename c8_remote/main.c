@@ -1,6 +1,7 @@
 #include "checkm8.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
@@ -361,18 +362,34 @@ int main_test_aes_hw_builtin()
                     0, 1, 2, 4}
     };
 
-    unsigned char res[16];
-    execute_payload(dev, PAYLOAD_AES_HW_BUILTIN,
-                    &args, sizeof(struct hx_aes_ctx),
-                    res, 16);
-
-    printf("result: ");
-    for(int i = 0; i < 16; i++)
+    while(1)
     {
-        if(i % 4 == 0) printf(" ");
-        printf("%02X", res[i]);
+        printf("UIDenc:\t");
+        for(int i = 0; i < 16; i++)
+        {
+            if(i % 4 == 0) printf(" ");
+            printf("%02X", args.msg[i]);
+        }
+        printf("\n");
+
+        unsigned char res[16];
+        execute_payload(dev, PAYLOAD_AES_HW_BUILTIN,
+                        &args, sizeof(struct hx_aes_ctx),
+                        res, 16);
+
+        printf("result:\t");
+        for(int i = 0; i < 16; i++)
+        {
+            if(i % 4 == 0) printf(" ");
+            printf("%02X", res[i]);
+
+            args.msg[i] = random() % 256;
+        }
+        printf("\n");
+
+        usleep(1000000);
     }
-    printf("\n");
+
     return 0;
 }
 
@@ -415,7 +432,20 @@ int main_checkra1n()
     return 0;
 }
 
+int main_boot_iboot()
+{
+    struct pwned_device *dev = exploit_device(true);
+    if(dev == NULL || dev->status == DEV_NORMAL)
+    {
+        printf("Failed to exploit device\n");
+        return -1;
+    }
+
+    install_payload(dev, PAYLOAD_EXIT_USB_TASK);
+    execute_payload(dev, PAYLOAD_EXIT_USB_TASK, NULL, 0, NULL, 0);
+}
+
 int main()
 {
-    return main_hardware_aes();
+    return main_checkra1n();
 }

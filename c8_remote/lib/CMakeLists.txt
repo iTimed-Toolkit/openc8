@@ -1,8 +1,9 @@
 set(PL_NAMES
         exploit:checkm8
+        exploit:handler
         exploit:checkra1n_stage1
         exploit:checkra1n_stage2
-        exploit:handler
+        exploit:checkra1n_handler
         exploit:patch_tables
 
         crypto:aes_sw_bern
